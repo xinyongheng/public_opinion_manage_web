@@ -80,5 +80,5 @@ class _AddPublicOpinionState extends State<AddPublicOpinion> {
   // 舆情基本信息
   // 舆情相关者
   // 舆情处理
-  //  提交
+  // 提交
 }
