@@ -11,6 +11,7 @@ class AddPublicOpinion extends StatefulWidget {
 
 class _AddPublicOpinionState extends State<AddPublicOpinion> {
   final _controllerMap = <String, TextEditingController>{};
+
   @override
   void initState() {
     super.initState();
@@ -40,7 +41,7 @@ class _AddPublicOpinionState extends State<AddPublicOpinion> {
       ),
     );
   }
-  
+
   Widget inputGroupView(title, explain, key, {double? width}) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -50,6 +51,7 @@ class _AddPublicOpinionState extends State<AddPublicOpinion> {
   }
 
   Widget firstTitle(title) => Text(title, style: Config.loadFirstTextStyle());
+
   Widget editText(explain, key, {double? width}) {
     return Padding(
       padding: EdgeInsets.only(right: 30.sp),
@@ -78,5 +80,5 @@ class _AddPublicOpinionState extends State<AddPublicOpinion> {
   // 舆情基本信息
   // 舆情相关者
   // 舆情处理
-
+  //  提交
 }
