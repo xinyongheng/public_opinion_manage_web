@@ -45,3 +45,13 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/windows/
+/android/
+/.vscode/
+/ios/
+/linux/
+/macos/
+/web/
+/.metadata
+/analysis_options.yaml
+/pubspec.lock
