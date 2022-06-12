@@ -1,6 +1,12 @@
+import 'dart:convert';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
+import 'dart:io';
 
 class AddPublicOpinion extends StatefulWidget {
   const AddPublicOpinion({Key? key}) : super(key: key);
@@ -37,11 +43,33 @@ class _AddPublicOpinionState extends State<AddPublicOpinion> {
           inputGroupView('舆情名称：', '名称', 'title'),
           inputGroupView('舆情链接：', '链接', 'link'),
           inputGroupView('舆情名称：', '名称', 'title'),
+          TextButton(
+              onPressed: () async {
+                FilePickerResult? result =
+                    await FilePicker.platform.pickFiles();
+                if (result != null && result.files.isNotEmpty) {
+                  if (kIsWeb) {
+                    final fileName = result.files.single.name;
+                    final fileBytes = result.files.single.bytes;
+                    // String text = String.fromCharCodes(fileBytes!);
+                    final text = const Utf8Decoder().convert(fileBytes!);
+                    print(text);
+                  } else {
+                    File file = File(result.files.single.path!);
+                    String s = await file.readAsString(encoding:utf8);
+                    print(s);
+                  }
+                } else {
+                  // User canceled the picker
+                }
+              },
+              child: const Text('提交')),
         ],
       ),
     );
   }
 
+  /// 标题+输入
   Widget inputGroupView(title, explain, key, {double? width}) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -50,8 +78,10 @@ class _AddPublicOpinionState extends State<AddPublicOpinion> {
     );
   }
 
+  /// 标题
   Widget firstTitle(title) => Text(title, style: Config.loadFirstTextStyle());
 
+  /// 输入
   Widget editText(explain, key, {double? width}) {
     return Padding(
       padding: EdgeInsets.only(right: 30.sp),
@@ -77,7 +107,37 @@ class _AddPublicOpinionState extends State<AddPublicOpinion> {
     );
   }
 
+  final _publicOpinionFiles = [];
   // 舆情基本信息
+  Widget publicOpinionFiles() {
+    CachedNetworkImage(
+      imageUrl: "http://via.placeholder.com/350x150",
+      placeholder: (context, url) => const CircularProgressIndicator(),
+      errorWidget: (context, url, error) => const Icon(Icons.error),
+    );
+    CachedNetworkImage(
+      imageUrl: "http://via.placeholder.com/350x150",
+      progressIndicatorBuilder: (context, url, downloadProgress) =>
+          CircularProgressIndicator(value: downloadProgress.progress),
+      errorWidget: (context, url, error) => const Icon(Icons.error),
+    );
+    return GridView.builder(
+      gridDelegate:
+          const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+      itemBuilder: (context, index) {
+        return index == _publicOpinionFiles.length
+            ? Container(
+                alignment: Alignment.center,
+                child: Icon(Icons.add_a_photo),
+              )
+            : SizedBox(
+                child: Image.asset(_publicOpinionFiles[index]),
+              );
+      },
+      itemCount: _publicOpinionFiles.length + 1,
+    );
+  }
+
   // 舆情相关者
   // 舆情处理
   // 提交
