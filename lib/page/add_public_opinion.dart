@@ -110,7 +110,7 @@ class _AddPublicOpinionState extends State<AddPublicOpinion> {
   final _publicOpinionFiles = [];
   // 舆情基本信息
   Widget publicOpinionFiles() {
-    CachedNetworkImage(
+    /* CachedNetworkImage(
       imageUrl: "http://via.placeholder.com/350x150",
       placeholder: (context, url) => const CircularProgressIndicator(),
       errorWidget: (context, url, error) => const Icon(Icons.error),
@@ -120,7 +120,8 @@ class _AddPublicOpinionState extends State<AddPublicOpinion> {
       progressIndicatorBuilder: (context, url, downloadProgress) =>
           CircularProgressIndicator(value: downloadProgress.progress),
       errorWidget: (context, url, error) => const Icon(Icons.error),
-    );
+    ); */
+    Icons.record_voice_over;
     return GridView.builder(
       gridDelegate:
           const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
@@ -128,7 +129,7 @@ class _AddPublicOpinionState extends State<AddPublicOpinion> {
         return index == _publicOpinionFiles.length
             ? Container(
                 alignment: Alignment.center,
-                child: Icon(Icons.add_a_photo),
+                child: const Icon(Icons.add),
               )
             : SizedBox(
                 child: Image.asset(_publicOpinionFiles[index]),
