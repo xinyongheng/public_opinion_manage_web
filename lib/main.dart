@@ -56,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: Config.loadAppbar(widget.title),
-      body: const AddPublicOpinion(),
+      body: const Login(),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',

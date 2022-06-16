@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/page/add_public_opinion.dart';
+import 'package:public_opinion_manage_web/page/info_public_opinion.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -40,7 +41,7 @@ class _LoginState extends State<Login> {
           SizedBox(height: 30.sp),
           TextButton(
             onPressed: () {
-              Config.startPage(context, const AddPublicOpinion());
+              Config.startPage(context, const ListInfoWidget());
             },
             style: TextButton.styleFrom(
               primary: Colors.white,

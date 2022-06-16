@@ -9,6 +9,13 @@ class Config {
     );
   }
 
+  static TextStyle loadDefaultTextStyle({Color color = Colors.black}) {
+    return TextStyle(
+      color: color,
+      fontSize: 10.sp,
+    );
+  }
+
   static AppBar loadAppbar(String title) {
     return AppBar(
       title: Text(
