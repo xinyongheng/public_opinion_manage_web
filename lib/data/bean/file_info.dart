@@ -1,9 +1,12 @@
+import 'dart:typed_data';
+
 class FileInfo {
   late String type;
   late String name;
   late String path;
+  final Uint8List? bytes;
   // FileInfo();
-  FileInfo(this.path) {
+  FileInfo(this.path, {this.bytes}) {
     int pointIndex = path.lastIndexOf('/');
     if (pointIndex > -1) {
       name = path.substring(pointIndex);
