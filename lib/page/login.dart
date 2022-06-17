@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image_picker_web/image_picker_web.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/page/add_public_opinion.dart';
 import 'package:public_opinion_manage_web/page/info_public_opinion.dart';
+import 'package:video_thumbnail_imageview/video_thumbnail_imageview.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -14,6 +17,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   late TextEditingController _controller1;
   late TextEditingController _controller2;
+
   @override
   void initState() {
     super.initState();
@@ -29,19 +33,36 @@ class _LoginState extends State<Login> {
     _controller2.dispose();
   }
 
+  final _images = <Widget>[];
+
   @override
   Widget build(BuildContext context) {
+    // _images.add(Image.asset('images/placeholder.jpg'));
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          loadAcountItem('账号：'),
+          loadAccountItem('账号：'),
           SizedBox(height: 15.sp),
           loadPasswordItem('密码：'),
           SizedBox(height: 30.sp),
+          ..._images,
           TextButton(
-            onPressed: () {
-              Config.startPage(context, const ListInfoWidget());
+            onPressed: () async {
+              Config.startPage(context, const AddPublicOpinion());
+              /*final xFile =
+                  await ImagePicker().pickVideo(source: ImageSource.camera);
+              if (null != xFile) {
+                final view = VTImageView(
+                  videoUrl: xFile.path,
+                  assetPlaceHolder: 'images/placeholder.jpg',
+                  width: 100.sp,
+                  height: 100.sp,
+                );
+                setState((){
+                  _images.add(view);
+                });
+              }*/
             },
             style: TextButton.styleFrom(
               primary: Colors.white,
@@ -61,7 +82,7 @@ class _LoginState extends State<Login> {
     );
   }
 
-  loadAcountItem(String explain) {
+  loadAccountItem(String explain) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [

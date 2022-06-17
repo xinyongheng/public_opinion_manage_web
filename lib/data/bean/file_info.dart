@@ -1,19 +1,27 @@
+import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:video_thumbnail_imageview/video_thumbnail_imageview.dart';
 
-class FileInfo {
+class FileInfoBean {
   late String type;
-  late String name;
+  String? name;
   late String path;
   final Uint8List? bytes;
+
   // FileInfo();
-  FileInfo(this.path, {this.bytes}) {
-    int pointIndex = path.lastIndexOf('/');
-    if (pointIndex > -1) {
-      name = path.substring(pointIndex);
-    } else {
-      name = path;
+  FileInfoBean(this.path, {this.bytes, this.name}) {
+    if (name == null) {
+      int pointIndex = path.lastIndexOf('/');
+      if (pointIndex > -1) {
+        name = path.substring(pointIndex);
+      } else {
+        name = path;
+      }
     }
-    type = fileType(name);
+    type = fileType(name!);
+    print(name);
+    print(type);
   }
 
   String fileName(String path) {
@@ -29,10 +37,11 @@ class FileInfo {
     int pointIndex = name.lastIndexOf('.');
     String endString;
     if (pointIndex > -1) {
-      endString = name.substring(pointIndex);
+      endString = name.substring(pointIndex + 1);
     } else {
       endString = name;
     }
+    print(endString);
     switch (endString.toLowerCase()) {
       case 'jpg':
       case 'png':
@@ -54,6 +63,25 @@ class FileInfo {
         return 'video';
       default:
         return 'file';
+    }
+  }
+
+  static Widget getTagIcon(FileInfoBean bean) {
+
+    switch (bean.type) {
+      case 'image':
+        return bean.path.startsWith('web_') == true
+            ? Image.memory(bean.bytes!, semanticLabel: bean.name)
+            : Image.file(File(bean.path));
+      case 'video':
+        return Stack(
+          children: [
+            Image(image: MemoryImage(bean.bytes!)),
+            const Icon(Icons.play_circle_fill_outlined),
+          ],
+        );
+      default:
+        return const Icon(Icons.file_copy);
     }
   }
 }
