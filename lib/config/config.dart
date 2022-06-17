@@ -27,11 +27,24 @@ class Config {
     );
   }
 
-  static TextStyle loadFirstTextStyle() {
+  static TextStyle loadFirstTextStyle({Color? backgroundColor}) {
     return TextStyle(
       fontSize: 15.sp,
       fontWeight: FontWeight.bold,
-      backgroundColor: Colors.yellow,
+      backgroundColor: backgroundColor,
+    );
+  }
+
+  static ButtonStyle loadPerformButtonStyle() {
+    return TextButton.styleFrom(
+      primary: Colors.white,
+      backgroundColor: Colors.blue,
+      padding: EdgeInsets.only(
+        left: 60.sp,
+        top: 15.sp,
+        right: 60.sp,
+        bottom: 15.sp,
+      ),
     );
   }
 

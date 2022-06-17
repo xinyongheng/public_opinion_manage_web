@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
-import 'package:public_opinion_manage_web/page/add_public_opinion.dart';
 import 'package:public_opinion_manage_web/page/login.dart';
 
 void main() {
@@ -17,7 +17,13 @@ class MyApp extends StatelessWidget {
     return ScreenUtilInit(
       builder: (context, child) {
         return MaterialApp(
-          title: 'Flutter Demo',
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          supportedLocales: const [
+            Locale('zh', 'CH'),
+            Locale('en', 'US'),
+          ],
+          locale: const Locale('zh', 'CH'),
+          title: '舆情台账',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             primarySwatch: Colors.blue,
@@ -48,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: Config.loadAppbar(widget.title),
-      body: const Login(),
+      body: const LoginView(),
     );
   }
 }

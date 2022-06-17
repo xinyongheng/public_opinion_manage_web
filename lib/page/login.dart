@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:image_picker_web/image_picker_web.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/page/add_public_opinion.dart';
-import 'package:public_opinion_manage_web/page/info_public_opinion.dart';
-import 'package:video_thumbnail_imageview/video_thumbnail_imageview.dart';
 
-class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
+class LoginView extends StatefulWidget {
+  const LoginView({Key? key}) : super(key: key);
 
   @override
-  State<Login> createState() => _LoginState();
+  State<LoginView> createState() => _LoginViewState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginViewState extends State<LoginView> {
   late TextEditingController _controller1;
   late TextEditingController _controller2;
 
@@ -49,6 +45,16 @@ class _LoginState extends State<Login> {
           ..._images,
           TextButton(
             onPressed: () async {
+              /* showDatePicker(
+                context: context,
+                firstDate: DateTime(2000),
+                lastDate: DateTime.now(),
+                initialDate: DateTime.now(),
+                selectableDayPredicate: (datetime) {
+                  print(datetime);
+                  return false;
+                },
+              ); */
               Config.startPage(context, const AddPublicOpinion());
               /*final xFile =
                   await ImagePicker().pickVideo(source: ImageSource.camera);
@@ -64,16 +70,7 @@ class _LoginState extends State<Login> {
                 });
               }*/
             },
-            style: TextButton.styleFrom(
-              primary: Colors.white,
-              backgroundColor: Colors.blue,
-              padding: EdgeInsets.only(
-                left: 60.sp,
-                top: 15.sp,
-                right: 60.sp,
-                bottom: 15.sp,
-              ),
-            ),
+            style: Config.loadPerformButtonStyle(),
             child: const Text('登录'),
           ),
           SizedBox(height: 300.h),

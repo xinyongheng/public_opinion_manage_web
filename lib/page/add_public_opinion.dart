@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
@@ -24,10 +25,6 @@ class _AddPublicOpinionState extends State<AddPublicOpinion> {
   @override
   void initState() {
     super.initState();
-    _controllerMap['link'] = TextEditingController();
-    _controllerMap['title'] = TextEditingController();
-    _controllerMap['create_time'] = TextEditingController();
-    _controllerMap['find_time'] = TextEditingController();
   }
 
   @override
@@ -69,11 +66,20 @@ class _AddPublicOpinionState extends State<AddPublicOpinion> {
               CircularProgressIndicator(value: downloadProgress.progress),
           errorWidget: (context, url, error) => const Icon(Icons.error),
         ),
-        TextButton(
-            onPressed: () {
-              Config.toast('点击提交');
-            },
-            child: const Text('提交')),
+        SizedBox(
+          width: 300.w,
+          height: 50.h,
+          child: Center(
+            widthFactor: 150.w,
+            child: TextButton(
+              onPressed: () {
+                Config.toast('点击提交');
+              },
+              style: Config.loadPerformButtonStyle(),
+              child: const Text('提交'),
+            ),
+          ),
+        ),
       ],
     );
     // return ;
@@ -177,10 +183,14 @@ class _AddPublicOpinionState extends State<AddPublicOpinion> {
   }
 
   /// 标题
-  Widget firstTitle(title) => Text(title, style: Config.loadFirstTextStyle());
+  Widget firstTitle(title) => Text(title,
+      style: Config.loadFirstTextStyle(backgroundColor: Colors.yellow));
 
   /// 输入
-  Widget editText(explain, key, {double? width}) {
+  Widget editText(String explain, key, {double? width}) {
+    if (!_controllerMap.containsKey(key)) {
+      _controllerMap[key] = TextEditingController();
+    }
     return Padding(
       padding: EdgeInsets.only(right: 30.sp),
       child: SizedBox(
@@ -188,28 +198,59 @@ class _AddPublicOpinionState extends State<AddPublicOpinion> {
         height: 80.sp,
         child: Padding(
           padding: EdgeInsets.only(top: 20.sp, left: 20.sp),
-          child: TextField(
-            controller: _controllerMap[key],
-            maxLength: 100,
-            maxLines: 1,
-            scrollPadding: EdgeInsets.all(0.sp),
-            textInputAction: TextInputAction.next,
-            style: Config.loadDefaultTextStyle(color: Colors.black),
-            decoration: InputDecoration(
-              // label: const Icon(Icons.people),
-              // labelText: '请输入$explain',
-              border: const OutlineInputBorder(gapPadding: 0),
-              contentPadding: EdgeInsets.only(
-                left: 5.sp,
-                right: 20.sp,
-              ),
-              // helperText: '手机号',
-              hintText: "请输入$explain",
-              hintStyle: Config.loadDefaultTextStyle(color: Colors.grey),
-              // errorText: '错误',
-            ),
-          ),
+          child: explain.contains('时间')
+              ? dateInputView(key, explain)
+              : textInputView(key, explain),
         ),
+      ),
+    );
+  }
+
+  Widget dateInputView(key, explain) {
+    return DateTimePicker(
+      controller: _controllerMap[key],
+      type: DateTimePickerType.dateTime,
+      dateMask: 'yyyy-MM-dd HH:mm',
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      textInputAction: TextInputAction.next,
+      style: Config.loadDefaultTextStyle(color: Colors.black),
+      decoration: InputDecoration(
+        // label: const Icon(Icons.people),
+        // labelText: '请输入$explain',
+        border: const OutlineInputBorder(gapPadding: 0),
+        contentPadding: EdgeInsets.only(
+          left: 5.sp,
+          right: 20.sp,
+        ),
+        // helperText: '手机号',
+        hintText: "请输入$explain",
+        hintStyle: Config.loadDefaultTextStyle(color: Colors.grey),
+        // errorText: '错误',
+      ),
+    );
+  }
+
+  TextField textInputView(key, explain) {
+    return TextField(
+      controller: _controllerMap[key],
+      maxLength: 100,
+      maxLines: 1,
+      scrollPadding: EdgeInsets.all(0.sp),
+      textInputAction: TextInputAction.next,
+      style: Config.loadDefaultTextStyle(color: Colors.black),
+      decoration: InputDecoration(
+        // label: const Icon(Icons.people),
+        // labelText: '请输入$explain',
+        border: const OutlineInputBorder(gapPadding: 0),
+        contentPadding: EdgeInsets.only(
+          left: 5.sp,
+          right: 20.sp,
+        ),
+        // helperText: '手机号',
+        hintText: "请输入$explain",
+        hintStyle: Config.loadDefaultTextStyle(color: Colors.grey),
+        // errorText: '错误',
       ),
     );
   }
