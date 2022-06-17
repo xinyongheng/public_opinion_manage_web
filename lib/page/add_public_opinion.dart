@@ -94,14 +94,16 @@ class _AddPublicOpinionState extends State<AddPublicOpinion> {
       ],
     );
   }
+
   /// 原链接图文信息
-  Widget linkFileInfo(){
-    Widget titleView = firstTitle('原文图文链接：'); 
+  Widget linkFileInfo() {
+    Widget titleView = firstTitle('原文图文链接：');
     Widget listView = Wrap(
       direction: Axis.horizontal,
     );
-    return 
+    return listView;
   }
+
   /// 舆情处理
   /// 提交
   ///
