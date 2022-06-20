@@ -1,7 +1,5 @@
-import 'package:flutter/cupertino.dart';
+import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 
@@ -17,13 +15,15 @@ class _CreatePressTypeState extends State<CreatePressType> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: Config.loadAppbar('chaungjain baokan'),
+      appBar: Config.loadAppbar('创建报刊'),
       body: Container(
-        alignment: Alignment.center,
+        alignment: Alignment.topCenter,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [],
+          children: [
+            searchView(),
+          ],
         ),
       ),
     );
@@ -31,23 +31,33 @@ class _CreatePressTypeState extends State<CreatePressType> {
 
   // public opinion search
   Column searchView() {
-    final arr = [
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-    ];
+    final arr = ['事件名称', '舆情类别', '舆情报刊类型', '发布时间', '发现时间', '反馈时间'];
+    final views = <Widget>[];
+    for (String element in arr) {
+      views.add(searchItemView(element));
+    }
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        loadFirstTitle('search:'),
+        loadFirstTitle('舆情搜索:'),
         Wrap(
           direction: Axis.horizontal,
           spacing: 30.sp,
-          children: [],
+          children: [
+            ...views,
+            TextButton(
+              onPressed: () {},
+              style: TextButton.styleFrom(
+                primary: Colors.white,
+                backgroundColor: Colors.blue,
+                padding: EdgeInsets.only(
+                    left: 30.sp, right: 30.sp, top: 10.sp, bottom: 10.sp),
+                textStyle: Config.loadDefaultTextStyle(),
+              ),
+              child: const Text('筛选'),
+            )
+          ],
         )
       ],
     );
@@ -71,11 +81,12 @@ class _CreatePressTypeState extends State<CreatePressType> {
           padding: EdgeInsets.only(right: 30.sp),
           child: SizedBox(
             width: 200.sp,
-            height: 50.sp,
+            height: 80.sp,
             child: Padding(
               padding: EdgeInsets.only(top: 20.sp, left: 20.sp),
               child: data.contains('时间')
-                  ? Config.dateInputView(data, _mapController[data])
+                  ? Config.dateInputView(data, _mapController[data],
+                      type: DateTimePickerType.date)
                   : Config.textInputView(data, _mapController[data]),
             ),
           ),

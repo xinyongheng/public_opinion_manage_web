@@ -65,11 +65,13 @@ class Config {
         fontSize: 15.sp);
   }
 
-  static Widget dateInputView(explain, controller) {
+  static Widget dateInputView(explain, controller, {DateTimePickerType? type}) {
     return DateTimePicker(
       controller: controller,
-      type: DateTimePickerType.dateTime,
-      dateMask: 'yyyy-MM-dd HH:mm',
+      type: type ?? DateTimePickerType.dateTime,
+      dateMask: type == DateTimePickerType.dateTime
+          ? 'yyyy-MM-dd HH:mm'
+          : 'yyyy-MM-dd',
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
       textInputAction: TextInputAction.next,

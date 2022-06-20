@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/page/add_public_opinion.dart';
+import 'package:public_opinion_manage_web/page/press_type_create.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({Key? key}) : super(key: key);
@@ -55,7 +56,7 @@ class _LoginViewState extends State<LoginView> {
                   return false;
                 },
               ); */
-              Config.startPage(context, const AddPublicOpinion());
+              Config.startPage(context, const CreatePressType());
               /*final xFile =
                   await ImagePicker().pickVideo(source: ImageSource.camera);
               if (null != xFile) {
