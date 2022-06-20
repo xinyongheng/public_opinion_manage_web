@@ -1,3 +1,4 @@
+import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -10,10 +11,11 @@ class Config {
     );
   }
 
-  static TextStyle loadDefaultTextStyle({Color color = Colors.black}) {
+  static TextStyle loadDefaultTextStyle(
+      {Color color = Colors.black, double? fonstSize}) {
     return TextStyle(
       color: color,
-      fontSize: 15.sp,
+      fontSize: fonstSize ?? 15.sp,
     );
   }
 
@@ -61,5 +63,54 @@ class Config {
         backgroundColor: Colors.red,
         textColor: Colors.white,
         fontSize: 15.sp);
+  }
+
+  static Widget dateInputView(explain, controller) {
+    return DateTimePicker(
+      controller: controller,
+      type: DateTimePickerType.dateTime,
+      dateMask: 'yyyy-MM-dd HH:mm',
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      textInputAction: TextInputAction.next,
+      style: Config.loadDefaultTextStyle(color: Colors.black),
+      decoration: InputDecoration(
+        // label: const Icon(Icons.people),
+        // labelText: '请输入$explain',
+        border: const OutlineInputBorder(gapPadding: 0),
+        contentPadding: EdgeInsets.only(
+          left: 5.sp,
+          right: 20.sp,
+        ),
+        // helperText: '手机号',
+        hintText: "请输入$explain",
+        hintStyle: Config.loadDefaultTextStyle(color: Colors.grey),
+        // errorText: '错误',
+      ),
+    );
+  }
+
+  static TextField textInputView(explain, controller) {
+    return TextField(
+      controller: controller,
+      maxLength: 100,
+      maxLines: 1,
+      scrollPadding: EdgeInsets.all(0.sp),
+      textInputAction: TextInputAction.next,
+      style: Config.loadDefaultTextStyle(color: Colors.black),
+      decoration: InputDecoration(
+        // label: const Icon(Icons.people),
+        // labelText: '请输入$explain',
+        border: const OutlineInputBorder(gapPadding: 0),
+        contentPadding: EdgeInsets.only(
+          left: 5.sp,
+          right: 20.sp,
+        ),
+        // helperText: '手机号',
+        hintText: "请输入$explain",
+        hintStyle: Config.loadDefaultTextStyle(color: Colors.grey),
+        // errorText: '错误',
+      ),
+    );
   }
 }
