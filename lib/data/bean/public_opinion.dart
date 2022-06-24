@@ -39,7 +39,7 @@ class PublicOpinionBean {
   String? leaderName;
 
   // 是否完结 0否1是
-  int isComplete = 0;
+  int? isComplete = 0;
 
   PublicOpinionBean.build(
     this.name,
@@ -58,6 +58,7 @@ class PublicOpinionBean {
     this.leaderInstructionsContent,
     this.leaderInstructionsTime,
     this.leaderName,
+    this.isComplete,
   });
 
   void specifiedUnit(dutyUnitName) {
@@ -107,6 +108,11 @@ class PublicOpinionBean {
       '2022-05-01',
       '社会问题',
       no: 3,
+      dutyUnit: '县公安局',
+      feedbackTime: '2022-05-04',
+      specifiedUnitTime: '2022-05-04',
+      isLateReport: 0,
+      isComplete: 1,
     ));
     list.add(PublicOpinionBean.build(
       '333',
@@ -116,6 +122,14 @@ class PublicOpinionBean {
       '2022-05-01',
       '疫情防控',
       no: 4,
+      dutyUnit: '县卫健委',
+      feedbackTime: '2022-05-04',
+      specifiedUnitTime: '2022-05-04',
+      leaderInstructionsContent: '测试批示内容****',
+      leaderInstructionsTime: '2022-05-05',
+      leaderName: '于**',
+      isLateReport: 0,
+      isComplete: 1,
     ));
     return list;
   }

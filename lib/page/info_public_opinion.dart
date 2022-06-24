@@ -18,7 +18,7 @@ class ListInfoPage extends StatelessWidget {
 
 class ListInfoWidget extends StatefulWidget {
   final bool? canSelect;
-  final select_list = <PublicOpinionBean>[];
+  final selectList = <PublicOpinionBean>[];
 
   ListInfoWidget({Key? key, this.canSelect}) : super(key: key);
 
@@ -31,7 +31,6 @@ class _ListInfoWidgetState extends State<ListInfoWidget> {
   final wordLength = 20.sp;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _list.addAll(PublicOpinionBean.create());
   }
@@ -57,7 +56,13 @@ class _ListInfoWidgetState extends State<ListInfoWidget> {
         SizedBox(
           width: 40.sp,
           height: 30.sp,
-          child: Center(child: Text('编辑')),
+          child: Center(
+            child: InkWell(
+                onTap: () {
+                  print('asdf');
+                },
+                child: const Text('选择')),
+          ),
         ),
         childItemView('序号', '',
             color: Colors.white, bgColor: Colors.blue, height: 30.sp),
@@ -66,15 +71,24 @@ class _ListInfoWidgetState extends State<ListInfoWidget> {
         childItemView('媒体类型', '',
             color: Colors.white, bgColor: Colors.blue, height: 30.sp),
         childItemView('发布时间', '',
-            color: Colors.white, bgColor: Colors.blue, height: 30.sp),
+            width: 5 * wordLength,
+            color: Colors.white,
+            bgColor: Colors.blue,
+            height: 30.sp),
         childItemView('发现时间', '',
-            color: Colors.white, bgColor: Colors.blue, height: 30.sp),
+            width: 5 * wordLength,
+            color: Colors.white,
+            bgColor: Colors.blue,
+            height: 30.sp),
         childItemView('舆情类别', '',
             color: Colors.white, bgColor: Colors.blue, height: 30.sp),
         childItemView('责任单位', '',
             color: Colors.white, bgColor: Colors.blue, height: 30.sp),
         childItemView('反馈时间', '',
-            color: Colors.white, bgColor: Colors.blue, height: 30.sp),
+            width: 5 * wordLength,
+            color: Colors.white,
+            bgColor: Colors.blue,
+            height: 30.sp),
         childItemView('上级通报时间', '',
             color: Colors.white, bgColor: Colors.blue, height: 30.sp),
         childItemView('报刊类型', '',
@@ -119,17 +133,17 @@ class _ListInfoWidgetState extends State<ListInfoWidget> {
         childItemView(bean.mediaType.toString(), '媒体类型',
             width: 4 * wordLength, index: index),
         childItemView(bean.linkPublishTime.toString(), '发布时间',
-            width: 4 * wordLength, index: index),
+            width: 5 * wordLength, index: index),
         childItemView(bean.findTime.toString(), '发现时间',
-            width: 4 * wordLength, index: index),
+            width: 5 * wordLength, index: index),
         childItemView(bean.publicOpinionType.toString(), '舆情类别',
             width: 4 * wordLength, index: index),
         childItemView(bean.dutyUnit?.toString() ?? '指定', '责任单位',
             width: 4 * wordLength, index: index),
         childItemView(bean.feedbackTime.toString(), '反馈时间',
-            width: 4 * wordLength, index: index),
-        childItemView(bean.superiorNoticeTime.toString(), '上级通报时间',
             width: 5 * wordLength, index: index),
+        childItemView(bean.superiorNoticeTime.toString(), '上级通报时间',
+            width: 6 * wordLength, index: index),
         childItemView(bean.pressType.toString(), '报刊类型',
             width: 4 * wordLength, index: index),
         childItemView(
