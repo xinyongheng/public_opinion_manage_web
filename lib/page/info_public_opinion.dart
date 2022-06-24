@@ -1,10 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
+import 'package:public_opinion_manage_web/custom/check_box.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 
+class ListInfoPage extends StatelessWidget {
+  const ListInfoPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: Config.loadAppbar('舆情列表'),
+      body: ListInfoWidget(),
+    );
+  }
+}
+
 class ListInfoWidget extends StatefulWidget {
-  const ListInfoWidget({Key? key}) : super(key: key);
+  final bool? canSelect;
+  final select_list = <PublicOpinionBean>[];
+
+  ListInfoWidget({Key? key, this.canSelect}) : super(key: key);
 
   @override
   State<ListInfoWidget> createState() => _ListInfoWidgetState();
@@ -13,22 +29,20 @@ class ListInfoWidget extends StatefulWidget {
 class _ListInfoWidgetState extends State<ListInfoWidget> {
   final List<PublicOpinionBean> _list = [];
   final wordLength = 20.sp;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _list.addAll(PublicOpinionBean.create());
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: Config.loadAppbar('舆情列表'),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: 2500,
-          child: ListView.builder(
-            itemBuilder: itemView,
-            itemCount: _list.length + 1,
-            shrinkWrap: true, //内容适配
-          ),
-        ),
-      ),
+    return ListView.builder(
+      // physics: const NeverScrollableScrollPhysics(),
+      // shrinkWrap: true, //内容适配
+      itemBuilder: itemView,
+      itemCount: _list.length + 1,
     );
   }
 
@@ -40,6 +54,11 @@ class _ListInfoWidgetState extends State<ListInfoWidget> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        SizedBox(
+          width: 40.sp,
+          height: 30.sp,
+          child: Center(child: Text('编辑')),
+        ),
         childItemView('序号', '',
             color: Colors.white, bgColor: Colors.blue, height: 30.sp),
         childItemView('事件名称', '',
@@ -75,13 +94,24 @@ class _ListInfoWidgetState extends State<ListInfoWidget> {
   }
 
   Widget tableRowView(PublicOpinionBean bean) {
-    String leaderInstructions = bean.leaderName == null
-        ? '添加'
-        : "${bean.leaderName}\n${bean.leaderInstructionsTime}";
+    bool tag = bean.leaderName == null;
+    print(tag);
+    String leaderInstructions =
+        tag ? '添加' : "${bean.leaderName}\n${bean.leaderInstructionsTime}";
     int index = bean.no! - 1;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        Container(
+          width: 40.sp,
+          height: 30.sp,
+          alignment: Alignment.center,
+          child: CheckBoxWidget(
+            boxTag: bean.no!,
+            value: false,
+            // onChanged: (bool? value) {},
+          ),
+        ),
         childItemView(bean.no?.toString() ?? '-', '序号',
             width: 2 * wordLength, index: index),
         childItemView(bean.name.toString(), '事件名称',

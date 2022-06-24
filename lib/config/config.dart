@@ -4,10 +4,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class Config {
+  static final AppBar_Title_Size = 25.sp;
+  static final First_Size = 15.sp;
+  static final Second_Size = 15.sp;
+  static final Default_Size = 15.sp;
+
   static TextStyle loadAppBarTextStyle() {
     return TextStyle(
       color: Colors.white,
-      fontSize: 25.sp,
+      fontSize: AppBar_Title_Size,
     );
   }
 
@@ -15,7 +20,7 @@ class Config {
       {Color color = Colors.black, double? fonstSize}) {
     return TextStyle(
       color: color,
-      fontSize: fonstSize ?? 15.sp,
+      fontSize: fonstSize ?? Default_Size,
     );
   }
 
@@ -31,7 +36,7 @@ class Config {
 
   static TextStyle loadFirstTextStyle({Color? backgroundColor}) {
     return TextStyle(
-      fontSize: 15.sp,
+      fontSize: First_Size,
       fontWeight: FontWeight.bold,
       backgroundColor: backgroundColor,
     );
@@ -62,7 +67,7 @@ class Config {
         timeInSecForIosWeb: 2,
         backgroundColor: Colors.red,
         textColor: Colors.white,
-        fontSize: 15.sp);
+        fontSize: First_Size);
   }
 
   static Widget dateInputView(explain, controller, {DateTimePickerType? type}) {
@@ -83,6 +88,8 @@ class Config {
         contentPadding: EdgeInsets.only(
           left: 5.sp,
           right: 20.sp,
+          top: 5.sp,
+          bottom: 5.sp,
         ),
         // helperText: '手机号',
         hintText: "请输入$explain",

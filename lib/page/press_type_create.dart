@@ -2,6 +2,7 @@ import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
+import 'package:public_opinion_manage_web/page/info_public_opinion.dart';
 
 class CreatePressType extends StatefulWidget {
   const CreatePressType({Key? key}) : super(key: key);
@@ -23,6 +24,7 @@ class _CreatePressTypeState extends State<CreatePressType> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             searchView(),
+            Expanded(child: ListInfoWidget()),
           ],
         ),
       ),
@@ -41,23 +43,37 @@ class _CreatePressTypeState extends State<CreatePressType> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         loadFirstTitle('舆情搜索:'),
-        Wrap(
-          direction: Axis.horizontal,
-          spacing: 30.sp,
-          children: [
-            ...views,
-            TextButton(
-              onPressed: () {},
-              style: TextButton.styleFrom(
-                primary: Colors.white,
-                backgroundColor: Colors.blue,
-                padding: EdgeInsets.only(
-                    left: 30.sp, right: 30.sp, top: 10.sp, bottom: 10.sp),
-                textStyle: Config.loadDefaultTextStyle(),
+        Padding(
+          padding: EdgeInsets.only(
+              left: Config.Default_Size, top: Config.Default_Size),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                flex: 4,
+                child: Wrap(
+                  direction: Axis.horizontal,
+                  spacing: 30.sp,
+                  children: views,
+                ),
               ),
-              child: const Text('筛选'),
-            )
-          ],
+              Padding(
+                padding: EdgeInsets.only(right: 30.sp),
+                child: TextButton(
+                  onPressed: () {},
+                  style: TextButton.styleFrom(
+                    primary: Colors.white,
+                    backgroundColor: Colors.blue,
+                    padding: EdgeInsets.only(
+                        left: 30.sp, right: 30.sp, top: 10.sp, bottom: 10.sp),
+                    textStyle: Config.loadDefaultTextStyle(),
+                  ),
+                  child: const Text('筛选'),
+                ),
+              ),
+            ],
+          ),
         )
       ],
     );

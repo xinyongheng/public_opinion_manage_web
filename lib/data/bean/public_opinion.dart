@@ -10,6 +10,7 @@ class PublicOpinionBean {
   final String name;
   // 媒体类型
   final String mediaType;
+  final String link;
   // 发布时间
   final String linkPublishTime;
   // 发现时间
@@ -40,8 +41,24 @@ class PublicOpinionBean {
   // 是否完结 0否1是
   int isComplete = 0;
 
-  PublicOpinionBean.build(this.name, this.mediaType, this.linkPublishTime,
-      this.findTime, this.publicOpinionType);
+  PublicOpinionBean.build(
+    this.name,
+    this.link,
+    this.mediaType,
+    this.linkPublishTime,
+    this.findTime,
+    this.publicOpinionType, {
+    this.no,
+    this.dutyUnit,
+    this.specifiedUnitTime,
+    this.feedbackTime,
+    this.superiorNoticeTime,
+    this.pressType,
+    this.isLateReport,
+    this.leaderInstructionsContent,
+    this.leaderInstructionsTime,
+    this.leaderName,
+  });
 
   void specifiedUnit(dutyUnitName) {
     dutyUnit = dutyUnitName;
@@ -51,5 +68,55 @@ class PublicOpinionBean {
   @override
   String toString() {
     return 'PublicOpinionBean{id: $id, no: $no, name: $name, mediaType: $mediaType, linkPublishTime: $linkPublishTime, findTime: $findTime, publicOpinionType: $publicOpinionType, dutyUnit: $dutyUnit, specifiedUnitTime: $specifiedUnitTime, feedbackTime: $feedbackTime, superiorNoticeTime: $superiorNoticeTime, pressType: $pressType, isLateReport: $isLateReport, leaderInstructionsContent: $leaderInstructionsContent, leaderInstructionsTime: $leaderInstructionsTime, leaderName: $leaderName, isComplete: $isComplete}';
+  }
+
+  static List<PublicOpinionBean> create() {
+    var list = <PublicOpinionBean>[];
+    list.add(PublicOpinionBean.build(
+      '111',
+      'https://www.xxxx.xx/sd/erm',
+      '抖音1',
+      '2022-05-01',
+      '2022-05-01',
+      '拖欠工资1',
+      no: 0,
+    ));
+    list.add(PublicOpinionBean.build(
+      '222',
+      'https://www.xxxx.xx/sd/erm',
+      '抖音2',
+      '2022-05-01',
+      '2022-05-01',
+      '拖欠工资2',
+      no: 1,
+    ));
+    list.add(PublicOpinionBean.build(
+      '333',
+      'https://www.xxxx.xx/sd/erm',
+      '抖音3',
+      '2022-05-01',
+      '2022-05-01',
+      '拖欠工资3',
+      no: 2,
+    ));
+    list.add(PublicOpinionBean.build(
+      '333',
+      'https://www.xxxx.xx/sd/erm',
+      '天涯社区',
+      '2022-05-01',
+      '2022-05-01',
+      '社会问题',
+      no: 3,
+    ));
+    list.add(PublicOpinionBean.build(
+      '333',
+      'https://www.xxxx.xx/sd/erm',
+      '新浪微博',
+      '2022-05-01',
+      '2022-05-01',
+      '疫情防控',
+      no: 4,
+    ));
+    return list;
   }
 }
