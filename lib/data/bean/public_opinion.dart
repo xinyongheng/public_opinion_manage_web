@@ -125,7 +125,7 @@ class PublicOpinionBean {
       dutyUnit: '县卫健委',
       feedbackTime: '2022-05-04',
       specifiedUnitTime: '2022-05-04',
-      leaderInstructionsContent: '测试批示内容****',
+      leaderInstructionsContent: '测试批示内容阿伦诺夫看似打开卡十分难看看上的妇女阿斯弗',
       leaderInstructionsTime: '2022-05-05',
       leaderName: '于**',
       isLateReport: 0,
