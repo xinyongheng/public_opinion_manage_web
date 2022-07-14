@@ -4,10 +4,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class Config {
-  static final AppBar_Title_Size = 25.sp;
-  static final First_Size = 15.sp;
-  static final Second_Size = 15.sp;
-  static final Default_Size = 15.sp;
+  static final AppBar_Title_Size = 65.sp;
+  static final First_Size = 60.sp;
+  static final Second_Size = 50.sp;
+  static final Default_Size = 40.sp;
 
   static TextStyle loadAppBarTextStyle() {
     return TextStyle(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
-import 'package:public_opinion_manage_web/page/add_public_opinion.dart';
 import 'package:public_opinion_manage_web/page/press_type_create.dart';
 
 class LoginView extends StatefulWidget {
@@ -24,7 +23,6 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     _controller1.dispose();
     _controller2.dispose();
@@ -35,48 +33,72 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     // _images.add(Image.asset('images/placeholder.jpg'));
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          loadAccountItem('账号：'),
-          SizedBox(height: 15.sp),
-          loadPasswordItem('密码：'),
-          SizedBox(height: 30.sp),
-          ..._images,
-          TextButton(
-            onPressed: () async {
-              /* showDatePicker(
-                context: context,
-                firstDate: DateTime(2000),
-                lastDate: DateTime.now(),
-                initialDate: DateTime.now(),
-                selectableDayPredicate: (datetime) {
-                  print(datetime);
-                  return false;
-                },
-              ); */
-              Config.startPage(context, const CreatePressType());
-              /*final xFile =
-                  await ImagePicker().pickVideo(source: ImageSource.camera);
-              if (null != xFile) {
-                final view = VTImageView(
-                  videoUrl: xFile.path,
-                  assetPlaceHolder: 'images/placeholder.jpg',
-                  width: 100.sp,
-                  height: 100.sp,
-                );
-                setState((){
-                  _images.add(view);
-                });
-              }*/
-            },
-            style: Config.loadPerformButtonStyle(),
-            child: const Text('登录'),
+    return Row(
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('images/login_left.png'),
+              fit: BoxFit.fill,
+            ),
           ),
-          SizedBox(height: 300.h),
-        ],
-      ),
+          alignment: Alignment.topLeft,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset('images/logo.png', width: 60.sp, height: 60.sp),
+              SizedBox(width: 30.sp),
+              Text('舆情台账管理系统', style: Config.loadDefaultTextStyle()),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 1,
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                loadAccountItem('账号：'),
+                SizedBox(height: 15.sp),
+                loadPasswordItem('密码：'),
+                SizedBox(height: 30.sp),
+                ..._images,
+                TextButton(
+                  onPressed: () async {
+                    /* showDatePicker(
+                      context: context,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime.now(),
+                      initialDate: DateTime.now(),
+                      selectableDayPredicate: (datetime) {
+                        print(datetime);
+                        return false;
+                      },
+                    ); */
+                    Config.startPage(context, const CreatePressType());
+                    /*final xFile =
+                        await ImagePicker().pickVideo(source: ImageSource.camera);
+                    if (null != xFile) {
+                      final view = VTImageView(
+                        videoUrl: xFile.path,
+                        assetPlaceHolder: 'images/placeholder.jpg',
+                        width: 100.sp,
+                        height: 100.sp,
+                      );
+                      setState((){
+                        _images.add(view);
+                      });
+                    }*/
+                  },
+                  style: Config.loadPerformButtonStyle(),
+                  child: const Text('登录'),
+                ),
+                SizedBox(height: 300.h),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 

@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
           home: child,
         );
       },
-      designSize: const Size(360, 900),
+      designSize: const Size(1920, 1080),
       minTextAdapt: true,
       splitScreenMode: true,
       child: const MyHomePage(title: '舆情台账管理系统'),
@@ -53,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: Config.loadAppbar(widget.title),
+      // appBar: Config.loadAppbar(widget.title),
       body: const LoginView(),
     );
   }
