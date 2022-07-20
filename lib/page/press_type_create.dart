@@ -45,7 +45,7 @@ class _CreatePressTypeState extends State<CreatePressType> {
         loadFirstTitle('舆情搜索:'),
         Padding(
           padding: EdgeInsets.only(
-              left: Config.Default_Size, top: Config.Default_Size),
+              left: Config.defaultSize, top: Config.defaultSize),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,

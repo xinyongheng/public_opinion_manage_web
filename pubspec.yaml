@@ -56,6 +56,9 @@ dependencies:
   fluttertoast: ^8.0.9
   image_picker: ^0.8.5+3
   video_thumbnail_imageview: ^0.0.5
+  flutter_easyloading: ^3.0.5
+  shared_preferences: ^2.0.15
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

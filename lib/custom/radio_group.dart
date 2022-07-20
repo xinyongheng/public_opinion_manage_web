@@ -1,77 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 
-typedef OnChangeListener = void Function(int groupValue);
-
-class RadioGroup extends StatefulWidget {
-  final Axis direction;
-  final TextStyle? style;
+class RadioGroupWidget extends StatefulWidget {
   final List<String> list;
-  int groupValue = 0;
-  OnChangeListener changeListener;
-
-  RadioGroup({
+  final int defaultSelectIndex;
+  final Axis direction;
+  final ValueChanged<int?>? change;
+  const RadioGroupWidget({
     Key? key,
     required this.list,
-    this.style,
+    this.defaultSelectIndex = -1,
     this.direction = Axis.horizontal,
-    required this.changeListener,
+    this.change,
   }) : super(key: key);
 
-  String loadSelect() {
-    return list[groupValue];
-  }
-
   @override
-  State<RadioGroup> createState() => _RadioGroupState();
+  State<RadioGroupWidget> createState() => _RadioGroupWidgetState();
 }
 
-class _RadioGroupState extends State<RadioGroup> {
+class _RadioGroupWidgetState extends State<RadioGroupWidget> {
+  int _selectValue = -1;
+  @override
+  void initState() {
+    super.initState();
+    _selectValue = widget.defaultSelectIndex;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return widget.direction == Axis.horizontal ? row() : column();
-  }
-
-  Widget row() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: radioList(),
+    return Wrap(
+      direction: widget.direction,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: loadItmes(),
     );
   }
 
-  Widget column() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: radioList(),
-    );
-  }
-
-  void onChange(int? v) {
-    print("啦啦啦1： $v");
-    setState(() {
-      widget.groupValue = v ?? 0;
-    });
-    widget.changeListener(v ?? 0);
-    print("啦啦啦2： ${widget.groupValue}");
-  }
-
-  List<Widget> radioList() {
-    final views = <Widget>[];
-    for (int index = 0; index < widget.list.length; index++) {
-      String element = widget.list[index];
-      final item = Row(
+  List<Widget> loadItmes() {
+    final items = <Widget>[];
+    for (int i = 0; i < widget.list.length; i++) {
+      final element = widget.list[i];
+      items.add(Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
           Radio(
-            value: index,
-            groupValue: widget.groupValue,
-            onChanged: onChange,
+            activeColor: const Color.fromARGB(255, 29, 153, 93),
+            value: i,
+            groupValue: _selectValue,
+            onChanged: (int? value) {
+              if (value != _selectValue) {
+                setState(() {
+                  _selectValue = value ?? 0;
+                });
+              }
+              widget.change?.call(value);
+            },
           ),
-          Text(element, style: widget.style ?? Config.loadDefaultTextStyle())
+          // SizedBox(width: 5.sp),
+          Text(element, style: Config.loadDefaultTextStyle()),
         ],
-      );
-      views.add(item);
+      ));
+      if (i < widget.list.length - 1) {
+        items.add(SizedBox(width: 10.sp));
+      }
     }
-    return views;
+    return items;
   }
 }

@@ -2,25 +2,27 @@ import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:public_opinion_manage_web/main.dart';
+import 'package:public_opinion_manage_web/page/login.dart';
+import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 class Config {
-  static final AppBar_Title_Size = 65.sp;
-  static final First_Size = 60.sp;
-  static final Second_Size = 50.sp;
-  static final Default_Size = 40.sp;
+  static final appBarTitleSize = 50.sp;
+  static final firstSize = 40.sp;
+  static final secondSize = 35.sp;
+  static final defaultSize = 30.sp;
 
   static TextStyle loadAppBarTextStyle() {
     return TextStyle(
       color: Colors.white,
-      fontSize: AppBar_Title_Size,
+      fontSize: appBarTitleSize,
     );
   }
 
-  static TextStyle loadDefaultTextStyle(
-      {Color color = Colors.black, double? fonstSize}) {
+  static TextStyle loadDefaultTextStyle({Color? color, double? fonstSize}) {
     return TextStyle(
       color: color,
-      fontSize: fonstSize ?? Default_Size,
+      fontSize: fonstSize ?? defaultSize,
     );
   }
 
@@ -36,7 +38,7 @@ class Config {
 
   static TextStyle loadFirstTextStyle({Color? backgroundColor}) {
     return TextStyle(
-      fontSize: First_Size,
+      fontSize: firstSize,
       fontWeight: FontWeight.bold,
       backgroundColor: backgroundColor,
     );
@@ -55,8 +57,31 @@ class Config {
     );
   }
 
-  static startPage(context, page) {
+  static startPage(BuildContext context, page) {
     Navigator.of(context).push(MaterialPageRoute(builder: (context) => page));
+  }
+
+  static startPageAndFinishOther(context, page) {
+    Navigator.of(context)
+        .pushReplacement(MaterialPageRoute(builder: (content) => page));
+  }
+
+  static finishPage(BuildContext context) {
+    Navigator.of(context).pop();
+  }
+
+  static startLoginPage() {
+    Global.navigatorKey.currentState!.push(MaterialPageRoute(
+        builder: (context) => const LoginPage(
+              comeFrom: UserUtil.reLogin,
+            )));
+    // Global.navigatorKey.currentState!.pushAndRemoveUntil(
+    //     MaterialPageRoute(
+    //       builder: (context) => const LoginPage(
+    //         comeFrom: UserUtil.reLogin,
+    //       ),
+    //     ),
+    //     (route) => false);
   }
 
   static toast(String data) {
@@ -67,7 +92,7 @@ class Config {
         timeInSecForIosWeb: 2,
         backgroundColor: Colors.red,
         textColor: Colors.white,
-        fontSize: First_Size);
+        fontSize: firstSize);
   }
 
   static Widget dateInputView(explain, controller, {DateTimePickerType? type}) {

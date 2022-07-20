@@ -1,24 +1,34 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
-import 'package:public_opinion_manage_web/page/press_type_create.dart';
+import 'package:public_opinion_manage_web/custom/dialog.dart';
+import 'package:public_opinion_manage_web/data/bean/user_bean.dart';
+import 'package:public_opinion_manage_web/page/widget/save_event_info.dart';
+import 'package:public_opinion_manage_web/service/service.dart';
+import 'package:public_opinion_manage_web/utils/str_util.dart';
+import 'package:public_opinion_manage_web/utils/token_util.dart';
 
-class LoginView extends StatefulWidget {
-  const LoginView({Key? key}) : super(key: key);
+import 'homepage.dart';
+
+class LoginPage extends StatefulWidget {
+  final String? comeFrom;
+  const LoginPage({Key? key, this.comeFrom}) : super(key: key);
 
   @override
-  State<LoginView> createState() => _LoginViewState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginViewState extends State<LoginView> {
+class _LoginPageState extends State<LoginPage> {
   late TextEditingController _controller1;
   late TextEditingController _controller2;
 
   @override
   void initState() {
     super.initState();
-    _controller1 = TextEditingController(/* text: '17600666716' */);
-    _controller2 = TextEditingController(/* text: '123456' */);
+    _controller1 = TextEditingController(text: '17600666716');
+    _controller2 = TextEditingController(text: '123456');
   }
 
   @override
@@ -32,7 +42,31 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    // _images.add(Image.asset('images/placeholder.jpg'));
+    return Scaffold(
+      body: FutureBuilder<String?>(
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.done:
+              String? token = snapshot.data;
+              // InfoSaveUtil.save('account', '17600666716').then((value) => null);
+              if (snapshot.data?.isNotEmpty == true) {
+                // 非空
+                // Config.startPage(context, SaveEventInfoWidget(token: token!));
+                //return SaveEventInfoWidget(token: token!);
+                return ManageHomePage(token: token!);
+              } else {
+                return loginRowView();
+              }
+            default:
+              return const CircularProgressIndicator();
+          }
+        },
+        future: loadToken(),
+      ),
+    );
+  }
+
+  Row loginRowView() {
     return Row(
       children: [
         Container(
@@ -64,31 +98,8 @@ class _LoginViewState extends State<LoginView> {
                 SizedBox(height: 30.sp),
                 ..._images,
                 TextButton(
-                  onPressed: () async {
-                    /* showDatePicker(
-                      context: context,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime.now(),
-                      initialDate: DateTime.now(),
-                      selectableDayPredicate: (datetime) {
-                        print(datetime);
-                        return false;
-                      },
-                    ); */
-                    Config.startPage(context, const CreatePressType());
-                    /*final xFile =
-                        await ImagePicker().pickVideo(source: ImageSource.camera);
-                    if (null != xFile) {
-                      final view = VTImageView(
-                        videoUrl: xFile.path,
-                        assetPlaceHolder: 'images/placeholder.jpg',
-                        width: 100.sp,
-                        height: 100.sp,
-                      );
-                      setState((){
-                        _images.add(view);
-                      });
-                    }*/
+                  onPressed: () {
+                    requestLogin();
                   },
                   style: Config.loadPerformButtonStyle(),
                   child: const Text('登录'),
@@ -100,6 +111,14 @@ class _LoginViewState extends State<LoginView> {
         ),
       ],
     );
+  }
+
+  Future<String?> loadToken() async {
+    if (widget.comeFrom == UserUtil.reLogin) {
+      await UserUtil.clearUser();
+      return null;
+    }
+    return await UserUtil.getToken();
   }
 
   loadAccountItem(String explain) {
@@ -152,5 +171,36 @@ class _LoginViewState extends State<LoginView> {
         )
       ],
     );
+  }
+
+  requestLogin() {
+    try {
+      String phone = checkEmpty(_controller1.value.text, '请输入手机号');
+      String password = checkEmpty(_controller2.value.text, '请输入密码');
+      Map map = <String, String>{};
+      map['phone'] = phone;
+      map['password'] = password;
+      ServiceHttp().post(
+        ServiceHttp.loginApi,
+        data: map,
+        isData: false,
+        success: (data) async {
+          User user = User.fromJson(data);
+          await UserUtil.save(user.data!, token: user.token);
+          if (!mounted) return;
+          if (widget.comeFrom == UserUtil.reLogin) {
+            Config.finishPage(context);
+          } else {
+            Config.startPage(context, SaveEventInfoWidget(token: user.token!));
+          }
+        },
+      );
+    } catch (e) {
+      if (e is AssertionError) {
+        toast(e.message!.toString());
+      } else {
+        toast(e.toString());
+      }
+    }
   }
 }

@@ -138,16 +138,15 @@ class _AddPublicOpinionState extends State<AddPublicOpinion> {
     ];
   }
 
-  late RadioGroup radioGroup;
+  late RadioGroupWidget radioGroup;
   late Offstage offstage;
 
   List<Widget> superiorNotice() {
-    radioGroup = RadioGroup(
+    radioGroup = RadioGroupWidget(
       list: const ['通报', '未通报'],
-      changeListener: (int v) {
+      change: <int>(int v) {
         setState(() {
           _isSuperiorNotice = (v == 0);
-          print(radioGroup.groupValue);
         });
       },
     );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/page/login.dart';
 
 void main() {
@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
     return ScreenUtilInit(
       builder: (context, child) {
         return MaterialApp(
+          navigatorKey: Global.navigatorKey,
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
           supportedLocales: const [
             Locale('zh', 'CH'),
@@ -24,6 +25,13 @@ class MyApp extends StatelessWidget {
           ],
           locale: const Locale('zh', 'CH'),
           title: '舆情台账',
+          builder: EasyLoading.init(builder: (context, child) {
+            EasyLoading.instance.loadingStyle = EasyLoadingStyle.custom;
+            EasyLoading.instance.indicatorColor = Colors.blue;
+            EasyLoading.instance.backgroundColor = Colors.white;
+            EasyLoading.instance.textColor = Colors.black;
+            return child!;
+          }),
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             primarySwatch: Colors.blue,
@@ -35,7 +43,7 @@ class MyApp extends StatelessWidget {
       designSize: const Size(1920, 1080),
       minTextAdapt: true,
       splitScreenMode: true,
-      child: const MyHomePage(title: '舆情台账管理系统'),
+      child: const LoginPage(),
     );
   }
 }
@@ -52,9 +60,13 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       // appBar: Config.loadAppbar(widget.title),
-      body: const LoginView(),
+      body: LoginPage(),
     );
   }
+}
+
+class Global {
+  static GlobalKey<NavigatorState> navigatorKey = GlobalKey();
 }

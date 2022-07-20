@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:video_thumbnail_imageview/video_thumbnail_imageview.dart';
+// import 'package:video_thumbnail_imageview/video_thumbnail_imageview.dart';
 
 class FileInfoBean {
   late String type;
@@ -20,8 +20,6 @@ class FileInfoBean {
       }
     }
     type = fileType(name!);
-    print(name);
-    print(type);
   }
 
   String fileName(String path) {
@@ -67,7 +65,6 @@ class FileInfoBean {
   }
 
   static Widget getTagIcon(FileInfoBean bean) {
-
     switch (bean.type) {
       case 'image':
         return bean.path.startsWith('web_') == true
