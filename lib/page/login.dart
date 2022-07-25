@@ -191,7 +191,7 @@ class _LoginPageState extends State<LoginPage> {
           if (widget.comeFrom == UserUtil.reLogin) {
             Config.finishPage(context);
           } else {
-            Config.startPage(context, SaveEventInfoWidget(token: user.token!));
+            Config.startPage(context, ManageHomePage(token: user.token!));
           }
         },
       );

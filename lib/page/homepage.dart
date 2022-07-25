@@ -6,6 +6,7 @@ import 'package:public_opinion_manage_web/page/widget/save_event_info.dart';
 
 import 'info_public_opinion.dart';
 import 'widget/make_account.dart';
+import 'widget/test.dart';
 
 class ManageHomePage extends StatefulWidget {
   final String token;
@@ -31,7 +32,8 @@ class _ManageHomePageState extends State<ManageHomePage> {
       SaveEventInfoWidget(token: widget.token),
       ListInfoWidget(),
       Text(arr[2], style: Config.loadFirstTextStyle()),
-      Text(arr[3], style: Config.loadFirstTextStyle()),
+      // Text(arr[3], style: Config.loadFirstTextStyle()),
+      const MyTestPage(),
       const MakeAccountWidget(),
     ];
   }

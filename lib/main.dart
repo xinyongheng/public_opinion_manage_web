@@ -1,15 +1,37 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/page/login.dart';
 
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html';
+
+import 'package:public_opinion_manage_web/utils/info_save.dart';
+
+import 'page/load_dispose_event.dart';
+
 void main() {
-  runApp(const MyApp());
+  String? info;
+  if (kIsWeb) {
+    var uri = Uri.dataFromString(window.location.href);
+    // print("path=" + uri.path);
+    // print(uri.pathSegments);
+    if (uri.pathSegments.isNotEmpty &&
+        uri.pathSegments.last == 'loadDisposeEvent') {
+      var qp = uri.queryParameters;
+      //获取参娄数ID，或你要找的参数
+      info = qp['info'];
+      // print(info);
+    }
+  }
+  runApp(MyApp(value: info));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  final String? value;
+  const MyApp({Key? key, this.value}) : super(key: key);
 
   // This widget is the root of your application.
   @override
@@ -43,7 +65,9 @@ class MyApp extends StatelessWidget {
       designSize: const Size(1920, 1080),
       minTextAdapt: true,
       splitScreenMode: true,
-      child: const LoginPage(),
+      child: !DataUtil.isEmpty(value)
+          ? LoadDisposeEventPage(info: value!)
+          : const LoginPage(),
     );
   }
 }

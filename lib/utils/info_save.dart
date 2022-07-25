@@ -8,6 +8,8 @@ class DataUtil {
         return (data! as String).isEmpty;
       case List:
         return (data! as List).isEmpty;
+      case Map:
+        return (data! as Map).isEmpty;
       default:
         return true;
     }
@@ -40,12 +42,15 @@ class InfoSaveUtil {
   static Future<String?> getString(String key) async {
     return (await _prefs).getString(key);
   }
+
   static Future<int?> getInt(String key) async {
     return (await _prefs).getInt(key);
   }
+
   static Future<double?> getDouble(String key) async {
     return (await _prefs).getDouble(key);
   }
+
   static Future<bool> clear() async {
     return await (await _prefs).clear();
   }

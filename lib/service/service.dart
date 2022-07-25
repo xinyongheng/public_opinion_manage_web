@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -131,13 +132,19 @@ class ServiceHttp {
       },
       onResponse: (Response e, ResponseInterceptorHandler handler) {
         // print('onResponse： ${DateTime.now()}');
-        print(e.data);
+        print(json.encode(e.data));
         print('*************output**************');
         handler.next(e);
         dismissDialog();
       },
       onError: (DioError e, ErrorInterceptorHandler handler) {
-        handler.next(e);
+        // handler.next(e);
+        print(e.message);
+        handler.resolve(Response(
+            requestOptions: e.requestOptions,
+            statusCode: 444,
+            data: {"code": 444, 'message': e.message},
+            statusMessage: 'fail'));
         dismissDialog();
       },
     ));
