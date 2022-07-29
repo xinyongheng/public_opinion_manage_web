@@ -65,9 +65,10 @@ class MyApp extends StatelessWidget {
       designSize: const Size(1920, 1080),
       minTextAdapt: true,
       splitScreenMode: true,
-      child: !DataUtil.isEmpty(value)
-          ? LoadDisposeEventPage(info: value!)
-          : const LoginPage(),
+      child: //const MyHomePage(title: '')
+          !DataUtil.isEmpty(value)
+              ? LoadDisposeEventPage(info: value!)
+              : const LoginPage(),
     );
   }
 }
@@ -82,11 +83,106 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  var _color = Colors.yellow;
+  var _height = 200.0;
+  var _width = 200.0;
+  var _showFirst = true;
+  var _textColor = Colors.red;
+  var _textFront = 20.0;
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       // appBar: Config.loadAppbar(widget.title),
-      body: LoginPage(),
+      body: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(seconds: 1),
+                  color: _color,
+                  width: _width,
+                  height: _height,
+                ),
+                TextButton(
+                  onPressed: () {
+                    _color = Colors.red;
+                    _height = 400.0;
+                    _width = 400.0;
+                    setState(() {});
+                  },
+                  child: const Text('开始动画'),
+                ),
+              ],
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedCrossFade(
+                  duration: const Duration(seconds: 2),
+                  firstChild: const FlutterLogo(
+                    style: FlutterLogoStyle.horizontal,
+                    size: 100,
+                  ),
+                  secondChild: const FlutterLogo(
+                    style: FlutterLogoStyle.stacked,
+                    size: 100,
+                  ),
+                  crossFadeState: _showFirst
+                      ? CrossFadeState.showFirst
+                      : CrossFadeState.showSecond,
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _showFirst = !_showFirst;
+                    });
+                  },
+                  child: const Text('开始动画'),
+                ),
+              ],
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedDefaultTextStyle(
+                  style: TextStyle(
+                    color: _textColor,
+                    fontSize: _textFront,
+                  ),
+                  duration: const Duration(seconds: 1),
+                  child: const Text('文字演示'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _textColor = Colors.blue;
+                      _textFront = 40.0;
+                    });
+                  },
+                  child: const Text('开始动画'),
+                ),
+              ],
+            ),
+            SizedBox(
+              width: 300.0,
+              child: PageView.builder(
+                scrollDirection: Axis.vertical,
+                itemBuilder: (context, index) {
+                  return Container(
+                    color: _color,
+                    alignment: Alignment.center,
+                    child: Text('测试数组-$index'),
+                  );
+                },
+                itemCount: 230,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
