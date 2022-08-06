@@ -23,23 +23,46 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      child: Row(
+    return SingleChildScrollView(
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 50.sp),
-          Expanded(
-            flex: 1,
-            child: secondColumn(),
+          // SizedBox(width: 50.sp),
+          // Expanded(
+          //   flex: 1,
+          //   child: secondColumn(),
+          // ),
+          // SizedBox(width: 100.w),
+          // Expanded(
+          //   flex: 1,
+          //   child: firstColumn(),
+          // ),
+          // SizedBox(width: 100.w),
+          Padding(
+            padding: EdgeInsets.fromLTRB(43.w, 32.w, 0, 39.w),
+            child: Text('舆情录入', style: Config.loadFirstTextStyle()),
           ),
-          SizedBox(width: 100.w),
-          Expanded(
-            flex: 1,
-            child: firstColumn(),
+          ...firstColumn(),
+          ...secondColumn(),
+          Padding(
+            padding: EdgeInsets.only(left: 525.w),
+            child: TextButton(
+              onPressed: () => saveEventInfo(),
+              style: TextButton.styleFrom(
+                  primary: Colors.white,
+                  backgroundColor: Colors.blue,
+                  textStyle: Config.loadDefaultTextStyle(),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5.sp),
+                  ),
+                  // fixedSize: Size(112.sp, 43.sp),
+                  padding:
+                      EdgeInsets.symmetric(vertical: 14.w, horizontal: 19.w)),
+              child: const Text('录入事件'),
+            ),
           ),
-          SizedBox(width: 100.w),
-          // secondColumn(),
+          spaceWidget(),
         ],
       ),
     );
@@ -84,113 +107,169 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
     '信访维权',
     '其他'
   ];
-  firstColumn() {
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+  List<Widget> firstColumn() {
+    return [
+      childTextItems('问题描述：', '问题描述', 'description', min: 3, max: 5),
+      SizedBox(height: 43.w),
+      childTextItems('发帖主题：', '发帖主题', 'author'),
+      SizedBox(height: 43.w),
+      childDateItems('发布时间：', '发布时间', 'publishTime'),
+      SizedBox(height: 43.w),
+      childAutocomplete('舆情类别：', '舆情类别', typeList),
+      SizedBox(height: 43.w),
+      childDateItems('发现时间：', '发现时间', 'findTime'),
+      SizedBox(height: 43.w),
+      childRadioItems('上级是否通报：'),
+      SizedBox(height: 43.w),
+      Visibility(
+        visible: _isSuperiorNotice,
+        child: childDateItems('通报时间：', '通报时间', 'superiorNotificationTime'),
+      ),
+    ];
+  }
+
+  Widget titleView(data) => Padding(
+        padding: EdgeInsets.symmetric(vertical: 7.w),
+        child: Text(data, style: Config.loadDefaultTextStyle()),
+      );
+
+  Widget childAutocomplete(title, explain, List<String> searchList) => Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          spaceWidget(),
-          ...childTextItems('问题描述：', '问题描述', 'description', min: 5, max: 5),
-          ...childDateItems('发布时间：', '发布时间', 'publishTime'),
-          ...childAutocomplete('舆情类别：', '舆情类别', typeList),
-          ...childDateItems('发现时间：', '发现时间', 'findTime'),
-          ...childRadioItems('上级是否通报：'),
-          Visibility(
-            visible: _isSuperiorNotice,
-            child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: childDateItems(
-                    '通报时间：', '通报时间', 'superiorNotificationTime')),
-          ),
-          TextButton(
-            onPressed: () => saveEventInfo(),
-            style: TextButton.styleFrom(
-              primary: Colors.white,
-              backgroundColor: Colors.blue,
-              textStyle: Config.loadDefaultTextStyle(),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.sp),
-              ),
-              fixedSize: Size(700.sp, Config.defaultSize * 3),
+          SizedBox(width: 440.w),
+          titleView(title),
+          SizedBox(
+            width: 624.w,
+            child: Autocomplete(
+              optionsBuilder: (textEditingValue) {
+                final v = textEditingValue.text;
+                final candidates = searchList;
+                return candidates.where(
+                    (String c) => c.toUpperCase().contains(v.toUpperCase()));
+              },
+              fieldViewBuilder: (BuildContext context,
+                  TextEditingController textEditingController,
+                  FocusNode focusNode,
+                  VoidCallback onFieldSubmitted) {
+                // return TextFormField(
+                //   controller: textEditingController,
+                //   focusNode: focusNode,
+                //   onFieldSubmitted: (String value) {
+                //     onFieldSubmitted();
+                //   },
+                // );
+                _controllerMap['type'] = textEditingController;
+                return TextField(
+                  controller: textEditingController,
+                  focusNode: focusNode,
+                  maxLines: 1,
+                  minLines: 1,
+                  scrollPadding: EdgeInsets.zero,
+                  textInputAction: TextInputAction.next,
+                  style: Config.loadDefaultTextStyle(color: Colors.black),
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      gapPadding: 0,
+                      borderRadius: BorderRadius.circular(5.sp),
+                      borderSide: BorderSide(color: borderColor),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      gapPadding: 0,
+                      borderRadius: BorderRadius.circular(5.sp),
+                      borderSide: BorderSide(color: borderColor),
+                    ),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 14.w, horizontal: 16.w),
+                    counterText: '',
+                    isDense: true,
+                    hintText: "请输入$explain",
+                    hintStyle: Config.loadDefaultTextStyle(color: borderColor),
+                  ),
+                );
+              },
             ),
-            child: const Text('录入事件'),
           ),
           spaceWidget(),
         ],
-      ),
-    );
-  }
-
-  Widget titleView(data) => Text(data,
-      style: Config.loadDefaultTextStyle(fonstSize: Config.secondSize));
-
-  List<Widget> childAutocomplete(title, explain, List<String> searchList) => [
-        titleView(title),
-        SizedBox(width: 25.sp, height: 25.sp),
-        Autocomplete(
-          /* optionsViewBuilder:(context, onSelected, options) {
-            return 
-          }, */
-          optionsBuilder: (textEditingValue) {
-            final v = textEditingValue.text;
-            final candidates = searchList;
-            return candidates
-                .where((String c) => c.toUpperCase().contains(v.toUpperCase()));
-          },
-        ),
-        spaceWidget(),
-      ];
-  List<Widget> childTextItems(title, explain, key,
-          {int min = 1, int max = 1}) =>
-      [
-        titleView(title),
-        SizedBox(width: 25.sp, height: 25.sp),
-        TextField(
-          controller: loadcontroller(key),
-          maxLines: max,
-          minLines: min,
-          scrollPadding: EdgeInsets.all(0.sp),
-          textInputAction: TextInputAction.next,
-          style: Config.loadDefaultTextStyle(color: Colors.black),
-          decoration: InputDecoration(
-            border: OutlineInputBorder(gapPadding: 10.sp),
-            contentPadding: EdgeInsets.all(10.sp),
-            counterText: '',
-            hintText: "请输入$explain",
-            hintStyle: Config.loadDefaultTextStyle(color: Colors.grey),
-          ),
-        ),
-        spaceWidget(),
-      ];
-  List<Widget> childDateItems(title, explain, key) => [
-        titleView(title),
-        SizedBox(width: 25.sp, height: 25.sp),
-        DateTimePicker(
-          controller: loadcontroller(key),
-          type: DateTimePickerType.date,
-          dateMask: 'yyyy-MM-dd',
-          firstDate: DateTime(1992),
-          lastDate: DateTime.now(),
-          textInputAction: TextInputAction.next,
-          style: Config.loadDefaultTextStyle(color: Colors.black),
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(gapPadding: 0),
-            contentPadding: EdgeInsets.only(
-              left: 5.sp,
-              right: 20.sp,
+      );
+  final Color borderColor = const Color.fromRGBO(0, 0, 0, 0.15);
+  Widget childTextItems(title, explain, key, {int min = 1, int max = 1}) => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: 440.w),
+          titleView(title),
+          SizedBox(
+            width: 624.w,
+            child: TextField(
+              controller: loadcontroller(key),
+              maxLines: max,
+              minLines: min,
+              scrollPadding: EdgeInsets.zero,
+              textInputAction: TextInputAction.next,
+              style: Config.loadDefaultTextStyle(color: Colors.black),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  gapPadding: 0,
+                  borderRadius: BorderRadius.circular(5.sp),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  gapPadding: 0,
+                  borderRadius: BorderRadius.circular(5.sp),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 14.w, horizontal: 16.w),
+                counterText: '',
+                isDense: true,
+                hintText: "请输入$explain",
+                hintStyle: Config.loadDefaultTextStyle(color: borderColor),
+              ),
             ),
-            hintText: "请输入$explain",
-            hintStyle: Config.loadDefaultTextStyle(color: Colors.grey),
-            // errorText: '错误',
+          ),
+          spaceWidget(),
+        ],
+      );
+  Widget childDateItems(title, explain, key) =>
+      Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        SizedBox(width: 440.w),
+        titleView(title),
+        SizedBox(
+          width: 624.w,
+          child: DateTimePicker(
+            controller: loadcontroller(key),
+            type: DateTimePickerType.date,
+            dateMask: 'yyyy-MM-dd',
+            firstDate: DateTime(1992),
+            lastDate: DateTime.now(),
+            textInputAction: TextInputAction.next,
+            style: Config.loadDefaultTextStyle(color: Colors.black),
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                gapPadding: 0,
+                borderRadius: BorderRadius.circular(5.sp),
+                borderSide: BorderSide(color: borderColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                gapPadding: 0,
+                borderRadius: BorderRadius.circular(5.sp),
+                borderSide: BorderSide(color: borderColor),
+              ),
+              isDense: true,
+              contentPadding:
+                  EdgeInsets.symmetric(vertical: 14.w, horizontal: 16.w),
+              hintText: "请输入$explain（年/月/日）",
+              hintStyle: Config.loadDefaultTextStyle(color: borderColor),
+              // errorText: '错误',
+            ),
           ),
         ),
         spaceWidget(),
-      ];
-  childRadioItems(title) => [
+      ]);
+  Widget childRadioItems(title) =>
+      Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        SizedBox(width: 440.w),
         titleView(title),
-        SizedBox(width: 25.sp, height: 25.sp),
         RadioGroupWidget(
           list: const ['通报', '为通报'],
           change: (int? value) {
@@ -200,76 +279,105 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
           },
         ),
         spaceWidget(),
-      ];
+      ]);
   Widget spaceWidget() => SizedBox(width: 50.sp, height: 50.sp);
-  secondColumn() {
+  List<Widget> secondColumn() {
     if (_listLink.isEmpty) {
       _listLink.add(TextEditingController());
     }
     if (_listMediaType.isEmpty) {
       _listMediaType.add(TextEditingController());
     }
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          spaceWidget(),
-          titleAddIconView('事件链接：', () {
-            setState(() {
-              _listLink.add(TextEditingController());
-            });
-          }),
-          SizedBox(height: 25.sp),
-          loadListView('事件链接', _listLink),
-          spaceWidget(),
-          titleAddIconView('媒体类型：', () {
-            setState(() {
-              _listMediaType.add(TextEditingController());
-            });
-          }),
-          SizedBox(height: 25.sp),
-          loadListView('事件链接', _listMediaType),
-          spaceWidget(),
-          ...titleFileView('事件图文信息'),
-          spaceWidget(),
-        ],
-      ),
-    );
+    return [
+      SizedBox(height: 43.w),
+      titleAddIconView('事件链接：', '请输入事件链接', _listLink.first, () {
+        setState(() {
+          _listLink.add(TextEditingController());
+        });
+      }),
+      SizedBox(height: 25.sp),
+      loadListView('事件链接', _listLink),
+      spaceWidget(),
+      titleAddIconView('媒体类型：', '请输入媒体类型', _listMediaType.first, () {
+        setState(() {
+          _listMediaType.add(TextEditingController());
+        });
+      }),
+      SizedBox(height: 25.sp),
+      loadListView('事件链接', _listMediaType),
+      spaceWidget(),
+      ...titleFileView('事件图文信息'),
+      spaceWidget(),
+    ];
   }
 
   final _listLink = <TextEditingController>[];
   final _listMediaType = <TextEditingController>[];
 
-  titleAddIconView(title, onPressed) => Row(
+  titleAddIconView(title, hintText, controller, onPressed) => Row(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          SizedBox(width: 440.w),
           titleView(title),
-          const Spacer(flex: 2),
-          TextButton(
-            onPressed: onPressed,
-            style: TextButton.styleFrom(
-                primary: Colors.black,
-                backgroundColor: Colors.white,
-                textStyle: Config.loadDefaultTextStyle(),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.sp))),
-            child: const Text('添加'),
+          SizedBox(
+            width: 624.w,
+            child: TextField(
+              controller: controller,
+              maxLines: 1,
+              minLines: 1,
+              scrollPadding: EdgeInsets.zero,
+              textInputAction: TextInputAction.next,
+              style: Config.loadDefaultTextStyle(color: Colors.black),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  gapPadding: 0,
+                  borderRadius: BorderRadius.circular(5.sp),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  gapPadding: 0,
+                  borderRadius: BorderRadius.circular(5.sp),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 14.w, horizontal: 16.w),
+                counterText: '',
+                isDense: true,
+                hintText: hintText,
+                hintStyle: Config.loadDefaultTextStyle(color: borderColor),
+              ),
+            ),
           ),
-          const Spacer(flex: 1),
+          SizedBox(width: 31.w),
+          InkWell(
+            onTap: onPressed,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.add, size: 14.w, color: Config.fontColorSelect),
+                SizedBox(width: 8.w),
+                Text(
+                  '添加',
+                  style: Config.loadDefaultTextStyle(
+                      color: Config.fontColorSelect),
+                ),
+              ],
+            ),
+          )
         ],
       );
   ListView loadListView(String explain, List<TextEditingController> list) =>
       ListView.separated(
-          itemCount: list.length,
+          itemCount: list.length - 1,
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           itemBuilder: (context, index) {
             return Row(
               children: [
-                Expanded(
-                  flex: 3,
+                SizedBox(width: 525.w),
+                SizedBox(
+                  width: 624.w,
                   child: TextField(
                     controller: list[index],
                     maxLines: 1,
@@ -278,36 +386,38 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
                     textInputAction: TextInputAction.next,
                     style: Config.loadDefaultTextStyle(color: Colors.black),
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(gapPadding: 10.sp),
-                      contentPadding: EdgeInsets.only(
-                        left: 5.sp,
-                        right: 20.sp,
+                      border: OutlineInputBorder(
+                        gapPadding: 0,
+                        borderRadius: BorderRadius.circular(5.sp),
+                        borderSide: BorderSide(color: borderColor),
                       ),
+                      enabledBorder: OutlineInputBorder(
+                        gapPadding: 0,
+                        borderRadius: BorderRadius.circular(5.sp),
+                        borderSide: BorderSide(color: borderColor),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: 14.w, horizontal: 16.w),
                       counterText: '',
-                      hintText:
-                          index > 0 ? "请输入$explain-$index" : "请输入$explain",
+                      isDense: true,
+                      hintText: "请输入$explain-${index + 2}",
                       hintStyle:
-                          Config.loadDefaultTextStyle(color: Colors.grey),
+                          Config.loadDefaultTextStyle(color: borderColor),
                     ),
                   ),
                 ),
-                SizedBox(width: 50.sp),
-                Container(
-                  width: 100.sp,
-                  height: 50.sp,
-                  alignment: Alignment.center,
-                  child: Visibility(
-                    visible: index > 0,
-                    child: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            list.removeAt(index);
-                          });
-                        },
-                        icon: const Icon(Icons.close, color: Colors.blue)),
-                  ),
-                ),
-                const Spacer(flex: 1),
+                SizedBox(width: 15.w),
+                IconButton(
+                    onPressed: () {
+                      setState(() {
+                        list.removeAt(index);
+                      });
+                    },
+                    icon: Icon(
+                      Icons.close,
+                      color: Colors.blue,
+                      size: 20.w,
+                    )),
               ],
             );
           },

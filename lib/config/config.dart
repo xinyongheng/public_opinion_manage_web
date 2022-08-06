@@ -8,10 +8,11 @@ import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 class Config {
   static final appBarTitleSize = 50.sp;
-  static final firstSize = 40.sp;
-  static final secondSize = 35.sp;
-  static final defaultSize = 30.sp;
-
+  static final firstSize = 27.sp;
+  static final secondSize = 21.sp;
+  static final defaultSize = 19.sp;
+  static const fontColorSelect = Color(0xFF3E7BFA);
+  // static const fontColorDefault = Color(0xFF333333);
   static TextStyle loadAppBarTextStyle() {
     return TextStyle(
       color: Colors.white,
@@ -23,6 +24,7 @@ class Config {
     return TextStyle(
       color: color,
       fontSize: fonstSize ?? defaultSize,
+      // textBaseline: TextBaseline.alphabetic,
     );
   }
 

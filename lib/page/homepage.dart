@@ -20,8 +20,8 @@ class ManageHomePage extends StatefulWidget {
 class _ManageHomePageState extends State<ManageHomePage> {
   int newNoticeNum = 0;
   int sumNoticeNum = 0;
-  int _nowIndex = 2;
-
+  int _nowIndex = 0;
+  int _pressIndex = 0;
   late List<Widget> pages;
 
   final Color lineColor = Colors.grey;
@@ -41,30 +41,46 @@ class _ManageHomePageState extends State<ManageHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SizedBox(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ...headView(),
-            Expanded(
-              flex: 1,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  leftMenuView(),
-                  Container(
-                    width: 1,
-                    height: double.infinity,
-                    color: lineColor,
-                  ),
-                  Expanded(flex: 1, child: pages[_nowIndex - 1]),
-                ],
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ...headView(),
+          Expanded(
+            flex: 1,
+            child: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage('images/bg.png'), fit: BoxFit.fill),
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(top: 45.w, bottom: 45.w),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    leftMenuView(),
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                          width: double.infinity,
+                          height: double.infinity,
+                          alignment: Alignment.topLeft,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(13.sp),
+                            color: Colors.white,
+                          ),
+                          child: _nowIndex != 2
+                              ? pages[_nowIndex]
+                              : (_pressIndex == 0 ? pages[2] : Text('旧文件'))),
+                    ),
+                    SizedBox(width: 32.w),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -75,33 +91,48 @@ class _ManageHomePageState extends State<ManageHomePage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(width: 100.w),
+          SizedBox(width: 23.w),
           Image.asset(
             'images/logo.png',
-            width: Config.firstSize,
-            height: Config.firstSize,
+            width: 44.w,
+            height: 53.w,
           ),
           Container(
-            height: Config.firstSize,
-            width: 1,
-            color: Colors.grey,
+            height: 75.w,
+            width: 20.w,
+            color: Colors.transparent,
           ),
-          SizedBox(width: 10.sp),
+          // SizedBox(width: 10.sp),
           Text('舆情台账管理', style: Config.loadFirstTextStyle()),
           const Spacer(),
-          Text('管理员', style: Config.loadDefaultTextStyle()),
-          Icon(Icons.notifications_outlined,
-              size: Config.firstSize, color: Colors.grey),
+
           Text('($newNoticeNum/$sumNoticeNum)',
               style: Config.loadDefaultTextStyle()),
-          Icon(Icons.people, size: Config.firstSize, color: Colors.blue),
-          SizedBox(width: 100.w),
+          Image.asset(
+            'images/notice.png',
+            height: 21.w,
+            width: 21.w,
+          ),
+          SizedBox(width: 47.w),
+          //Icon(Icons.people, size: Config.firstSize, color: Colors.blue),
+          Container(
+            width: 32.w,
+            height: 32.w,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16.w),
+              color: Config.fontColorSelect,
+            ),
+            child: Image.asset(
+              'images/logo.png',
+              width: 10.w,
+              height: 12.w,
+              fit: BoxFit.fitWidth,
+            ),
+          ),
+          SizedBox(width: 20.w),
+          Text('管理员', style: Config.loadDefaultTextStyle()),
+          SizedBox(width: 32.w),
         ],
-      ),
-      Container(
-        width: double.infinity,
-        height: 1,
-        color: lineColor,
       ),
     ];
   }
@@ -115,50 +146,174 @@ class _ManageHomePageState extends State<ManageHomePage> {
     Colors.orange
   ];
   Widget leftMenuView() {
+    List<Widget> leftArr = <Widget>[];
+    for (var i = 0; i < arr.length; i++) {
+      leftArr.add(leftListItem(i));
+      leftArr.add(SizedBox(height: 10.w));
+    }
     return SizedBox(
-      width: 8 * Config.defaultSize,
-      child: ListView.builder(
-          itemCount: arr.length + 1,
-          shrinkWrap: true,
-          itemBuilder: (context, index) {
-            if (index == 0) return SizedBox(height: 100.h);
-            return Row(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                const Spacer(flex: 1),
-                SizedBox(
-                  width: 40.sp,
-                  height: 40.sp,
-                  child: Card(
-                      color: colors[index - 1],
-                      shadowColor: colors[index - 1],
-                      elevation: 20,
-                      child: SizedBox(
-                        width: 30.sp,
-                        height: 30.sp,
-                      )),
+      width: 373.w,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: leftArr,
+      ),
+    );
+  }
+
+  Widget leftListItem(int index) {
+    final text = arr[index];
+    if (text != '舆情报刊') {
+      return Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          SizedBox(
+            width: 32.w,
+            height: 1.sp,
+          ),
+          leftIcon(text, index),
+          SizedBox(width: 4.w),
+          InkWell(
+              onTap: () {
+                menuItemClick(arr[index], index);
+              },
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: 15.sp,
+                  horizontal: 5.sp,
                 ),
-                SizedBox(width: 10.sp),
-                InkWell(
+                child: Text(arr[index],
+                    style: Config.loadDefaultTextStyle(
+                        color: index == _nowIndex
+                            ? Config.fontColorSelect
+                            : Colors.black,
+                        fonstSize: 21.sp)),
+              )),
+          const Spacer(flex: 1),
+        ],
+      );
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(mainAxisSize: MainAxisSize.max, children: [
+          SizedBox(
+            width: 32.w,
+            height: 1.sp,
+          ),
+          leftIcon(text, index),
+          SizedBox(width: 4.w),
+          InkWell(
+              onTap: () {
+                setState(() {
+                  _nowIndex = index;
+                });
+              },
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: 15.sp,
+                  horizontal: 5.sp,
+                ),
+                child: Text(arr[index],
+                    style: Config.loadDefaultTextStyle(
+                        color: index == _nowIndex
+                            ? Config.fontColorSelect
+                            : Colors.black,
+                        fonstSize: 21.sp)),
+              )),
+          const Spacer(flex: 1),
+        ]),
+        Visibility(
+          visible: _nowIndex == 2,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(width: 67.w),
+                  InkWell(
                     onTap: () {
-                      menuItemClick(arr[index - 1], index);
+                      if (_pressIndex != 0) {
+                        setState(() {
+                          _pressIndex = 0;
+                        });
+                      }
                     },
                     child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 15.sp,
-                        horizontal: 5.sp,
-                      ),
-                      child: Text(arr[index - 1],
-                          style: Config.loadDefaultTextStyle()),
-                    )),
-                const Spacer(flex: 1),
-              ],
-            );
-          }),
+                      padding: EdgeInsets.symmetric(vertical: 10.sp),
+                      child: Text('新版',
+                          style: Config.loadDefaultTextStyle(
+                              fonstSize: 19.sp,
+                              color: _pressIndex == 0
+                                  ? Config.fontColorSelect
+                                  : Colors.black)),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(width: 67.w),
+                  InkWell(
+                    onTap: () {
+                      if (_pressIndex != 1) {
+                        setState(() {
+                          _pressIndex = 1;
+                        });
+                      }
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10.sp),
+                      child: Text('旧文件',
+                          style: Config.loadDefaultTextStyle(
+                              fonstSize: 19.sp,
+                              color: _pressIndex == 1
+                                  ? Config.fontColorSelect
+                                  : Colors.black)),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget leftIcon(String text, int index) {
+    String imageName;
+    switch (text) {
+      case '舆情录入':
+        imageName = 'op_save';
+        break;
+      case '舆情列表':
+        imageName = 'op_list';
+        break;
+      case '舆情报刊':
+        imageName = 'op_press';
+        break;
+      case '舆情统计':
+        imageName = 'op_statics';
+        break;
+      default:
+        imageName = 'op_user';
+        break;
+    }
+    return Image.asset(
+      "images/$imageName.png",
+      color: index == _nowIndex ? Config.fontColorSelect : Colors.black,
+      width: 21.w,
+      height: 21.w,
+      fit: BoxFit.fill,
     );
   }
 
   void menuItemClick(String text, int index) {
+    if (_nowIndex == index) return;
     setState(() {
       _nowIndex = index;
     });
