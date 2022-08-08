@@ -99,7 +99,7 @@ class Config {
         fontSize: firstSize);
   }
 
-  static defaultInputDecoration({String hintText = '请输入', Widget? prefix}) {
+  static defaultInputDecoration({String hintText = '请输入', Widget? suffixIcon}) {
     return InputDecoration(
       border: OutlineInputBorder(
         gapPadding: 0,
@@ -115,7 +115,7 @@ class Config {
       counterText: '',
       isDense: true,
       hintText: hintText,
-      prefix: prefix,
+      suffixIcon: suffixIcon,
       hintStyle: Config.loadDefaultTextStyle(color: borderColor),
     );
   }

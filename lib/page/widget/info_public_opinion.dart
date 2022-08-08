@@ -18,27 +18,76 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
   final controllerMap = <String, TextEditingController>{};
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.fromLTRB(43.w, 32.w, 0, 39.w),
-          child: Text('舆情列表', style: Config.loadFirstTextStyle()),
-        ),
-        Row(
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(43.w, 32.w, 0, 39.w),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ...filterWidget('事件名称：', 'descriptionFilter'),
-            SizedBox(width: 45.w),
-            ...filterWidget('舆情类别：', 'typeFilter'),
-            SizedBox(width: 45.w),
-            ...filterWidget('舆情报刊类型：', 'pressTypeFilter'),
-            SizedBox(width: 45.w),
+            Text('舆情列表', style: Config.loadFirstTextStyle()),
+            SizedBox(height: 38.w),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ...filterWidget('事件名称：', 'descriptionFilter'),
+                SizedBox(width: 45.w),
+                ...filterWidget('舆情类别：', 'typeFilter'),
+                SizedBox(width: 45.w),
+                ...filterWidget('舆情报刊类型：', 'pressTypeFilter'),
+              ],
+            ),
+            SizedBox(width: 45.w, height: 21.w),
+            timeFilter('发布时间：', 'publishTimeStart', 'publishTimeEnd'),
+            SizedBox(width: 45.w, height: 21.w),
+            timeFilter('反馈时间：', 'feedbackTimeStart', 'feedbackTimeEnd'),
+            SizedBox(width: 45.w, height: 21.w),
+            Row(
+              children: [
+                timeFilter('发现时间：', 'findTimeStart', 'findTimeEnd'),
+                SizedBox(width: 33.w),
+                loadTextButton('查 询', () {}),
+                SizedBox(width: 33.w),
+                loadTextButton(
+                  '重 置',
+                  () {},
+                  primary: Config.fontColorSelect,
+                  backgroundColor: Colors.white,
+                ),
+              ],
+            ),
+            SizedBox(width: 45.w, height: 60.w),
+            ListInfoWidget(canSelect: false),
           ],
-        )
-      ],
+        ),
+      ),
+    );
+  }
+
+  TextButton loadTextButton(
+    data,
+    onPressed, {
+    Color? primary = Colors.white,
+    Color? backgroundColor = Config.fontColorSelect,
+  }) {
+    return TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        primary: primary,
+        backgroundColor: backgroundColor,
+        textStyle: Config.loadDefaultTextStyle(fonstSize: 19.sp),
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.w),
+        minimumSize: Size(87.sp, 43.sp),
+        side: backgroundColor == Colors.white ? const BorderSide() : null,
+        shape: RoundedRectangleBorder(
+          side: backgroundColor == Colors.white
+              ? const BorderSide(color: Color(0xFFD9D9D9))
+              : BorderSide.none,
+          borderRadius: BorderRadius.circular(2.sp),
+        ),
+      ),
+      child: Text(data, textAlign: TextAlign.center),
     );
   }
 
@@ -81,14 +130,40 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
               style: Config.loadDefaultTextStyle(color: Colors.black),
               decoration: Config.defaultInputDecoration(
                 hintText: '年/月/日',
-                prefix: Image.asset(
-                  'image/icon_date.png',
+                suffixIcon: Image.asset(
+                  'images/op_save.png',
                   width: 19.w,
                   height: 19.w,
+                  color: Colors.grey,
                 ),
               ),
             ),
-          )
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 14.w),
+            child: Text('至', style: Config.loadDefaultTextStyle()),
+          ),
+          SizedBox(
+            width: 213.w,
+            child: DateTimePicker(
+              controller: loadController(keyEnd),
+              type: DateTimePickerType.date,
+              dateMask: 'yyyy-MM-dd',
+              firstDate: DateTime(1992),
+              lastDate: DateTime.now(),
+              textInputAction: TextInputAction.next,
+              style: Config.loadDefaultTextStyle(color: Colors.black),
+              decoration: Config.defaultInputDecoration(
+                hintText: '年/月/日',
+                suffixIcon: Image.asset(
+                  'images/op_save.png',
+                  width: 19.w,
+                  height: 19.w,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          ),
         ]);
   }
 
@@ -116,7 +191,7 @@ class ListInfoWidget extends StatefulWidget {
 
 class _ListInfoWidgetState extends State<ListInfoWidget> {
   final List<PublicOpinionBean> _list = [];
-  final wordLength = 20.sp;
+  final wordLength = 16.sp;
   @override
   void initState() {
     super.initState();
@@ -125,11 +200,21 @@ class _ListInfoWidgetState extends State<ListInfoWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      // physics: const NeverScrollableScrollPhysics(),
-      // shrinkWrap: true, //内容适配
-      itemBuilder: itemView,
-      itemCount: _list.length + 1,
+    return SizedBox(
+      width: 1429.w,
+      child: ListView.separated(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true, //内容适配
+        itemBuilder: itemView,
+        itemCount: _list.length + 1,
+        separatorBuilder: (BuildContext context, int index) {
+          return const Divider(
+            height: 1,
+            thickness: 1,
+            color: Color(0xFFE8E8E8),
+          );
+        },
+      ),
     );
   }
 
@@ -151,47 +236,66 @@ class _ListInfoWidgetState extends State<ListInfoWidget> {
         ),
       ),
       childItemView('序号', '',
-          color: Colors.white, bgColor: Colors.blue, height: 30.sp),
-      childItemView('事件名称', '',
-          color: Colors.white, bgColor: Colors.blue, height: 30.sp),
+          width: 4 * wordLength,
+          bgColor: const Color(0xFFFAFAFA),
+          height: 72.w),
+      childItemView('事件描述', '',
+          width: 8 * wordLength,
+          bgColor: const Color(0xFFFAFAFA),
+          height: 72.w),
       childItemView('媒体类型', '',
-          color: Colors.white, bgColor: Colors.blue, height: 30.sp),
+          width: 8 * wordLength,
+          bgColor: const Color(0xFFFAFAFA),
+          height: 72.w),
       childItemView('发布时间', '',
-          width: 5 * wordLength,
-          color: Colors.white,
-          bgColor: Colors.blue,
-          height: 30.sp),
+          width: 6 * wordLength,
+          bgColor: const Color(0xFFFAFAFA),
+          height: 72.w),
       childItemView('发现时间', '',
-          width: 5 * wordLength,
-          color: Colors.white,
-          bgColor: Colors.blue,
-          height: 30.sp),
+          width: 6 * wordLength,
+          bgColor: const Color(0xFFFAFAFA),
+          height: 72.w),
       childItemView('舆情类别', '',
-          color: Colors.white, bgColor: Colors.blue, height: 30.sp),
+          width: 6 * wordLength,
+          color: Colors.black,
+          bgColor: const Color(0xFFFAFAFA),
+          height: 72.w),
       childItemView('责任单位', '',
-          color: Colors.white, bgColor: Colors.blue, height: 30.sp),
+          width: 8 * wordLength,
+          bgColor: const Color(0xFFFAFAFA),
+          height: 72.w),
       childItemView('反馈时间', '',
-          width: 5 * wordLength,
-          color: Colors.white,
-          bgColor: Colors.blue,
-          height: 30.sp),
+          width: 6 * wordLength,
+          bgColor: const Color(0xFFFAFAFA),
+          height: 72.w),
       childItemView('上级通报时间', '',
-          color: Colors.white, bgColor: Colors.blue, height: 30.sp),
+          width: 8 * wordLength,
+          bgColor: const Color(0xFFFAFAFA),
+          height: 72.w),
       childItemView('报刊类型', '',
-          color: Colors.white, bgColor: Colors.blue, height: 30.sp),
+          width: 6 * wordLength,
+          bgColor: const Color(0xFFFAFAFA),
+          height: 72.w),
       childItemView('是否迟报', '',
-          color: Colors.white, bgColor: Colors.blue, height: 30.sp),
+          width: 6 * wordLength,
+          bgColor: const Color(0xFFFAFAFA),
+          height: 72.w),
       childItemView('领导批示', '',
-          width: 5 * wordLength,
-          color: Colors.white,
-          bgColor: Colors.blue,
-          height: 30.sp),
+          width: 6 * wordLength,
+          bgColor: const Color(0xFFFAFAFA),
+          height: 72.w),
       childItemView('批示内容', '',
-          color: Colors.white, bgColor: Colors.blue, height: 30.sp),
+          width: 6 * wordLength,
+          bgColor: const Color(0xFFFAFAFA),
+          height: 72.w),
       childItemView('是否完结', '',
-          color: Colors.white, bgColor: Colors.blue, height: 30.sp),
+          width: 6 * wordLength,
+          bgColor: const Color(0xFFFAFAFA),
+          height: 72.w),
       childItemView('详情', '',
-          color: Colors.white, bgColor: Colors.blue, height: 30.sp),
+          width: 4 * wordLength,
+          bgColor: const Color(0xFFFAFAFA),
+          height: 72.w),
     ];
     if (widget.canSelect != true) {
       arr.removeAt(0);
@@ -218,60 +322,63 @@ class _ListInfoWidgetState extends State<ListInfoWidget> {
           // onChanged: (bool? value) {},
         ),
       ),
-      childItemView(null == bean.no ? "-" : ("${bean.no! + 1}"), '序号',
-          width: 2 * wordLength, index: index),
+      childItemView(null == bean.no ? "—" : ("${bean.no! + 1}"), '序号',
+          width: 4 * wordLength, index: index),
       childItemView(bean.name.toString(), '事件名称',
-          width: 4 * wordLength, index: index),
+          width: 8 * wordLength, index: index),
       childItemView(bean.mediaType.toString(), '媒体类型',
-          width: 4 * wordLength, index: index),
+          width: 8 * wordLength, index: index),
       childItemView(bean.linkPublishTime.toString(), '发布时间',
-          width: 5 * wordLength, index: index),
-      childItemView(bean.findTime.toString(), '发现时间',
-          width: 5 * wordLength, index: index),
-      childItemView(bean.publicOpinionType.toString(), '舆情类别',
-          width: 4 * wordLength, index: index),
-      childItemView(bean.dutyUnit ?? '指定', '责任单位',
-          width: 4 * wordLength, index: index),
-      childItemView(bean.feedbackTime ?? '-', '反馈时间',
-          width: 5 * wordLength, index: index),
-      childItemView(bean.superiorNoticeTime ?? '-', '上级通报时间',
           width: 6 * wordLength, index: index),
-      childItemView(bean.pressType ?? '-', '报刊类型',
-          width: 4 * wordLength, index: index),
+      childItemView(bean.findTime.toString(), '发现时间',
+          width: 6 * wordLength, index: index),
+      childItemView(bean.publicOpinionType.toString(), '舆情类别',
+          width: 6 * wordLength, index: index),
+      childItemView(bean.dutyUnit ?? '指定', '责任单位',
+          width: 8 * wordLength, index: index),
+      childItemView(bean.feedbackTime ?? "—", '反馈时间',
+          width: 6 * wordLength, index: index),
+      childItemView(bean.superiorNoticeTime ?? "—", '上级通报时间',
+          width: 8 * wordLength, index: index),
+      childItemView(bean.pressType ?? "—", '报刊类型',
+          width: 6 * wordLength, index: index),
       childItemView(
-          bean.isLateReport == 1 ? '是' : (bean.isLateReport == 0 ? '否' : '-'),
+          bean.isLateReport == 1 ? '是' : (bean.isLateReport == 0 ? '否' : "—"),
           '是否迟报',
-          width: 4 * wordLength,
+          width: 6 * wordLength,
           index: index),
       childItemView(leaderInstructions, '领导批示',
-          width: 5 * wordLength, index: index),
-      childItemView(bean.leaderInstructionsContent ?? "-", '批示内容',
-          width: 4 * wordLength, index: index),
+          width: 6 * wordLength, index: index),
+      childItemView(bean.leaderInstructionsContent ?? "—", '批示内容',
+          width: 6 * wordLength, index: index),
       childItemView(bean.isComplete == 1 ? '是' : '否', '是否完结',
-          width: 4 * wordLength, index: index),
-      childItemView('查看', '详情', width: 2 * wordLength, index: index),
+          width: 6 * wordLength, index: index),
+      childItemView('查看', '详情', width: 4 * wordLength, index: index),
     ];
     if (widget.canSelect != true) {
       arr.removeAt(0);
     }
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: arr,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: arr,
+      ),
     );
   }
 
   Widget childItemView(String data, String tag,
       {color = Colors.black,
-      bgColor = Colors.white,
+      bgColor = const Color(0xFFFDFDFD),
       double? width,
       double? height,
       int? index}) {
     const clickTag = ',添加,指定,查看,编辑,';
-    bool canClick = clickTag.contains(data) || (data != '-' && tag == '批示内容');
+    bool canClick = clickTag.contains(data) || (data != "—" && tag == '批示内容');
     final child = Text(
       data,
       textAlign: TextAlign.center,
-      style: Config.loadDefaultTextStyle(color: color),
+      style: Config.loadDefaultTextStyle(color: color, fonstSize: wordLength),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );
@@ -282,7 +389,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget> {
       height: height ?? 60.sp,
       decoration: BoxDecoration(
         color: bgColor,
-        border: Border.all(color: Colors.black, width: 0.5),
+        // border: Border.all(color: Colors.black, width: 0.5),
       ),
       child: canClick
           ? InkWell(onTap: () => viewClick(tag, index ?? 0), child: child)

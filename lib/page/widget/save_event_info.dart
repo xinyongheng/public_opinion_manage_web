@@ -356,19 +356,22 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
             ),
           ),
           SizedBox(width: 31.w),
-          InkWell(
-            onTap: onPressed,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.add, size: 19.sp, color: Config.fontColorSelect),
-                SizedBox(width: 8.sp),
-                Text(
-                  '添加',
-                  style: Config.loadDefaultTextStyle(
-                      color: Config.fontColorSelect),
-                ),
-              ],
+          Material(
+            color: Colors.white,
+            child: InkWell(
+              onTap: onPressed,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.add, size: 19.sp, color: Config.fontColorSelect),
+                  SizedBox(width: 8.sp),
+                  Text(
+                    '添加',
+                    style: Config.loadDefaultTextStyle(
+                        color: Config.fontColorSelect),
+                  ),
+                ],
+              ),
             ),
           )
         ],

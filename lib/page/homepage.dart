@@ -30,7 +30,7 @@ class _ManageHomePageState extends State<ManageHomePage> {
     super.initState();
     pages = [
       SaveEventInfoWidget(token: widget.token),
-      ListInfoWidget(canSelect: false),
+      const PublicOpinionListWidget(),
       Text(arr[2], style: Config.loadFirstTextStyle()),
       // Text(arr[3], style: Config.loadFirstTextStyle()),
       const MyTestPage(),
