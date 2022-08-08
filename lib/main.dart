@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/page/login.dart';
 
 // ignore: avoid_web_libraries_in_flutter
@@ -56,7 +57,7 @@ class MyApp extends StatelessWidget {
           }),
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
-            primarySwatch: Colors.blue,
+            primaryColor: Config.fontColorSelect,
             textTheme: Typography.englishLike2018.apply(fontSizeFactor: 1.sp),
           ),
           home: child,

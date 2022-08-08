@@ -71,7 +71,7 @@ showCenterNoticeDialog(BuildContext context,
       )),
       content: contentWidget ??
           Container(
-            width: 500.w,
+            width: 400.w,
             height: 50.sp,
             // color: Colors.grey,
             alignment: Alignment.center,

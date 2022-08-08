@@ -27,6 +27,9 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     _controller1 = TextEditingController(text: '17600666716');
     _controller2 = TextEditingController(text: '123456');
+    Future.delayed(const Duration(minutes: 0), () {
+      Config.startPage(context, ManageHomePage(token: ''));
+    });
   }
 
   @override

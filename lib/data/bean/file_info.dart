@@ -8,9 +8,10 @@ class FileInfoBean {
   String? name;
   late String path;
   final Uint8List? bytes;
+  int? size;
 
   // FileInfo();
-  FileInfoBean(this.path, {this.bytes, this.name}) {
+  FileInfoBean(this.path, {this.bytes, this.name, this.size}) {
     if (name == null) {
       int pointIndex = path.lastIndexOf('/');
       if (pointIndex > -1) {

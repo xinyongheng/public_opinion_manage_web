@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
-import 'package:public_opinion_manage_web/custom/file_view.dart';
 import 'package:public_opinion_manage_web/custom/radio_group.dart';
+import 'package:public_opinion_manage_web/custom/select_file.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 
 class SaveEventInfoWidget extends StatefulWidget {
@@ -45,22 +45,25 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
           ),
           ...firstColumn(),
           ...secondColumn(),
-          Padding(
-            padding: EdgeInsets.only(left: 525.w),
-            child: TextButton(
-              onPressed: () => saveEventInfo(),
-              style: TextButton.styleFrom(
-                  primary: Colors.white,
-                  backgroundColor: Colors.blue,
-                  textStyle: Config.loadDefaultTextStyle(),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.sp),
-                  ),
-                  // fixedSize: Size(112.sp, 43.sp),
-                  padding:
-                      EdgeInsets.symmetric(vertical: 14.w, horizontal: 19.w)),
-              child: const Text('录入事件'),
-            ),
+          Row(
+            children: [
+              SizedBox(width: 403.w),
+              Opacity(opacity: 0, child: titleView('原文图文信息：')),
+              TextButton(
+                onPressed: () => saveEventInfo(),
+                style: TextButton.styleFrom(
+                    primary: Colors.white,
+                    backgroundColor: Colors.blue,
+                    textStyle: Config.loadDefaultTextStyle(),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.sp),
+                    ),
+                    // fixedSize: Size(112.sp, 43.sp),
+                    padding:
+                        EdgeInsets.symmetric(vertical: 14.w, horizontal: 19.w)),
+                child: const Text('录入事件'),
+              ),
+            ],
           ),
           spaceWidget(),
         ],
@@ -159,13 +162,16 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
                 //   },
                 // );
                 _controllerMap['type'] = textEditingController;
-                return TextField(
+                return TextFormField(
                   controller: textEditingController,
                   focusNode: focusNode,
                   maxLines: 1,
                   minLines: 1,
                   scrollPadding: EdgeInsets.zero,
                   textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (String value) {
+                    onFieldSubmitted();
+                  },
                   style: Config.loadDefaultTextStyle(color: Colors.black),
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
@@ -306,7 +312,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
       SizedBox(height: 25.sp),
       loadListView('事件链接', _listMediaType),
       spaceWidget(),
-      ...titleFileView('事件图文信息'),
+      titleFileView('原文图文信息：'),
       spaceWidget(),
     ];
   }
@@ -355,8 +361,8 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.add, size: 14.w, color: Config.fontColorSelect),
-                SizedBox(width: 8.w),
+                Icon(Icons.add, size: 19.sp, color: Config.fontColorSelect),
+                SizedBox(width: 8.sp),
                 Text(
                   '添加',
                   style: Config.loadDefaultTextStyle(
@@ -375,7 +381,11 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
           itemBuilder: (context, index) {
             return Row(
               children: [
-                SizedBox(width: 525.w),
+                SizedBox(width: 440.w),
+                Opacity(
+                  opacity: 0,
+                  child: titleView('原文链接：'),
+                ),
                 SizedBox(
                   width: 624.w,
                   child: TextField(
@@ -428,12 +438,15 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
               color: Colors.transparent,
             );
           });
-  final _fileView = FileView();
-  titleFileView(title) => [
-        titleView(title),
-        SizedBox(height: 25.sp),
-        _fileView,
-      ];
+  final _fileView = FileListWidget();
+  Widget titleFileView(title) => Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(width: 403.w),
+            titleView(title),
+            _fileView,
+          ]);
   String loadText(String key) => _controllerMap[key]?.value.text ?? '';
   String splicingString(List<TextEditingController> list) {
     if (list.length < 2) return ',';

@@ -12,6 +12,8 @@ class Config {
   static final secondSize = 21.sp;
   static final defaultSize = 19.sp;
   static const fontColorSelect = Color(0xFF3E7BFA);
+  static const Color borderColor = Color.fromRGBO(0, 0, 0, 0.15);
+
   // static const fontColorDefault = Color(0xFF333333);
   static TextStyle loadAppBarTextStyle() {
     return TextStyle(
@@ -95,6 +97,27 @@ class Config {
         backgroundColor: Colors.red,
         textColor: Colors.white,
         fontSize: firstSize);
+  }
+
+  static defaultInputDecoration({String hintText = '请输入', Widget? prefix}) {
+    return InputDecoration(
+      border: OutlineInputBorder(
+        gapPadding: 0,
+        borderRadius: BorderRadius.circular(5.sp),
+        borderSide: const BorderSide(color: borderColor),
+      ),
+      enabledBorder: OutlineInputBorder(
+        gapPadding: 0,
+        borderRadius: BorderRadius.circular(5.sp),
+        borderSide: const BorderSide(color: borderColor),
+      ),
+      contentPadding: EdgeInsets.symmetric(vertical: 14.w, horizontal: 16.w),
+      counterText: '',
+      isDense: true,
+      hintText: hintText,
+      prefix: prefix,
+      hintStyle: Config.loadDefaultTextStyle(color: borderColor),
+    );
   }
 
   static Widget dateInputView(explain, controller, {DateTimePickerType? type}) {

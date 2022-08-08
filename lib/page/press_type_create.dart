@@ -2,7 +2,7 @@ import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
-import 'package:public_opinion_manage_web/page/info_public_opinion.dart';
+import 'package:public_opinion_manage_web/page/widget/info_public_opinion.dart';
 
 class CreatePressType extends StatefulWidget {
   const CreatePressType({Key? key}) : super(key: key);
