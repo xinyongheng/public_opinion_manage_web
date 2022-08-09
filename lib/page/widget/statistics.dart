@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/triangle.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:charts_common/common.dart' as common;
 
 class StatisticsWidget extends StatefulWidget {
   const StatisticsWidget({Key? key}) : super(key: key);
@@ -48,7 +49,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
   }
 
   Widget lineChartForUnitOpinion() {
-    final list = [];
+    final list = <common.Series<dynamic, num>>[];
     return charts.LineChart(
       list,
       animate: true,
