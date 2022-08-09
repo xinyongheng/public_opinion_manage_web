@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/page/widget/info_public_opinion.dart';
 
+///创建报刊
 class CreatePressType extends StatefulWidget {
   const CreatePressType({Key? key}) : super(key: key);
 

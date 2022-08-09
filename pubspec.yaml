@@ -58,7 +58,8 @@ dependencies:
   video_thumbnail_imageview: ^0.0.5
   flutter_easyloading: ^3.0.5
   shared_preferences: ^2.0.15
-
+  # 图标
+  charts_flutter: ^0.12.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -85,6 +86,9 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
   - images/bg.png
+  - images/icon_date.png
+  - images/icon_down.png
+  - images/icon_select.png
   - images/ic_txt .png
   - images/ic_xls.png
   - images/login_left.png
@@ -96,7 +100,7 @@ flutter:
   - images/op_statics.png
   - images/op_user.png
   - images/placeholder.jpg
-  - images/upload.png
+  - images/slide_left.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

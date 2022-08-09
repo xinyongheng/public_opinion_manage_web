@@ -4,8 +4,10 @@ import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/page/widget/save_event_info.dart';
 
+import 'widget/history_press_file.dart';
 import 'widget/info_public_opinion.dart';
 import 'widget/make_account.dart';
+import 'widget/press_list.dart';
 import 'widget/test.dart';
 
 class ManageHomePage extends StatefulWidget {
@@ -20,7 +22,7 @@ class ManageHomePage extends StatefulWidget {
 class _ManageHomePageState extends State<ManageHomePage> {
   int newNoticeNum = 0;
   int sumNoticeNum = 0;
-  int _nowIndex = 1;
+  int _nowIndex = 2;
   int _pressIndex = 0;
   late List<Widget> pages;
 
@@ -31,7 +33,7 @@ class _ManageHomePageState extends State<ManageHomePage> {
     pages = [
       SaveEventInfoWidget(token: widget.token),
       const PublicOpinionListWidget(),
-      Text(arr[2], style: Config.loadFirstTextStyle()),
+      const PressListWidget(),
       // Text(arr[3], style: Config.loadFirstTextStyle()),
       const MyTestPage(),
       const MakeAccountWidget(),
@@ -72,7 +74,9 @@ class _ManageHomePageState extends State<ManageHomePage> {
                           ),
                           child: _nowIndex != 2
                               ? pages[_nowIndex]
-                              : (_pressIndex == 0 ? pages[2] : Text('旧文件'))),
+                              : (_pressIndex == 0
+                                  ? pages[2]
+                                  : const HistoryPressFileWidget())),
                     ),
                     SizedBox(width: 32.w),
                   ],

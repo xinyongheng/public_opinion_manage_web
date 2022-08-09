@@ -123,7 +123,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
       childDateItems('发现时间：', '发现时间', 'findTime'),
       SizedBox(height: 43.w),
       childRadioItems('上级是否通报：'),
-      SizedBox(height: 43.w),
+      Visibility(visible: _isSuperiorNotice, child: SizedBox(height: 43.w)),
       Visibility(
         visible: _isSuperiorNotice,
         child: childDateItems('通报时间：', '通报时间', 'superiorNotificationTime'),

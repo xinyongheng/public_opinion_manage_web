@@ -115,7 +115,11 @@ class Config {
       counterText: '',
       isDense: true,
       hintText: hintText,
-      suffixIcon: suffixIcon,
+      suffixIcon: Padding(
+        padding: EdgeInsets.only(right: 10.w),
+        child: suffixIcon,
+      ),
+      suffixIconConstraints: BoxConstraints.expand(width: 29.w, height: 19.w),
       hintStyle: Config.loadDefaultTextStyle(color: borderColor),
     );
   }

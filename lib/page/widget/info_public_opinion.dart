@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -77,9 +78,11 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
         primary: primary,
         backgroundColor: backgroundColor,
         textStyle: Config.loadDefaultTextStyle(fonstSize: 19.sp),
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.w),
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.w),
         minimumSize: Size(87.sp, 43.sp),
-        side: backgroundColor == Colors.white ? const BorderSide() : null,
+        side: backgroundColor == Colors.white
+            ? const BorderSide(width: 0.5)
+            : null,
         shape: RoundedRectangleBorder(
           side: backgroundColor == Colors.white
               ? const BorderSide(color: Color(0xFFD9D9D9))
@@ -132,8 +135,8 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
                 hintText: '年/月/日',
                 suffixIcon: Image.asset(
                   'images/op_save.png',
-                  width: 19.w,
-                  height: 19.w,
+                  width: 5.sp,
+                  height: 5.sp,
                   color: Colors.grey,
                 ),
               ),
@@ -157,8 +160,8 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
                 hintText: '年/月/日',
                 suffixIcon: Image.asset(
                   'images/op_save.png',
-                  width: 19.w,
-                  height: 19.w,
+                  width: 5.sp,
+                  height: 5.sp,
                   color: Colors.grey,
                 ),
               ),
@@ -189,37 +192,84 @@ class ListInfoWidget extends StatefulWidget {
   State<ListInfoWidget> createState() => _ListInfoWidgetState();
 }
 
-class _ListInfoWidgetState extends State<ListInfoWidget> {
+class _ListInfoWidgetState extends State<ListInfoWidget>
+    with TickerProviderStateMixin {
   final List<PublicOpinionBean> _list = [];
-  final wordLength = 16.sp;
+  final wordLength = 16.w;
   @override
   void initState() {
     super.initState();
     _list.addAll(PublicOpinionBean.create());
+    _list.addAll(PublicOpinionBean.create());
   }
 
+  final _physics = const NeverScrollableScrollPhysics();
+  final ScrollController _scrollController = ScrollController();
+  bool _slideLeftTag = false;
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 1429.w,
-      child: ListView.separated(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true, //内容适配
-        itemBuilder: itemView,
-        itemCount: _list.length + 1,
-        separatorBuilder: (BuildContext context, int index) {
-          return const Divider(
-            height: 1,
-            thickness: 1,
-            color: Color(0xFFE8E8E8),
-          );
+    return Padding(
+      padding: EdgeInsets.only(right: 42.w),
+      child: Stack(children: [
+        ListView.separated(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true, //内容适配
+          itemBuilder: itemView,
+          itemCount: _list.length + 1,
+          separatorBuilder: (BuildContext context, int index) {
+            return const Divider(
+              height: 1,
+              thickness: 1,
+              color: Color(0xFFE8E8E8),
+            );
+          },
+        ),
+        Positioned(
+          right: _slideLeftTag ? null : 0,
+          left: _slideLeftTag ? 0 : null,
+          top: 0,
+          child: slideLeftWidget(),
+        )
+      ]),
+    );
+  }
+
+  Widget slideLeftWidget() {
+    return Card(
+      // color: Colors.grey,
+      elevation: 10,
+      child: InkWell(
+        onTap: () {
+          // print(_scrollController.position.maxScrollExtent);
+          // _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+          if (_slideLeftTag) {
+            _scrollController.jumpTo(0);
+          } else {
+            _scrollController.animateTo(1800.w,
+                duration: const Duration(seconds: 3), curve: const SawTooth(5));
+          }
+          setState(() {
+            _slideLeftTag = !_slideLeftTag;
+          });
         },
+        child: Container(
+          height: 60.w,
+          width: 27.w,
+          alignment: Alignment.center,
+          child: Transform.rotate(
+            angle: _slideLeftTag ? -pi : 0,
+            child: Image.asset('images/slide_left.png'),
+          ),
+        ),
       ),
     );
   }
 
+// RotationTransition
   Widget itemView(BuildContext context, int index) {
-    return index == 0 ? firstTableRowView() : tableRowView(_list[index - 1]);
+    return index == 0
+        ? firstTableRowView()
+        : tableRowView(_list[index - 1], index);
   }
 
   Widget firstTableRowView() {
@@ -248,11 +298,11 @@ class _ListInfoWidgetState extends State<ListInfoWidget> {
           bgColor: const Color(0xFFFAFAFA),
           height: 72.w),
       childItemView('发布时间', '',
-          width: 6 * wordLength,
+          width: 8 * wordLength,
           bgColor: const Color(0xFFFAFAFA),
           height: 72.w),
       childItemView('发现时间', '',
-          width: 6 * wordLength,
+          width: 8 * wordLength,
           bgColor: const Color(0xFFFAFAFA),
           height: 72.w),
       childItemView('舆情类别', '',
@@ -265,7 +315,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget> {
           bgColor: const Color(0xFFFAFAFA),
           height: 72.w),
       childItemView('反馈时间', '',
-          width: 6 * wordLength,
+          width: 8 * wordLength,
           bgColor: const Color(0xFFFAFAFA),
           height: 72.w),
       childItemView('上级通报时间', '',
@@ -300,13 +350,18 @@ class _ListInfoWidgetState extends State<ListInfoWidget> {
     if (widget.canSelect != true) {
       arr.removeAt(0);
     }
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: arr,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: _physics,
+      controller: _scrollController,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: arr,
+      ),
     );
   }
 
-  Widget tableRowView(PublicOpinionBean bean) {
+  Widget tableRowView(PublicOpinionBean bean, int indexNo) {
     bool tag = bean.leaderName == null;
     String leaderInstructions =
         tag ? '添加' : "${bean.leaderName}\n${bean.leaderInstructionsTime}";
@@ -322,22 +377,21 @@ class _ListInfoWidgetState extends State<ListInfoWidget> {
           // onChanged: (bool? value) {},
         ),
       ),
-      childItemView(null == bean.no ? "—" : ("${bean.no! + 1}"), '序号',
-          width: 4 * wordLength, index: index),
+      childItemView("$indexNo", '序号', width: 4 * wordLength, index: index),
       childItemView(bean.name.toString(), '事件名称',
           width: 8 * wordLength, index: index),
       childItemView(bean.mediaType.toString(), '媒体类型',
           width: 8 * wordLength, index: index),
       childItemView(bean.linkPublishTime.toString(), '发布时间',
-          width: 6 * wordLength, index: index),
+          width: 8 * wordLength, index: index),
       childItemView(bean.findTime.toString(), '发现时间',
-          width: 6 * wordLength, index: index),
+          width: 8 * wordLength, index: index),
       childItemView(bean.publicOpinionType.toString(), '舆情类别',
           width: 6 * wordLength, index: index),
       childItemView(bean.dutyUnit ?? '指定', '责任单位',
           width: 8 * wordLength, index: index),
       childItemView(bean.feedbackTime ?? "—", '反馈时间',
-          width: 6 * wordLength, index: index),
+          width: 8 * wordLength, index: index),
       childItemView(bean.superiorNoticeTime ?? "—", '上级通报时间',
           width: 8 * wordLength, index: index),
       childItemView(bean.pressType ?? "—", '报刊类型',
@@ -360,6 +414,8 @@ class _ListInfoWidgetState extends State<ListInfoWidget> {
     }
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      physics: _physics,
+      controller: _scrollController,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: arr,
@@ -374,11 +430,15 @@ class _ListInfoWidgetState extends State<ListInfoWidget> {
       double? height,
       int? index}) {
     const clickTag = ',添加,指定,查看,编辑,';
-    bool canClick = clickTag.contains(data) || (data != "—" && tag == '批示内容');
+    bool isClick = clickTag.contains(data);
+    final canClick = isClick || (data != "—" && tag == '批示内容');
     final child = Text(
       data,
       textAlign: TextAlign.center,
-      style: Config.loadDefaultTextStyle(color: color, fonstSize: wordLength),
+      style: Config.loadDefaultTextStyle(
+        color: isClick ? Config.fontColorSelect : color,
+        fonstSize: wordLength,
+      ),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );
@@ -386,7 +446,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget> {
       alignment: Alignment.center,
       // color: bgColor,
       width: width ?? data.length * wordLength,
-      height: height ?? 60.sp,
+      height: height ?? 60.w,
       decoration: BoxDecoration(
         color: bgColor,
         // border: Border.all(color: Colors.black, width: 0.5),
