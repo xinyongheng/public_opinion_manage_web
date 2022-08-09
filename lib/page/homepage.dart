@@ -8,6 +8,7 @@ import 'widget/history_press_file.dart';
 import 'widget/info_public_opinion.dart';
 import 'widget/make_account.dart';
 import 'widget/press_list.dart';
+import 'widget/statistics.dart';
 import 'widget/test.dart';
 
 class ManageHomePage extends StatefulWidget {
@@ -35,7 +36,7 @@ class _ManageHomePageState extends State<ManageHomePage> {
       const PublicOpinionListWidget(),
       const PressListWidget(),
       // Text(arr[3], style: Config.loadFirstTextStyle()),
-      const MyTestPage(),
+      const StatisticsWidget(),
       const MakeAccountWidget(),
     ];
   }
