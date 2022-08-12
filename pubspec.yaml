@@ -60,7 +60,7 @@ dependencies:
   shared_preferences: ^2.0.15
   # 图表
   charts_flutter: ^0.12.0
-  fl_chart: ^0.55.1
+  # fl_chart: ^0.55.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -86,22 +86,26 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-  - images/bg.png
-  - images/icon_date.png
-  - images/icon_down.png
-  - images/icon_select.png
-  - images/ic_txt .png
-  - images/ic_xls.png
-  - images/login_left.png
-  - images/logo.png
-  - images/notice.png
-  - images/op_list.png
-  - images/op_press.png
-  - images/op_save.png
-  - images/op_statics.png
-  - images/op_user.png
-  - images/placeholder.jpg
-  - images/slide_left.png
+    - images/bg.png
+    - images/icon_date.png
+    - images/icon_down.png
+    - images/icon_password.png
+    - images/icon_select.png
+    - images/icon_user.png
+    - images/ic_txt .png
+    - images/ic_xls.png
+    - images/login_left.png
+    - images/logo.png
+    - images/logo_text.png
+    - images/notice.png
+    - images/op_list.png
+    - images/op_press.png
+    - images/op_save.png
+    - images/op_statics.png
+    - images/op_user.png
+    - images/placeholder.jpg
+    - images/slide_left.png
+    - images/upload.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

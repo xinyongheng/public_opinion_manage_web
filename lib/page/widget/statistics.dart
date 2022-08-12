@@ -1,9 +1,7 @@
-import 'dart:html';
 import 'dart:math';
 
-import 'package:fl_chart/fl_chart.dart';
+// import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
@@ -19,6 +17,16 @@ class StatisticsWidget extends StatefulWidget {
 }
 
 class _StatisticsWidgetState extends State<StatisticsWidget> {
+  final startDateController = TextEditingController();
+  final endDateController = TextEditingController();
+
+  @override
+  void dispose() {
+    super.dispose();
+    startDateController.dispose();
+    endDateController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -26,12 +34,23 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         padding: EdgeInsets.only(left: 43.w, right: 43.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               '舆情统计',
-              style: Config.loadDefaultTextStyle(fonstSize: 27.sp),
+              style: Config.loadDefaultTextStyle(
+                  fonstSize: 26.w, fontWeight: FontWeight.w500),
             ),
-            unitOpinionView(),
+            SizedBox(height: 36.w),
+            dateSelectView(),
+            SizedBox(height: 36.w),
+            Row(
+              children: [
+                unitOpinionTypeView(),
+                const Spacer(),
+                unitOpinionView(),
+              ],
+            ),
           ],
         ),
       ),
@@ -50,17 +69,72 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         TriangleWidget(
             color: const Color(0xFF0DDDBB), width: 7.w, height: 12.w),
         SizedBox(width: 6.w),
-        Text(data, style: Config.loadDefaultTextStyle(fonstSize: 21.sp)),
+        Text(data,
+            style: Config.loadDefaultTextStyle(
+                fonstSize: 21.sp, fontWeight: FontWeight.w500)),
+      ],
+    );
+  }
+
+  Widget dateSelectView() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          '时间：',
+          style: Config.loadDefaultTextStyle(
+            color: Colors.black.withOpacity(0.85),
+            fonstSize: 16.w,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        SizedBox(
+          width: 213.w,
+          child: TextField(
+            controller: startDateController,
+            decoration: Config.defaultInputDecoration(
+              hintText: '年/月/日',
+              suffixIcon: Image.asset("images/op_save.png", color: Colors.grey),
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14.w),
+          child: Text(
+            "至",
+            style: Config.loadDefaultTextStyle(
+              color: Colors.black.withOpacity(0.85),
+              fonstSize: 16.w,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 213.w,
+          child: TextField(
+            controller: endDateController,
+            decoration: Config.defaultInputDecoration(
+              hintText: '年/月/日',
+              suffixIcon: Image.asset("images/op_save.png", color: Colors.grey),
+            ),
+          ),
+        ),
       ],
     );
   }
 
   Widget lineChartForUnitOpinion() {
+    // GestureDetector
     final list = <charts.Series<OrdinalSales, num>>[];
     fillList(list);
     return charts.LineChart(
       list,
       animate: true,
+      behaviors: [
+        // eventTrigger
+        // ChartBehavior<num>()
+      ],
       defaultRenderer: charts.LineRendererConfig(
         // 圆点大小
         radiusPx: 8.w,
@@ -76,16 +150,83 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         // 区域颜色透明度 0.0-1.0
         areaOpacity: 0.2,
       ),
+      selectionModels: [
+        charts.SelectionModelConfig(
+          type: charts.SelectionModelType.info,
+          changedListener: (charts.SelectionModel<num> value) {
+            /*int index = value.selectedDatum.first.index!;
+            final clickSeries = value.selectedSeries.first;
+            final tag = clickSeries.id;
+            toast("$tag ,第$index个");
+            final clickBean = value.selectedDatum.firstWhere((element) {
+              return element.series.id == tag;
+            });
+            toast(clickBean.toString());*/
+            //throw Error('故意的');
+            final list = <OrdinalSales>[];
+            // value.selectedDatum[4];
+            for (var element in value.selectedDatum) {
+              list.add(element.datum);
+            }
+            _showListDialog(list);
+          },
+        ),
+      ],
+      domainAxis: charts.NumericAxisSpec(
+          tickProviderSpec: charts.StaticNumericTickProviderSpec(tickSpec()),
+          tickFormatterSpec: charts.BasicNumericTickFormatterSpec(
+              (measure) => exp(measure ?? 0).toString())),
     );
+  }
+
+  List<charts.TickSpec<num>> tickSpec() {
+    final ticks = <charts.TickSpec<double>>[
+      const charts.TickSpec(0,
+          label: '公安局',
+          style: charts.TextStyleSpec(
+              //可对x轴设置颜色等
+              color: charts.Color(r: 0x4C, g: 0xFF, b: 0x50))),
+      const charts.TickSpec(1,
+          label: '卫健委',
+          style: charts.TextStyleSpec(
+              //可对x轴设置颜色等
+              color: charts.Color(r: 0x4C, g: 0xAF, b: 0x50))),
+      const charts.TickSpec(2,
+          label: '1.3',
+          style: charts.TextStyleSpec(
+              //可对x轴设置颜色等
+              color: charts.Color(r: 0x4C, g: 0xAF, b: 0x50))),
+      const charts.TickSpec(3,
+          label: '1.4',
+          style: charts.TextStyleSpec(
+              //可对x轴设置颜色等
+              color: charts.Color(r: 0x4C, g: 0xAF, b: 0x50))),
+      const charts.TickSpec(4,
+          label: '1.5',
+          style: charts.TextStyleSpec(
+              //可对x轴设置颜色等
+              color: charts.Color(r: 0x4C, g: 0xAF, b: 0x50))),
+      const charts.TickSpec(5,
+          label: '1.6',
+          style: charts.TextStyleSpec(
+              //可对x轴设置颜色等
+              color: charts.Color(r: 0x4C, g: 0xAF, b: 0x50))),
+      const charts.TickSpec(6,
+          label: '1.7',
+          style: charts.TextStyleSpec(
+              //可对x轴设置颜色等
+              color: charts.Color(r: 0x4C, g: 0xAF, b: 0x50))),
+    ];
+    return ticks;
   }
 
   void fillList(list) {
     var random = Random();
     final data = [
-      OrdinalSales('县公安局', 13, 0),
-      OrdinalSales('县公安局', 13, 1),
-      OrdinalSales('县卫健委', 24, 2),
-      OrdinalSales('县民政局', 12, 3),
+      OrdinalSales('县公安局1', 13, 0),
+      OrdinalSales('县公安局2', 13, 1),
+      OrdinalSales('县卫健委3', 24, 2),
+      OrdinalSales('县民政局4', 12, 3),
       OrdinalSales('县住建局1', 12, 4),
       OrdinalSales('县住建局2', random.nextInt(100), 5),
       OrdinalSales('县住建局3', random.nextInt(100), 6),
@@ -117,9 +258,11 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
 
     list.add(charts.Series<OrdinalSales, int>(
       id: 'Sales',
-      colorFn: (_, __) => charts.ColorUtil.fromDartColor(Color(0xFFE41E31)),
+      colorFn: (_, __) =>
+          charts.ColorUtil.fromDartColor(const Color(0xFFE41E31)),
       domainFn: (OrdinalSales sales, _) => sales.index,
       measureFn: (OrdinalSales sales, _) => sales.y,
+
       // labelAccessorFn: (sales, index) => sales.x,
       // keyFn: (OrdinalSales sales, _) => sales.x,
       // domainFormatterFn: (OrdinalSales sales, index) {
@@ -131,10 +274,11 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
       // dashPatternFn: (datum, index) => [8, 2, 4, 2],
       data: data,
     ));
-    /*  list.addAll([
+    list.addAll([
       charts.Series<OrdinalSales, int>(
         id: 'User',
-        colorFn: (_, __) => charts.ColorUtil.fromDartColor(Color(0xFF13A331)),
+        colorFn: (_, __) =>
+            charts.ColorUtil.fromDartColor(const Color(0xFF13A331)),
         domainFn: (OrdinalSales sales, _) => sales.index,
         measureFn: (OrdinalSales sales, _) => sales.y,
         // dashPatternFn: (_, __) => [8, 2, 4, 2],
@@ -142,22 +286,25 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
       ),
       charts.Series<OrdinalSales, int>(
         id: 'Dart',
-        colorFn: (_, __) => charts.ColorUtil.fromDartColor(Color(0xFF6300A1)),
+        colorFn: (_, __) =>
+            charts.ColorUtil.fromDartColor(const Color(0xFF6300A1)),
         domainFn: (OrdinalSales sales, _) => sales.index,
         measureFn: (OrdinalSales sales, _) => sales.y,
         // dashPatternFn: (_, __) => [8, 2, 4, 2],
         data: data3,
       ),
-    ]); */
+    ]);
   }
 
   final random = Random();
-  Widget unitOpinionView() {
+
+  Widget unitOpinionTypeView() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         titleView('各单位舆情分类'),
+        SizedBox(height: 27.w),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -174,130 +321,26 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         SizedBox(
           width: 631.w,
           height: 359.w,
-          child: LineChart(
-            LineChartData(
-              lineBarsData: [
-                LineChartBarData(
-                  spots: [
-                    FlSpot(1, 1),
-                    FlSpot(3, 1.5),
-                    FlSpot(5, 1.4),
-                    FlSpot(7, 3.4),
-                    FlSpot(9, 2),
-                    FlSpot(11, 2.2),
-                    FlSpot(13, 1.8),
-                  ],
-                  color: const Color(0xFFFF9900),
-                ),
-                LineChartBarData(
-                  spots: [
-                    FlSpot(1, 2),
-                    FlSpot(3, 3.5),
-                    FlSpot(5, 4.4),
-                    FlSpot(7, 5.4),
-                    FlSpot(9, 6),
-                    FlSpot(11, 7.2),
-                    FlSpot(13, 17.8),
-                  ],
-                  color: const Color(0xFF89BFFF),
-                ),
-                LineChartBarData(
-                  spots: [
-                    FlSpot(1, random.nextInt(10) * 1.0),
-                    FlSpot(3, random.nextInt(10) * 1.0),
-                    FlSpot(5, random.nextInt(10) * 1.0),
-                    FlSpot(7, random.nextInt(10) * 1.0),
-                    FlSpot(9, random.nextInt(10) * 1.0),
-                    FlSpot(11, random.nextInt(10) * 1.0),
-                    FlSpot(13, random.nextInt(10) * 1.0),
-                  ],
-                  color: const Color(0xFF54E0FF),
-                ),
-                LineChartBarData(
-                  spots: [
-                    FlSpot(1, random.nextInt(10) * 1.0),
-                    FlSpot(3, random.nextInt(10) * 1.0),
-                    FlSpot(5, random.nextInt(10) * 1.0),
-                    FlSpot(7, random.nextInt(10) * 1.0),
-                    FlSpot(9, random.nextInt(10) * 1.0),
-                    FlSpot(11, random.nextInt(10) * 1.0),
-                    FlSpot(13, random.nextInt(10) * 1.0),
-                  ],
-                  color: const Color(0xFF67FFB6),
-                ),
-                // TouchLineBarSpot(bar, barIndex, spot, distance)
-              ],
-              lineTouchData: LineTouchData(
-                enabled: true,
-                touchCallback: (p0, p1) {
-                  //toast('$p0$p1');
-                },
-                touchTooltipData: LineTouchTooltipData(
-                  maxContentWidth: 179.w,
-                  getTooltipItems: (List<LineBarSpot> touchedSpots) {
-                    return touchedSpots.map((LineBarSpot touchedSpot) {
-                      final textStyle = TextStyle(
-                        color: touchedSpot.bar.gradient?.colors.first ??
-                            touchedSpot.bar.color ??
-                            Colors.blueGrey,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      );
-                      touchedSpot.x;
-                      return LineTooltipItem(
-                        "", //touchedSpot.y.toString() + "月",
-                        textStyle,
-                        textAlign: TextAlign.left,
-                        children: [
-                          TextSpan(
-                            text: 'aa',
-                            style: TextStyle(
-                                color: Colors.transparent,
-                                backgroundColor:
-                                    touchedSpot.bar.gradient?.colors.first ??
-                                        touchedSpot.bar.color ??
-                                        Colors.blueGrey),
-                          ),
-                          TextSpan(
-                              text: 'aa',
-                              style: TextStyle(color: Colors.transparent)),
-                          TextSpan(
-                              text: '西瓜视频',
-                              recognizer: LongPressGestureRecognizer()
-                                ..onLongPress = () {
-                                  toast('点击');
-                                }),
-                          TextSpan(
-                              text: 'aaaa',
-                              style: TextStyle(color: Colors.transparent)),
-                          TextSpan(text: touchedSpot.y.toString()),
-                        ],
-                      );
-                    }).toList();
-                  },
-                ),
-              ),
-              titlesData: FlTitlesData(
-                show: true,
-                topTitles: null,
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    reservedSize: 44,
-                    showTitles: true,
-                    getTitlesWidget: (value, meta) {
-                      return Text(meta.formattedValue + "单位");
-                    },
-                  ),
-                ),
-              ),
-              backgroundColor: const Color(0xFFFF9900).withOpacity(0.2),
-            ),
-          ),
+          child: lineChartForUnitOpinion(),
         ),
       ],
     );
   }
-
+  Widget unitOpinionView(){
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        titleView('各单位舆情总数'),
+        SizedBox(height: 27.w),
+        SizedBox(
+          width: 631.w,
+          height: 359.w,
+          child: lineChartForUnitOpinion(),
+        ),
+      ],
+    );
+  }
   List<Widget> unitOpinionViewItem(Color color, String data) {
     return [
       Container(
@@ -316,6 +359,69 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
           )),
     ];
   }
+
+  void _showListDialog(List<OrdinalSales> list) {
+    // final unit = list.first.x;
+    final arr = <Widget>[];
+    arr.add(Text('标题***', style: dialogTextStyle()));
+    for (OrdinalSales element in list) {
+      arr.add(SizedBox(height: 10.w));
+      arr.add(listDialogItem(element));
+    }
+    for (OrdinalSales element in list) {
+      arr.add(SizedBox(height: 10.w));
+      arr.add(listDialogItem(element));
+    }
+    final child = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: arr,
+    );
+
+    //179,220,5 #4B4F52
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF4B4F52),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.sp)),
+          content: SizedBox(
+            width: 179.w,
+            child: Padding(
+              padding: EdgeInsets.all(10.w),
+              child: child,
+            ),
+          ),
+        );
+      },
+      barrierColor: Colors.transparent,
+    );
+  }
+
+  TextStyle dialogTextStyle() {
+    return Config.loadDefaultTextStyle(
+        color: Colors.white, fonstSize: 16.w, fontWeight: FontWeight.w400);
+  }
+
+  Row listDialogItem(OrdinalSales bean) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(width: 13.w, height: 13.w, color: randomColor()),
+        SizedBox(width: 13.w),
+        Text(bean.x, style: dialogTextStyle()),
+        const Spacer(),
+        Text(bean.y.toString(), style: dialogTextStyle())
+      ],
+    );
+  }
+
+  Color randomColor() {
+    return Color.fromRGBO(
+        Random().nextInt(256), Random().nextInt(256), Random().nextInt(256), 1);
+  }
 }
 
 class OrdinalSales {
@@ -324,4 +430,9 @@ class OrdinalSales {
   final int index;
 
   OrdinalSales(this.x, this.y, this.index);
+
+  @override
+  String toString() {
+    return 'OrdinalSales{x: $x, y: $y, index: $index}';
+  }
 }

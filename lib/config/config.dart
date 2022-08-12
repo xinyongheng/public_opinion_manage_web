@@ -22,10 +22,12 @@ class Config {
     );
   }
 
-  static TextStyle loadDefaultTextStyle({Color? color, double? fonstSize}) {
+  static TextStyle loadDefaultTextStyle(
+      {Color? color, double? fonstSize, FontWeight? fontWeight}) {
     return TextStyle(
       color: color,
       fontSize: fonstSize ?? defaultSize,
+      fontWeight: fontWeight,
       // textBaseline: TextBaseline.alphabetic,
     );
   }

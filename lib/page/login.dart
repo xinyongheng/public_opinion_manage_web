@@ -12,6 +12,7 @@ import 'homepage.dart';
 // Stepper Sstep
 class LoginPage extends StatefulWidget {
   final String? comeFrom;
+
   const LoginPage({Key? key, this.comeFrom}) : super(key: key);
 
   @override
@@ -27,9 +28,6 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     _controller1 = TextEditingController(text: '17600666716');
     _controller2 = TextEditingController(text: '123456');
-    Future.delayed(const Duration(minutes: 0), () {
-      Config.startPage(context, ManageHomePage(token: ''));
-    });
   }
 
   @override
@@ -70,42 +68,58 @@ class _LoginPageState extends State<LoginPage> {
   Row loginRowView() {
     return Row(
       children: [
-        Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('images/login_left.png'),
-              fit: BoxFit.fill,
-            ),
-          ),
-          alignment: Alignment.topLeft,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset('images/logo.png', width: 60.sp, height: 60.sp),
-              SizedBox(width: 30.sp),
-              Text('舆情台账管理系统', style: Config.loadDefaultTextStyle()),
-            ],
-          ),
+        Image.asset(
+          'images/login_left.png',
+          // width: 1200.w,
+          fit: BoxFit.fitHeight,
         ),
         Expanded(
-          flex: 1,
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                loadAccountItem('账号：'),
-                SizedBox(height: 15.sp),
-                loadPasswordItem('密码：'),
-                SizedBox(height: 30.sp),
+                Text(
+                  '欢迎登录',
+                  style: Config.loadDefaultTextStyle(
+                    fonstSize: 32.w,
+                    color: const Color(0xFF666666),
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                SizedBox(height: 50.w),
+                Image.asset(
+                  "images/logo_text.png",
+                  width: 232.w,
+                  fit: BoxFit.fitWidth,
+                ),
+                SizedBox(height: 30.w),
+                loadAccountItem('账号'),
+                SizedBox(height: 30.w),
+                loadPasswordItem('密码'),
+                SizedBox(height: 30.w),
                 ..._images,
                 TextButton(
                   onPressed: () {
-                    requestLogin();
+                    // requestLogin();
+                    Future.delayed(const Duration(minutes: 0), () {
+                      Config.startPage(context, ManageHomePage(token: ''));
+                    });
                   },
-                  style: Config.loadPerformButtonStyle(),
+                  style: TextButton.styleFrom(
+                    primary: Colors.white,
+                    backgroundColor: Config.fontColorSelect,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.w),
+                    ),
+                    textStyle: Config.loadDefaultTextStyle(
+                      fonstSize: 22.w,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    fixedSize: Size(500.w, 60.w),
+                  ),
                   child: const Text('登录'),
                 ),
-                SizedBox(height: 300.h),
               ],
             ),
           ),
@@ -122,56 +136,75 @@ class _LoginPageState extends State<LoginPage> {
     return await UserUtil.getToken();
   }
 
-  loadAccountItem(String explain) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(explain),
-        SizedBox(
-          width: 300.sp,
-          child: TextField(
-            controller: _controller1,
-            maxLength: 11,
-            maxLines: 1,
-            textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(
-              label: Icon(Icons.people),
-              // labelText: '请输入账号',
-              border: OutlineInputBorder(),
-              // helperText: '手机号',
-              hintText: '请输入账号',
-              // errorText: '错误',
+  bool _isObscure = true;
+
+  Widget loadEditText(String explain, controller) {
+    return Container(
+      width: 500.w,
+      height: 60.w,
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFFD9D9D9)),
+        borderRadius: BorderRadius.circular(5.w),
+      ),
+      alignment: Alignment.center,
+      child: Row(
+        children: [
+          SizedBox(width: 10.w),
+          Image.asset(
+              explain == '账号'
+                  ? 'images/icon_user.png'
+                  : 'images/icon_password.png',
+              width: 30.w,
+              height: 30.w,
+              fit: BoxFit.fill),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: TextField(
+              controller: controller,
+              obscureText: explain == '密码' && _isObscure,
+              style: Config.loadDefaultTextStyle(
+                fontWeight: FontWeight.w400,
+                fonstSize: 22.w,
+              ),
+              decoration: InputDecoration(
+                hintText: '请输入$explain',
+                hintStyle: Config.loadDefaultTextStyle(
+                  color: Config.borderColor,
+                  fontWeight: FontWeight.w400,
+                  fonstSize: 22.w,
+                ),
+                contentPadding: EdgeInsets.zero,
+                isCollapsed: true,
+                isDense: true,
+                suffix: explain == '密码'
+                    ? IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _isObscure = !_isObscure;
+                          });
+                        },
+                        icon: Icon(
+                          _isObscure ? Icons.visibility_off : Icons.visibility,
+                          size: 20.w,
+                        ),
+                        padding: EdgeInsets.zero,
+                      )
+                    : null,
+                border: InputBorder.none,
+              ),
             ),
-          ),
-        )
-      ],
+          )
+        ],
+      ),
     );
   }
 
+  loadAccountItem(String explain) {
+    return loadEditText(explain, _controller1);
+  }
+
   loadPasswordItem(String explain) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(explain),
-        SizedBox(
-          width: 300.sp,
-          child: TextField(
-            controller: _controller2,
-            maxLines: 1,
-            obscureText: true,
-            textInputAction: TextInputAction.go,
-            decoration: const InputDecoration(
-              label: Icon(Icons.password),
-              // labelText: '请输入账号',
-              border: OutlineInputBorder(),
-              // helperText: '手机号',
-              hintText: '请输入密码',
-              // errorText: '错误',
-            ),
-          ),
-        )
-      ],
-    );
+    return loadEditText(explain, _controller2);
   }
 
   requestLogin() {
