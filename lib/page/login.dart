@@ -68,10 +68,14 @@ class _LoginPageState extends State<LoginPage> {
   Row loginRowView() {
     return Row(
       children: [
-        Image.asset(
-          'images/login_left.png',
-          // width: 1200.w,
-          fit: BoxFit.fitHeight,
+        Container(
+          color: Colors.yellow,
+          width: 1200.w,
+          height: double.infinity,
+          child: Image.asset(
+            'images/login_left.png',
+            fit: BoxFit.fill,
+          ),
         ),
         Expanded(
           child: Center(
