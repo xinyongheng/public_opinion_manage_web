@@ -107,7 +107,7 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: () {
                     // requestLogin();
                     Future.delayed(const Duration(minutes: 0), () {
-                      Config.startPage(context, ManageHomePage(token: ''));
+                      Config.startPage(context, DutyUnitHomePage(token: ''));
                     });
                   },
                   style: TextButton.styleFrom(
