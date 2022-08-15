@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/check_box.dart';
+import 'package:public_opinion_manage_web/custom/dialog.dart';
+import 'package:public_opinion_manage_web/custom/duty_unit.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
+import 'package:public_opinion_manage_web/service/service.dart';
+import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 ///舆情列表
 class PublicOpinionListWidget extends StatefulWidget {
@@ -17,6 +21,34 @@ class PublicOpinionListWidget extends StatefulWidget {
 
 class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
   final controllerMap = <String, TextEditingController>{};
+  List<PublicOpinionBean> _list = [];
+  @override
+  void initState() {
+    super.initState();
+    askInternet(null);
+  }
+
+  // 请求网络列表
+  void askInternet(Map<String, dynamic>? map) async {
+    final finalMap = <String, dynamic>{};
+    if (null != map) {
+      finalMap.addAll(map);
+    }
+    finalMap["userId"] = await UserUtil.getUserId();
+    ServiceHttp().post("/eventList", data: finalMap, success: (data) {
+      setState(() {
+        _list = PublicOpinionBean.fromJsonArray(data);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controllerMap.forEach((_, value) => value.dispose());
+    controllerMap.forEach((_, value) => value.dispose());
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -59,7 +91,10 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
               ],
             ),
             SizedBox(width: 45.w, height: 60.w),
-            ListInfoWidget(canSelect: false),
+            ListInfoWidget(
+              canSelect: false,
+              selectList: _list,
+            ),
           ],
         ),
       ),
@@ -184,9 +219,10 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
 
 class ListInfoWidget extends StatefulWidget {
   final bool? canSelect;
-  final selectList = <PublicOpinionBean>[];
+  final List<PublicOpinionBean> selectList;
 
-  ListInfoWidget({Key? key, this.canSelect}) : super(key: key);
+  const ListInfoWidget({Key? key, this.canSelect, required this.selectList})
+      : super(key: key);
 
   @override
   State<ListInfoWidget> createState() => _ListInfoWidgetState();
@@ -194,14 +230,7 @@ class ListInfoWidget extends StatefulWidget {
 
 class _ListInfoWidgetState extends State<ListInfoWidget>
     with TickerProviderStateMixin {
-  final List<PublicOpinionBean> _list = [];
   final wordLength = 16.w;
-  @override
-  void initState() {
-    super.initState();
-    _list.addAll(PublicOpinionBean.create());
-    _list.addAll(PublicOpinionBean.create());
-  }
 
   final _physics = const NeverScrollableScrollPhysics();
   final ScrollController _scrollController = ScrollController();
@@ -215,7 +244,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true, //内容适配
           itemBuilder: itemView,
-          itemCount: _list.length + 1,
+          itemCount: widget.selectList.length + 1,
           separatorBuilder: (BuildContext context, int index) {
             return const Divider(
               height: 1,
@@ -269,7 +298,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
   Widget itemView(BuildContext context, int index) {
     return index == 0
         ? firstTableRowView()
-        : tableRowView(_list[index - 1], index);
+        : tableRowView(widget.selectList[index - 1], index);
   }
 
   Widget firstTableRowView() {
@@ -378,21 +407,21 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
         ),
       ),
       childItemView("$indexNo", '序号', width: 4 * wordLength, index: index),
-      childItemView(bean.name.toString(), '事件名称',
+      childItemView(bean.description.toString(), '事件名称',
           width: 8 * wordLength, index: index),
       childItemView(bean.mediaType.toString(), '媒体类型',
           width: 8 * wordLength, index: index),
-      childItemView(bean.linkPublishTime.toString(), '发布时间',
+      childItemView(bean.publishTime.toString(), '发布时间',
           width: 8 * wordLength, index: index),
       childItemView(bean.findTime.toString(), '发现时间',
           width: 8 * wordLength, index: index),
-      childItemView(bean.publicOpinionType.toString(), '舆情类别',
+      childItemView(bean.type.toString(), '舆情类别',
           width: 6 * wordLength, index: index),
       childItemView(bean.dutyUnit ?? '指定', '责任单位',
           width: 8 * wordLength, index: index),
       childItemView(bean.feedbackTime ?? "—", '反馈时间',
           width: 8 * wordLength, index: index),
-      childItemView(bean.superiorNoticeTime ?? "—", '上级通报时间',
+      childItemView(bean.superiorNotificationTime ?? "—", '上级通报时间',
           width: 8 * wordLength, index: index),
       childItemView(bean.pressType ?? "—", '报刊类型',
           width: 6 * wordLength, index: index),
@@ -428,7 +457,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
       bgColor = const Color(0xFFFDFDFD),
       double? width,
       double? height,
-      int? index}) {
+      int index = 1}) {
     const clickTag = ',添加,指定,查看,编辑,';
     bool isClick = clickTag.contains(data);
     final canClick = isClick || (data != "—" && tag == '批示内容');
@@ -439,6 +468,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
         color: isClick ? Config.fontColorSelect : color,
         fonstSize: wordLength,
       ),
+      softWrap: true,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );
@@ -452,15 +482,16 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
         // border: Border.all(color: Colors.black, width: 0.5),
       ),
       child: canClick
-          ? InkWell(onTap: () => viewClick(tag, index ?? 0), child: child)
+          ? InkWell(onTap: () => viewClick(tag, index - 1), child: child)
           : child,
     );
   }
 
   void viewClick(String data, int index) {
-    final bean = _list[index];
+    final bean = widget.selectList[index];
     switch (data) {
       case '责任单位':
+        preDutyUnit(bean);
         break;
       case '上级通报时间':
         break;
@@ -473,5 +504,20 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
       default:
       //详情
     }
+  }
+
+  void preDutyUnit(bean) {
+    showDutyUnitDialog(context, listCallback: (list) {
+      list.forEach((element) {});
+    });
+  }
+
+  void askInternetDutyUnit(PublicOpinionBean bean, list) async {
+    String api = "/assignedDutyUnit";
+    final map = <String, dynamic>{};
+    map["useId"] = await UserUtil.getUserId();
+    map["eventId"] = bean.id;
+    map["dutyUnit"] = list[0];
+    map["manageRemark"] = '';
   }
 }

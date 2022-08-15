@@ -9,7 +9,6 @@ import 'widget/info_public_opinion.dart';
 import 'widget/make_account.dart';
 import 'widget/press_list.dart';
 import 'widget/statistics.dart';
-import 'widget/test.dart';
 
 ///管理员首页
 class ManageHomePage extends StatefulWidget {
@@ -568,7 +567,7 @@ class _DutyUnitHomePageState extends State<DutyUnitHomePage> {
           const Spacer(flex: 1),
         ]),
         Visibility(
-          visible: _nowIndex==2,
+          visible: _nowIndex == 2,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

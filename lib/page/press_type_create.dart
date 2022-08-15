@@ -25,7 +25,7 @@ class _CreatePressTypeState extends State<CreatePressType> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             searchView(),
-            Expanded(child: ListInfoWidget()),
+            // Expanded(child: ListInfoWidget()),
           ],
         ),
       ),

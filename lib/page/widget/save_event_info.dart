@@ -277,7 +277,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
         SizedBox(width: 440.w),
         titleView(title),
         RadioGroupWidget(
-          list: const ['通报', '为通报'],
+          list: const ['通报', '未通报'],
           change: (int? value) {
             setState(() {
               _isSuperiorNotice = value! == 0;
@@ -468,6 +468,10 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
     if (description.isEmpty) {
       return toast('请输入事件问题描述');
     }
+    String author = loadText('author');
+    if (author.isEmpty) {
+      return toast('请输入事件问题描述');
+    }
     String publishTime = loadText('publishTime');
     if (publishTime.isEmpty) {
       return toast('请输入事件发布时间');
@@ -499,6 +503,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
       map['superiorNotificationTime'] = superiorNotificationTime;
     }
     map['description'] = description;
+    map['author'] = author;
     map['publishTime'] = publishTime;
     map['type'] = type;
     map['findTime'] = findTime;
@@ -529,7 +534,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
         final element = _fileView.list[i];
 
         arr.add(dio.MultipartFile.fromBytes(element.bytes!,
-            filename: 'file-${i + 1}${element.name!}'));
+            filename: 'file-${i + 1}${element.description!}'));
       }
       map['file'] = arr;
     }

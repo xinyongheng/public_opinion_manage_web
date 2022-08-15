@@ -105,10 +105,7 @@ class _LoginPageState extends State<LoginPage> {
                 ..._images,
                 TextButton(
                   onPressed: () {
-                    // requestLogin();
-                    Future.delayed(const Duration(minutes: 0), () {
-                      Config.startPage(context, DutyUnitHomePage(token: ''));
-                    });
+                    requestLogin();
                   },
                   style: TextButton.styleFrom(
                     primary: Colors.white,
@@ -229,7 +226,16 @@ class _LoginPageState extends State<LoginPage> {
           if (widget.comeFrom == UserUtil.reLogin) {
             Config.finishPage(context);
           } else {
-            Config.startPage(context, ManageHomePage(token: user.token!));
+            final int? type = user.data?.type;
+            if (null == type) {
+              showSuccessDialog("账号类型错误！");
+              return;
+            }
+            if (type == 1) {
+              Config.startPage(context, ManageHomePage(token: user.token!));
+            } else {
+              Config.startPage(context, DutyUnitHomePage(token: user.token!));
+            }
           }
         },
       );
