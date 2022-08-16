@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
+import 'package:public_opinion_manage_web/service/service.dart';
+import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 import 'dialog.dart';
 
-typedef ListCallback = void Function(List<String> list);
-void showDutyUnitDialog(context, {required ListCallback listCallback}) {
+// typedef ListCallback = void Function(List<String> list, String remark);
+void showDutyUnitDialog(context, eventId) {
   showDialog(
       context: context,
       builder: (context) {
@@ -22,18 +24,18 @@ void showDutyUnitDialog(context, {required ListCallback listCallback}) {
           titlePadding: EdgeInsets.only(top: 37.w, bottom: 17.w),
           content: SizedBox(
               width: 374.w,
-              child: DutyUnitWidget(width: 294.w, listCallback: listCallback)),
+              child: DutyUnitWidget(width: 294.w, eventId: eventId)),
         );
       });
 }
 
 class DutyUnitWidget extends StatefulWidget {
   final double width;
-  final ListCallback listCallback;
+  final int eventId;
   const DutyUnitWidget({
     Key? key,
     required this.width,
-    required this.listCallback,
+    required this.eventId,
   }) : super(key: key);
 
   @override
@@ -43,6 +45,7 @@ class DutyUnitWidget extends StatefulWidget {
 class _DutyUnitWidgetState extends State<DutyUnitWidget> {
   final dialoControllergMap = <String, TextEditingController>{};
   final TextEditingController remardController = TextEditingController();
+  String link = '';
   @override
   void initState() {
     _loadController(0);
@@ -128,10 +131,13 @@ class _DutyUnitWidgetState extends State<DutyUnitWidget> {
         SizedBox(height: 20.w),
         Center(
           child: TextButton(
-            onPressed: () {
-              makeLink();
-            },
+            onPressed: link.isEmpty
+                ? () {
+                    makeLink();
+                  }
+                : null,
             style: TextButton.styleFrom(
+              enableFeedback: true,
               primary: Colors.white,
               backgroundColor: Config.fontColorSelect,
               textStyle: Config.loadDefaultTextStyle(
@@ -179,9 +185,25 @@ class _DutyUnitWidgetState extends State<DutyUnitWidget> {
   void makeLink() {
     try {
       List<String> list = _checkUnit();
-      widget.listCallback.call(list);
+      askInternetDutyUnit(list, remardController.text);
     } catch (err) {
       toast((err as AssertionError).message.toString());
     }
+  }
+
+  void askInternetDutyUnit(List list, String remark) async {
+    String api = "/assignedDutyUnit";
+    final map = <String, dynamic>{};
+    map["userId"] = await UserUtil.getUserId();
+    map["eventId"] = widget.eventId;
+    map["dutyUnitList"] = list;
+    if (remark.isNotEmpty) {
+      map["manageRemark"] = remark;
+    }
+    ServiceHttp().post(api, data: map, success: (data) {
+      // setState(() {
+      //   link = data['linkPath'];
+      // });
+    });
   }
 }

@@ -4,6 +4,7 @@ import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/data/bean/user_bean.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
+import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/str_util.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
@@ -42,17 +43,19 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<String?>(
+      body: FutureBuilder<Map<String, dynamic>?>(
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
-              String? token = snapshot.data;
-              // InfoSaveUtil.save('account', '17600666716').then((value) => null);
-              if (snapshot.data?.isNotEmpty == true) {
+              Map<String, dynamic>? map = snapshot.data;
+              if (map != null) {
                 // 非空
-                // Config.startPage(context, SaveEventInfoWidget(token: token!));
-                //return SaveEventInfoWidget(token: token!);
-                return ManageHomePage(token: token!);
+                String token = map['token'];
+                int type = map['type'];
+                // 管理员
+                if (type == 1) return ManageHomePage(token: token);
+                // 非管理员
+                return DutyUnitHomePage(token: token);
               } else {
                 return loginRowView();
               }
@@ -129,12 +132,19 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<String?> loadToken() async {
+  Future<Map<String, dynamic>?> loadToken() async {
     if (widget.comeFrom == UserUtil.reLogin) {
       await UserUtil.clearUser();
       return null;
     }
-    return await UserUtil.getToken();
+    String? token = await UserUtil.getToken();
+    int? type = await UserUtil.getType();
+    if (DataUtil.isEmpty(token)) return null;
+    if (DataUtil.isEmpty(type)) return null;
+    Map<String, dynamic> map = {};
+    map['token'] = token;
+    map['type'] = type;
+    return map;
   }
 
   bool _isObscure = true;

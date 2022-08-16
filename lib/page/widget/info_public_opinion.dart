@@ -8,6 +8,7 @@ import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/duty_unit.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
+import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 ///舆情列表
@@ -45,7 +46,6 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
   @override
   void dispose() {
     super.dispose();
-    controllerMap.forEach((_, value) => value.dispose());
     controllerMap.forEach((_, value) => value.dispose());
   }
 
@@ -93,6 +93,7 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
             SizedBox(width: 45.w, height: 60.w),
             ListInfoWidget(
               canSelect: false,
+              type: 1,
               selectList: _list,
             ),
           ],
@@ -220,8 +221,9 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
 class ListInfoWidget extends StatefulWidget {
   final bool? canSelect;
   final List<PublicOpinionBean> selectList;
-
-  const ListInfoWidget({Key? key, this.canSelect, required this.selectList})
+  final int type;
+  const ListInfoWidget(
+      {Key? key, this.canSelect, required this.selectList, required this.type})
       : super(key: key);
 
   @override
@@ -392,8 +394,9 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
 
   Widget tableRowView(PublicOpinionBean bean, int indexNo) {
     bool tag = bean.leaderName == null;
-    String leaderInstructions =
-        tag ? '添加' : "${bean.leaderName}\n${bean.leaderInstructionsTime}";
+    String leaderInstructions = tag
+        ? (widget.type == 1 ? '添加' : "—")
+        : "${bean.leaderName}\n${bean.leaderInstructionsTime}";
     int index = bean.no!;
     final arr = [
       Container(
@@ -417,7 +420,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
           width: 8 * wordLength, index: index),
       childItemView(bean.type.toString(), '舆情类别',
           width: 6 * wordLength, index: index),
-      childItemView(bean.dutyUnit ?? '指定', '责任单位',
+      childItemView(dutyUnit(bean.dutyUnit) ?? '指定', '责任单位',
           width: 8 * wordLength, index: index),
       childItemView(bean.feedbackTime ?? "—", '反馈时间',
           width: 8 * wordLength, index: index),
@@ -450,6 +453,11 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
         children: arr,
       ),
     );
+  }
+
+  String? dutyUnit(String? units) {
+    if (DataUtil.isEmpty(units)) return null;
+    return units!.substring(1, units.length - 1);
   }
 
   Widget childItemView(String data, String tag,
@@ -498,6 +506,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
       case '报刊类型':
         break;
       case '领导批示':
+        toast('暂未开发');
         break;
       case '是否完结':
         break;
@@ -507,17 +516,6 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
   }
 
   void preDutyUnit(bean) {
-    showDutyUnitDialog(context, listCallback: (list) {
-      list.forEach((element) {});
-    });
-  }
-
-  void askInternetDutyUnit(PublicOpinionBean bean, list) async {
-    String api = "/assignedDutyUnit";
-    final map = <String, dynamic>{};
-    map["useId"] = await UserUtil.getUserId();
-    map["eventId"] = bean.id;
-    map["dutyUnit"] = list[0];
-    map["manageRemark"] = '';
+    showDutyUnitDialog(context, bean.id);
   }
 }

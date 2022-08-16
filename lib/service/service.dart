@@ -75,7 +75,7 @@ class ServiceHttp {
   void _handleRes(Response<dynamic> res, bool isData, SuccessCallback success,
       ErrorCallback? error) {
     int code = res.data['code'];
-    String message = res.data['message'];
+    String message = res.data['message'] ?? "未知错误";
     if (code != 200) {
       //  错误
       _handlerError(message, code, error);

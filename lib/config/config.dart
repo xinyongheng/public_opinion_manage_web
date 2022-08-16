@@ -8,7 +8,7 @@ import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 class Config {
   static final appBarTitleSize = 30.w;
-  static final firstSize = 27.sp;
+  static final firstSize = 26.w;
   static final secondSize = 21.w;
   static final defaultSize = 19.w;
   static const fontColorSelect = Color(0xFF3E7BFA);

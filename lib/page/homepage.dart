@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
+import 'package:public_opinion_manage_web/page/widget/duty_unit_info_list.dart';
 import 'package:public_opinion_manage_web/page/widget/save_event_info.dart';
+import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 import 'widget/history_press_file.dart';
 import 'widget/info_public_opinion.dart';
@@ -354,18 +356,19 @@ class _DutyUnitHomePageState extends State<DutyUnitHomePage> {
 
   final Color lineColor = Colors.grey;
   final arr = ['全部信息', '未处理', '已处理'];
-
+  String unit = "";
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     pages = [
-      Text('全部消息'),
+      DutyUnitInfoListWidget(),
       Text('未处理'),
       Text('通过'),
       Text('未通过'),
       Text('待审核'),
     ];
+    UserUtil.getUnit().then((value) => setState(() => unit = value));
   }
 
   @override
@@ -458,7 +461,7 @@ class _DutyUnitHomePageState extends State<DutyUnitHomePage> {
           ),
         ),
         SizedBox(width: 20.w),
-        Text('单位名称', style: Config.loadDefaultTextStyle()),
+        Text(unit, style: Config.loadDefaultTextStyle()),
         SizedBox(width: 32.w),
       ],
     );

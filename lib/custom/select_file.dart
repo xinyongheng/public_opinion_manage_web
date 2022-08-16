@@ -126,7 +126,7 @@ class _FileListWidgetState extends State<FileListWidget> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item.description,
+                  Text(item.name,
                       style: Config.loadDefaultTextStyle(
                           color: const Color(0xFF333333), fonstSize: 19.w)),
                   Text("${formatNum(item.size / 1204, 1)}K",

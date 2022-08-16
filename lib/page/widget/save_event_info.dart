@@ -7,6 +7,7 @@ import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/radio_group.dart';
 import 'package:public_opinion_manage_web/custom/select_file.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
+import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 class SaveEventInfoWidget extends StatefulWidget {
   final String token;
@@ -463,7 +464,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
     return s;
   }
 
-  saveEventInfo() {
+  saveEventInfo() async {
     String description = loadText('description');
     if (description.isEmpty) {
       return toast('请输入事件问题描述');
@@ -509,6 +510,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
     map['findTime'] = findTime;
     map['link'] = link;
     map['mediaType'] = mediaType;
+    map['userId'] = await UserUtil.getUserId();
     if (linkOther != ',') {
       map['linkOther'] = linkOther;
     }
@@ -534,7 +536,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
         final element = _fileView.list[i];
 
         arr.add(dio.MultipartFile.fromBytes(element.bytes!,
-            filename: 'file-${i + 1}${element.description!}'));
+            filename: 'file-${i + 1}${element.name!}'));
       }
       map['file'] = arr;
     }
