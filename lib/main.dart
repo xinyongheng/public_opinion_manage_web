@@ -17,14 +17,14 @@ void main() {
   String? info;
   if (kIsWeb) {
     var uri = Uri.dataFromString(window.location.href);
-    // print("path=" + uri.path);
-    // print(uri.pathSegments);
+    print("path=" + uri.path);
+    print(uri.pathSegments);
     if (uri.pathSegments.isNotEmpty &&
         uri.pathSegments.last == 'loadDisposeEvent') {
       var qp = uri.queryParameters;
       //获取参娄数ID，或你要找的参数
       info = qp['info'];
-      // print(info);
+      print(info);
     }
   }
   runApp(MyApp(value: info));

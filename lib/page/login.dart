@@ -139,8 +139,12 @@ class _LoginPageState extends State<LoginPage> {
     }
     String? token = await UserUtil.getToken();
     int? type = await UserUtil.getType();
-    if (DataUtil.isEmpty(token)) return null;
-    if (DataUtil.isEmpty(type)) return null;
+    if (DataUtil.isEmpty(token)) {
+      return null;
+    }
+    if (DataUtil.isEmpty(type)) {
+      return null;
+    }
     Map<String, dynamic> map = {};
     map['token'] = token;
     map['type'] = type;

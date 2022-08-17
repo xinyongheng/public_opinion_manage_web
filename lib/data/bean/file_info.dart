@@ -32,7 +32,7 @@ class FileInfoBean {
     }
   }
 
-  String fileType(String name) {
+  static String fileType(String name) {
     int pointIndex = name.lastIndexOf('.');
     String endString;
     if (pointIndex > -1) {

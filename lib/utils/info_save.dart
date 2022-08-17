@@ -11,7 +11,7 @@ class DataUtil {
       case Map:
         return (data! as Map).isEmpty;
       default:
-        return true;
+        return false;
     }
   }
 }
