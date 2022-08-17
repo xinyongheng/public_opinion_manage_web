@@ -32,6 +32,11 @@ class FileListWidget extends StatelessWidget {
 
   Widget fileView(String path, String name) {
     String type = FileInfoBean.fileType(path);
+    int pointIndex = path.lastIndexOf('.');
+    String endString = "";
+    if (pointIndex > -1) {
+      endString = name.substring(pointIndex);
+    }
     Widget image;
     if (type == "image") {
       image = Image.network("${ServiceHttp.parentUrl}/$path");
@@ -52,7 +57,7 @@ class FileListWidget extends StatelessWidget {
         SizedBox(
           width: 107.w,
           child: Text(
-            "$name.png",
+            "$name$endString",
             style: Config.loadDefaultTextStyle(
               fontWeight: FontWeight.w400,
               color: Config.fontColorSelect,

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/file_list_view.dart';
+import 'package:public_opinion_manage_web/custom/triangle.dart';
 import 'package:public_opinion_manage_web/data/bean/user_bean.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/info_save.dart';
@@ -20,9 +21,11 @@ class LoadDisposeEventPage extends StatefulWidget {
 class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
   final TextEditingController _controller1 = TextEditingController();
   final TextEditingController _controller2 = TextEditingController();
+  final TextEditingController _controller3 = TextEditingController();
   Map eventInfo = {};
+  Map disposeEvent = {};
   List? files;
-
+  List<Map>? disposeEventUnitMappingList;
   @override
   void initState() {
     super.initState();
@@ -61,6 +64,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
     super.dispose();
     _controller1.dispose();
     _controller2.dispose();
+    _controller3.dispose();
   }
 
 // loadDisposeEvent?info=
@@ -116,8 +120,15 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
                               ? childItem("原文图文信息：", '')
                               : fileItem("原文图文信息：", files!),
                           childItem("媒体类型：", eventInfo['link'] ?? ''),
-                          childItem("媒体类型：", eventInfo['link'] ?? ''),
-                          childItem("媒体类型：", eventInfo['link'] ?? ''),
+                          childItem("发布时间：", eventInfo['publishTime'] ?? ''),
+                          childItem("舆情类别：", eventInfo['type'] ?? ''),
+                          childItem("发现时间：", eventInfo['findTime'] ?? ''),
+                          ...superiorNotificationView(
+                              eventInfo['superiorNotificationTime']),
+                          childItem("处理内容：", eventInfo['link'] ?? ''),
+                          childItem(
+                              "管理员指定单位备注：", disposeEvent['manageRemark'] ?? ''),
+                          dutyContent(),
                         ],
                       ),
                     )
@@ -125,6 +136,137 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
                 ),
               ),
             ),
+    );
+  }
+
+  List<Widget> historyDuty() {
+    if (DataUtil.isEmpty(disposeEventUnitMappingList)) {
+      return <Widget>[];
+    }
+    // 从小到大排序
+    disposeEventUnitMappingList!
+        .sort((a, b) => a['rank']!.compareTo(b['rank']!));
+    final arr = [];
+    //最终状态
+    final finalPassState = disposeEventUnitMappingList!.last['passState'];
+    disposeEventUnitMappingList!.forEach((element) {
+      //通过、未通过、待审核、未处理
+      String passState = element['passState']!;
+      if (passState != '未处理') {}
+    });
+    return [];
+  }
+
+  Widget historyDutyItem(String passState, String date, String content) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        titleView(date),
+        SizedBox(height: 30.w),
+        childItem("处理内容：", eventInfo['link'] ?? ''),
+      ],
+    );
+  }
+
+  Widget lineView() =>
+      Container(width: 4.w, height: 31.w, color: const Color(0xFF3E7BFA));
+
+  Widget titleView(data) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        lineView(),
+        SizedBox(width: 4.w),
+        TriangleWidget(
+            color: const Color(0xFF0DDDBB), width: 7.w, height: 12.w),
+        SizedBox(width: 6.w),
+        Text("审核日期：$data",
+            style: Config.loadDefaultTextStyle(
+                fonstSize: 20.w, fontWeight: FontWeight.w500)),
+      ],
+    );
+  }
+
+  Widget dutyContent() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '处理内容：',
+          style: Config.loadDefaultTextStyle(
+            color: Colors.black.withOpacity(0.85),
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 642,
+              child: TextField(
+                controller: _controller3,
+                maxLines: 6,
+                minLines: 6,
+                decoration: Config.defaultInputDecoration(hintText: '请输入处理内容'),
+              ),
+            ),
+            SizedBox(height: 23.w),
+            TextButton(
+              onPressed: () {
+                requestCommitDutyContent(_controller3.text);
+              },
+              style: TextButton.styleFrom(
+                primary: Colors.white,
+                backgroundColor: Config.fontColorSelect,
+                textStyle:
+                    Config.loadDefaultTextStyle(fontWeight: FontWeight.w400),
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.w),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5.w)),
+              ),
+              child: const Text('提交'),
+            ),
+          ],
+        )
+      ],
+    );
+  }
+
+  List<Widget> superiorNotificationView(String? superiorNotificationTime) {
+    if (DataUtil.isEmpty(superiorNotificationTime)) {
+      return [
+        superiorNotificationChildView('未通报'),
+        SizedBox(height: 46.w),
+      ];
+    } else {
+      return [
+        superiorNotificationChildView('未通报'),
+        SizedBox(height: 46.w),
+        childItem('通报时间：', superiorNotificationTime!),
+      ];
+    }
+  }
+
+  Widget superiorNotificationChildView(String data) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '上级是否通报：',
+          style: Config.loadDefaultTextStyle(
+            color: Colors.black.withOpacity(0.85),
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        const Radio(value: 1, groupValue: 1, onChanged: null),
+        Text(
+          data,
+          style: Config.loadDefaultTextStyle(
+            color: Colors.black.withOpacity(0.85),
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ],
     );
   }
 
@@ -322,5 +464,14 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
         toast(e.toString());
       }
     }
+  }
+
+  ///提交处理内容
+  void requestCommitDutyContent(String text) async {
+    ServiceHttp().post('', data: {
+      "content": text,
+    }, success: (data) {
+      print(data);
+    });
   }
 }

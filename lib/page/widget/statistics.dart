@@ -71,7 +71,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         SizedBox(width: 6.w),
         Text(data,
             style: Config.loadDefaultTextStyle(
-                fonstSize: 21.sp, fontWeight: FontWeight.w500)),
+                fonstSize: 21.w, fontWeight: FontWeight.w500)),
       ],
     );
   }
@@ -326,7 +326,8 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
       ],
     );
   }
-  Widget unitOpinionView(){
+
+  Widget unitOpinionView() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -341,6 +342,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
       ],
     );
   }
+
   List<Widget> unitOpinionViewItem(Color color, String data) {
     return [
       Container(
