@@ -70,13 +70,16 @@ class FileListWidget extends StatefulWidget {
   final double? width;
   final double? height;
   final List<String>? allowedExtensions;
+  final int? maxSize;
   FileListWidget({
     Key? key,
     this.explain = '支持上传图片，视频，word的doc，excel以及文本txt',
     this.width,
     this.height,
     this.allowedExtensions,
-  }) : super(key: key);
+    this.maxSize,
+  })  : assert(maxSize == null || maxSize > 0),
+        super(key: key);
 
   @override
   State<FileListWidget> createState() => _FileListWidgetState();

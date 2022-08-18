@@ -60,17 +60,21 @@ showCenterNoticeDialog(BuildContext context,
     String? title,
     String? contentString,
     GestureTapCallback? onPress,
+    bool isNeedTitle = true,
+    bool isNeedActions = true,
     bool barrierDismissible = true}) {
   showDialog(
     context: context,
     barrierDismissible: barrierDismissible,
     builder: (content) => AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.sp)),
-      title: Center(
-          child: Text(
-        title ?? '温馨提示',
-        style: Config.loadFirstTextStyle(),
-      )),
+      title: isNeedTitle
+          ? Center(
+              child: Text(
+              title ?? '温馨提示',
+              style: Config.loadFirstTextStyle(),
+            ))
+          : null,
       content: contentWidget ??
           Container(
             width: 400.w,
@@ -83,32 +87,34 @@ showCenterNoticeDialog(BuildContext context,
             ),
           ),
       actionsAlignment: MainAxisAlignment.center,
-      actions: [
-        TextButton(
-          child: Text(
-            "取消",
-            style: Config.loadDefaultTextStyle(color: null),
-          ),
-          onPressed: () {
-            // 关闭 返回 false
-            Navigator.of(context).pop(false);
-          },
-        ),
-        SizedBox(width: 45.sp),
-        // Container(width: 1,color: Colors.grey,height: 30.sp),
-        SizedBox(width: 45.sp),
-        TextButton(
-          child: Text(
-            "确定",
-            style: Config.loadDefaultTextStyle(color: null),
-          ),
-          onPressed: () {
-            //关闭 返回true
-            Navigator.of(context).pop(true);
-            onPress?.call();
-          },
-        ),
-      ],
+      actions: isNeedActions
+          ? [
+              TextButton(
+                child: Text(
+                  "取消",
+                  style: Config.loadDefaultTextStyle(color: null),
+                ),
+                onPressed: () {
+                  // 关闭 返回 false
+                  Navigator.of(context).pop(false);
+                },
+              ),
+              SizedBox(width: 45.sp),
+              // Container(width: 1,color: Colors.grey,height: 30.sp),
+              SizedBox(width: 45.sp),
+              TextButton(
+                child: Text(
+                  "确定",
+                  style: Config.loadDefaultTextStyle(color: null),
+                ),
+                onPressed: () {
+                  //关闭 返回true
+                  Navigator.of(context).pop(true);
+                  onPress?.call();
+                },
+              ),
+            ]
+          : null,
     ),
   );
 }

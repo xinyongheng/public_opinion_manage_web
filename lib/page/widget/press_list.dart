@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
+import 'package:public_opinion_manage_web/custom/add_press_word_file.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
+import 'package:dio/dio.dart' as dio;
 
 class PressListWidget extends StatefulWidget {
   const PressListWidget({Key? key}) : super(key: key);
@@ -225,8 +227,18 @@ class _PressListWidgetState extends State<PressListWidget> {
         tableChildView(listViewItemText(item['title']), 370.w),
         tableChildView(listViewItemText(item['pressType']), 190.w), //63
         tableChildView(listViewItemText(item['utime']), 402.w), //169
-        tableChildView(listViewItemText('查看'), 84.w), //26
-        tableChildView(listViewItemText('添加'), 294.w),
+        InkWell(
+            onTap: () {
+              clickPress(item['id']);
+            },
+            child: tableChildView(listViewItemText('查看'), 84.w)), //26
+        InkWell(
+            onTap: () {
+              clickFile(item['file'], item['id']);
+            },
+            child: tableChildView(
+                listViewItemText(DataUtil.isEmpty(item['file']) ? '添加' : '查看'),
+                294.w)),
       ],
     );
   }
@@ -279,5 +291,48 @@ class _PressListWidgetState extends State<PressListWidget> {
       map['filter'] = filter;
     }
     ServiceHttp().post('/pressList', data: map, success: (data) {});
+  }
+
+  void clickPress(id) {
+    // Config.startPage(context, page);
+  }
+
+  void clickFile(file, id) {
+    if (null == file) {
+      showAddFileDialog(id);
+    } else {
+      Config.launch('${ServiceHttp.parentUrl}/${file['path']}');
+    }
+  }
+
+  void showAddFileDialog(id) {
+    showCenterNoticeDialog(
+      context,
+      isNeedTitle: false,
+      isNeedActions: false,
+      barrierDismissible: false,
+      contentWidget: AddPressWordFileWidget(
+        uploadFileCallback: (fileInfoBean, desprice) {
+          uploadFile(fileInfoBean, desprice, id);
+        },
+      ),
+    );
+  }
+
+  void uploadFile(fileInfoBean, desprice, id) async {
+    final Map<String, dynamic> map = <String, dynamic>{};
+    map['userId'] = await UserUtil.getUserId();
+    map['description'] = desprice;
+    map['pressId'] = id;
+    final list = [];
+    list.add(dio.MultipartFile.fromBytes(fileInfoBean.bytes!,
+        filename: fileInfoBean.name!));
+    map['file'] = list;
+    ServiceHttp().post('/addPressFile', data: map, success: (data) {
+      showSuccessDialog('上传成功', dialogDismiss: () {
+        //关闭上传弹窗
+        Config.finishPage(context);
+      });
+    });
   }
 }

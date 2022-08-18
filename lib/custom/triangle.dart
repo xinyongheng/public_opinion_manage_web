@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+///三角形，箭头→
 class TriangleWidget extends StatelessWidget {
   final double width;
   final double height;
