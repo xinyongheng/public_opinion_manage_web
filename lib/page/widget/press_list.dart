@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
+import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/info_save.dart';
+import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 class PressListWidget extends StatefulWidget {
   const PressListWidget({Key? key}) : super(key: key);
@@ -268,5 +270,14 @@ class _PressListWidgetState extends State<PressListWidget> {
       toast('请输入筛选条件');
       return;
     }
+  }
+
+  void loadList(String filter) async {
+    final Map<String, dynamic> map = <String, dynamic>{};
+    map['userId'] = await UserUtil.getUserId();
+    if (!DataUtil.isEmpty(filter)) {
+      map['filter'] = filter;
+    }
+    ServiceHttp().post('/pressList', data: map, success: (data) {});
   }
 }

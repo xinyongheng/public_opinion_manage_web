@@ -10,6 +10,7 @@ import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/str_util.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
+////loadDisposeEvent?info=4O5%2FEaiGr42KlnPoWWI%2FO3I8uu9x6T8h08dYMm%2FUJFOqKqKdPK7Q%2BBtrlSgRlihiKGrTagmMDogvLDP4eE%2FTUA%3D%3D
 class LoadDisposeEventPage extends StatefulWidget {
   final String? info;
   const LoadDisposeEventPage({Key? key, required this.info}) : super(key: key);
@@ -128,7 +129,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
                           childItem("处理内容：", eventInfo['link'] ?? ''),
                           childItem(
                               "管理员指定单位备注：", disposeEvent['manageRemark'] ?? ''),
-                          dutyContent(),
+                          // dutyContent(),
                         ],
                       ),
                     )
@@ -146,26 +147,98 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
     // 从小到大排序
     disposeEventUnitMappingList!
         .sort((a, b) => a['rank']!.compareTo(b['rank']!));
+    final length = disposeEventUnitMappingList!.length;
+
     final arr = [];
+    final lastMap = disposeEventUnitMappingList!.last;
     //最终状态
-    final finalPassState = disposeEventUnitMappingList!.last['passState'];
-    disposeEventUnitMappingList!.forEach((element) {
-      //通过、未通过、待审核、未处理
-      String passState = element['passState']!;
-      if (passState != '未处理') {}
-    });
-    return [];
+    final finalPassState = lastMap['passState'];
+
+    final list = <Widget>[];
+    if (length > 1) {
+      // 不添加: 处理内容，仅展示
+      for (var i = 0; i < length - 1; i++) {
+        Map element = disposeEventUnitMappingList![i];
+        //通过、未通过、待审核、未处理
+        final passState = element['passState'];
+        final auditDate = element['utime'];
+        final feedbackDate = element['time'];
+        final reason = element['reason'];
+        final content = element['content'];
+        list.add(historyDutyItem(
+            passState, auditDate, feedbackDate, reason, content));
+      }
+    }
+    var endList = <Widget>[];
+    if (finalPassState == '未处理') endList = [dutyContent()];
+    if (finalPassState == '待审核') {
+      endList = [childItem('处理内容', lastMap['content'] ?? "")];
+    }
+    if (finalPassState == '通过') {
+      endList = [
+        ...auditTitle(lastMap['utime'], finalPassState),
+        childItem("处理内容：\n(${lastMap['time']})", lastMap['content']),
+      ];
+    } else {
+      endList = [
+        historyDutyItem(finalPassState, lastMap['utime'], lastMap['time'],
+            lastMap['reason'], lastMap['content'])
+      ];
+    }
+    return [
+      ...list,
+      ...endList,
+    ];
   }
 
-  Widget historyDutyItem(String passState, String date, String content) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        titleView(date),
-        SizedBox(height: 30.w),
-        childItem("处理内容：", eventInfo['link'] ?? ''),
-      ],
+  Widget historyDutyItem(String passState, String auditDate,
+      String feedbackDate, String reason, String content) {
+    return SizedBox(
+      width: 744.w,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ...auditTitle(auditDate, passState),
+          childItem("不通过原因：", reason),
+          childItem("处理内容：\n($feedbackDate)", content,
+              textAlign: TextAlign.right),
+        ],
+      ),
     );
+  }
+
+  List<Widget> auditTitle(auditDate, passState) {
+    return [
+      titleView(auditDate),
+      SizedBox(height: 30.w),
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(width: 32.w),
+          Text(
+            '审核：',
+            style: Config.loadDefaultTextStyle(
+              color: Colors.black.withOpacity(0.85),
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          Radio(value: 1, groupValue: 1, onChanged: (v) {}),
+          Text(
+            passText(passState),
+            style: Config.loadDefaultTextStyle(
+              color: Colors.black.withOpacity(0.85),
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          const Spacer(),
+        ],
+      )
+    ];
+  }
+
+  String passText(String passState) {
+    if (passState == '完成') return '通过';
+    return passState;
   }
 
   Widget lineView() =>
@@ -266,6 +339,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
             fontWeight: FontWeight.w400,
           ),
         ),
+        SizedBox(width: 504.w),
       ],
     );
   }
@@ -281,7 +355,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
             fontWeight: FontWeight.w400,
           ),
         ),
-        FileListWidget(
+        ShowFileListWidget(
           list: list,
           width: 624.w,
         ),
@@ -289,36 +363,46 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
     );
   }
 
-  Widget childItem(String data, String content, {double? bottom}) {
+  Widget childItem(String data, String content,
+      {double? bottom, TextAlign textAlign = TextAlign.left}) {
     return Padding(
       padding: EdgeInsets.only(bottom: bottom ?? 46.w),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            data,
-            style: Config.loadDefaultTextStyle(
-              color: Colors.black.withOpacity(0.85),
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-          Container(
-            width: 624.w,
-            padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 12.w),
-            decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFFD9D9D9)),
-              borderRadius: BorderRadius.circular(5.w),
-            ),
-            child: Text(
-              content,
-              style: Config.loadDefaultTextStyle(
-                color: Colors.black.withOpacity(0.65),
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ),
+          bordContentTitle(data, textAlign),
+          bordContent(content),
         ],
+      ),
+    );
+  }
+
+  Text bordContentTitle(String data, TextAlign textAlign) {
+    return Text(
+      data,
+      style: Config.loadDefaultTextStyle(
+        color: Colors.black.withOpacity(0.85),
+        fontWeight: FontWeight.w400,
+      ),
+      textAlign: TextAlign.left,
+    );
+  }
+
+  Container bordContent(String content) {
+    return Container(
+      width: 624.w,
+      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 12.w),
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFFD9D9D9)),
+        borderRadius: BorderRadius.circular(5.w),
+      ),
+      child: Text(
+        content,
+        style: Config.loadDefaultTextStyle(
+          color: Colors.black.withOpacity(0.65),
+          fontWeight: FontWeight.w400,
+        ),
       ),
     );
   }

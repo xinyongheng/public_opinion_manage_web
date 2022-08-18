@@ -59,9 +59,11 @@ showCenterNoticeDialog(BuildContext context,
     {Widget? contentWidget,
     String? title,
     String? contentString,
-    GestureTapCallback? onPress}) {
+    GestureTapCallback? onPress,
+    bool barrierDismissible = true}) {
   showDialog(
     context: context,
+    barrierDismissible: barrierDismissible,
     builder: (content) => AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.sp)),
       title: Center(

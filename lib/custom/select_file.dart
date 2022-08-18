@@ -7,16 +7,26 @@ import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/data/bean/file_info.dart';
 import 'package:public_opinion_manage_web/utils/str_util.dart';
 
+///添加本地文件
 class AddFileWidget extends StatelessWidget {
   final VoidCallback onPressed;
-  const AddFileWidget({Key? key, required this.onPressed}) : super(key: key);
+  final String explain;
+  final double width;
+  final double height;
+  const AddFileWidget({
+    Key? key,
+    required this.onPressed,
+    required this.explain,
+    required this.width,
+    required this.height,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     // AspectRatio(aspectRatio: null,);
     return Container(
-      width: 624.w,
-      height: 245.w,
+      width: width,
+      height: height,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: Colors.white,
@@ -38,15 +48,15 @@ class AddFileWidget extends StatelessWidget {
             style: TextButton.styleFrom(
               primary: Config.fontColorSelect,
               backgroundColor: Colors.white,
-              fixedSize: Size(150.sp, 44.sp),
+              fixedSize: Size(150.w, 44.w),
               padding: EdgeInsets.zero,
               textStyle: Config.loadDefaultTextStyle(),
             ),
             child: const Text('点击上传文件'),
           ),
           Text(
-            '支持上传图片，视频，word的doc，excel以及文本txt',
-            style: Config.loadDefaultTextStyle(fonstSize: 16.sp),
+            explain,
+            style: Config.loadDefaultTextStyle(fonstSize: 16.w),
           )
         ],
       ),
@@ -55,9 +65,18 @@ class AddFileWidget extends StatelessWidget {
 }
 
 class FileListWidget extends StatefulWidget {
-  final List list = <FileInfoBean>[];
-
-  FileListWidget({Key? key}) : super(key: key);
+  final List<FileInfoBean> list = <FileInfoBean>[];
+  final String explain;
+  final double? width;
+  final double? height;
+  final List<String>? allowedExtensions;
+  FileListWidget({
+    Key? key,
+    this.explain = '支持上传图片，视频，word的doc，excel以及文本txt',
+    this.width,
+    this.height,
+    this.allowedExtensions,
+  }) : super(key: key);
 
   @override
   State<FileListWidget> createState() => _FileListWidgetState();
@@ -68,9 +87,14 @@ class _FileListWidgetState extends State<FileListWidget> {
   @override
   Widget build(BuildContext context) {
     return widget.list.isEmpty
-        ? AddFileWidget(onPressed: () {
-            addSelectFile();
-          })
+        ? AddFileWidget(
+            onPressed: () {
+              addSelectFile();
+            },
+            explain: widget.explain,
+            width: widget.width ?? 624.w,
+            height: widget.height ?? 245.w,
+          )
         : listFileView();
   }
 
@@ -79,8 +103,8 @@ class _FileListWidgetState extends State<FileListWidget> {
       width: 689.w,
       child: ListView.separated(
         separatorBuilder: (context, index) => Divider(
-          height: 37.sp,
-          thickness: 37.sp,
+          height: 37.w,
+          thickness: 37.w,
           color: Colors.transparent,
         ),
         shrinkWrap: true,
@@ -91,7 +115,7 @@ class _FileListWidgetState extends State<FileListWidget> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Icon(Icons.add, size: 25.sp, color: Config.fontColorSelect),
+                Icon(Icons.add, size: 25.w, color: Config.fontColorSelect),
                 // SizedBox(width: 5.sp),
                 TextButton(
                   onPressed: () {
@@ -100,7 +124,7 @@ class _FileListWidgetState extends State<FileListWidget> {
                   style: TextButton.styleFrom(
                     primary: Config.fontColorSelect,
                     backgroundColor: Colors.white,
-                    fixedSize: Size(80.sp, 29.sp),
+                    fixedSize: Size(80.w, 29.w),
                     padding: EdgeInsets.zero,
                     textStyle: Config.loadDefaultTextStyle(),
                   ),
@@ -126,10 +150,10 @@ class _FileListWidgetState extends State<FileListWidget> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item.name,
+                  Text(item.name!,
                       style: Config.loadDefaultTextStyle(
                           color: const Color(0xFF333333), fonstSize: 19.w)),
-                  Text("${formatNum(item.size / 1204, 1)}K",
+                  Text("${formatNum(item.size! / 1204, 1)}K",
                       style: Config.loadDefaultTextStyle(
                           color: const Color(0xFF333333), fonstSize: 19.w)),
                 ],
@@ -142,7 +166,7 @@ class _FileListWidgetState extends State<FileListWidget> {
                 style: TextButton.styleFrom(
                   primary: Config.fontColorSelect,
                   backgroundColor: Colors.white,
-                  fixedSize: Size(40.sp, 29.sp),
+                  fixedSize: Size(40.w, 29.w),
                   padding: EdgeInsets.zero,
                   textStyle: Config.loadDefaultTextStyle(),
                 ),
@@ -197,7 +221,8 @@ class _FileListWidgetState extends State<FileListWidget> {
   }
 
   void addSelectFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+        allowedExtensions: widget.allowedExtensions, type: FileType.custom);
     if (result != null && result.files.isNotEmpty) {
       if (kIsWeb) {
         // html.File file = html.File();

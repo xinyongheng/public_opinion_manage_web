@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:public_opinion_manage_web/main.dart';
 import 'package:public_opinion_manage_web/page/login.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Config {
   static final appBarTitleSize = 30.w;
@@ -177,5 +178,12 @@ class Config {
         // errorText: '错误',
       ),
     );
+  }
+
+  static void launch(String urlPath) async {
+    final Uri _uri = Uri.parse(urlPath);
+    if (!await launchUrl(_uri)) {
+      throw 'Could not launch $_uri';
+    }
   }
 }

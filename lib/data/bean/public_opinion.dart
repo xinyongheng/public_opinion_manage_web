@@ -47,7 +47,8 @@ class PublicOpinionBean {
 
   // 是否完结 0否1是
   int? isComplete = 0;
-
+  //此事件综合（多单位）处理状态；通过（完成）、未通过、待审核、未处理
+  String? passState;
   PublicOpinionBean.build(
     this.description,
     this.author,
@@ -67,6 +68,7 @@ class PublicOpinionBean {
     this.leaderInstructionsTime,
     this.leaderName,
     this.isComplete,
+    this.passState,
   });
 
   PublicOpinionBean.fromJson(Map<String, dynamic> json) {
@@ -90,6 +92,7 @@ class PublicOpinionBean {
     isLateReport = json['isLateReport'];
     dutyUnit = json['dutyUnit'];
     isComplete = json['isComplete'];
+    passState = json['passState'];
   }
 
   static List<PublicOpinionBean> fromJsonArray(List data) {
@@ -104,7 +107,7 @@ class PublicOpinionBean {
   }
 
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> data = new Map<String, dynamic>();
+    Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['author'] = author;
     data['description'] = description;
@@ -125,6 +128,7 @@ class PublicOpinionBean {
     data['isLateReport'] = isLateReport;
     data['dutyUnit'] = dutyUnit;
     data['isComplete'] = isComplete;
+    data['passState'] = passState;
     return data;
   }
 

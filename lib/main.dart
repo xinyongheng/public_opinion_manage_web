@@ -11,7 +11,7 @@ import 'dart:html';
 
 import 'package:public_opinion_manage_web/utils/info_save.dart';
 
-import 'page/load_dispose_event.dart';
+import 'page/widget/load_dispose_event.dart';
 
 void main() {
   String? info;

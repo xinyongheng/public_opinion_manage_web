@@ -4,10 +4,10 @@ import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/data/bean/file_info.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 
-class FileListWidget extends StatelessWidget {
+class ShowFileListWidget extends StatelessWidget {
   final double width;
   final List list;
-  const FileListWidget({Key? key, required this.width, required this.list})
+  const ShowFileListWidget({Key? key, required this.width, required this.list})
       : super(key: key);
 
   @override
@@ -38,8 +38,9 @@ class FileListWidget extends StatelessWidget {
       endString = name.substring(pointIndex);
     }
     Widget image;
+    final urlPath = "${ServiceHttp.parentUrl}/$path";
     if (type == "image") {
-      image = Image.network("${ServiceHttp.parentUrl}/$path");
+      image = Image.network(urlPath);
     } else {
       image = Image.asset("images/ic_xls.png");
     }
@@ -51,7 +52,12 @@ class FileListWidget extends StatelessWidget {
           height: 43.w,
           color: Colors.grey,
           alignment: Alignment.center,
-          child: image,
+          child: InkWell(
+            onTap: () {
+              Config.launch(urlPath);
+            },
+            child: image,
+          ),
         ),
         SizedBox(width: 11.w),
         SizedBox(

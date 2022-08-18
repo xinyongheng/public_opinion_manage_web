@@ -518,6 +518,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
       map['mediaTypeOther'] = mediaTypeOther;
     }
     if (_fileView.list.isEmpty) {
+      if (!mounted) return;
       showCenterNoticeDialog(
         context,
         title: '温馨提示',
