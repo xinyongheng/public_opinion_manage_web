@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 
+typedef CheckBoxChange = Function(bool value, dynamic tag);
+
 class CheckBoxWidget extends StatefulWidget {
   bool value;
   final dynamic boxTag;
-  CheckBoxWidget({Key? key, required this.value, required this.boxTag})
+  final CheckBoxChange onChanged;
+  CheckBoxWidget(
+      {Key? key,
+      required this.value,
+      required this.boxTag,
+      required this.onChanged})
       : super(key: key);
 
   @override
@@ -23,10 +30,10 @@ class _CheckBoxWidgetState extends State<CheckBoxWidget> {
     return Checkbox(
         value: _value,
         onChanged: (change) {
-          setState(() {
-            _value = change ?? false;
-            widget.value = _value;
-          });
+          setState(() {});
+          widget.value = _value;
+          _value = change ?? false;
+          widget.onChanged(_value, widget.boxTag);
         });
   }
 }

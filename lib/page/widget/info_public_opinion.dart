@@ -222,10 +222,15 @@ class ListInfoWidget extends StatefulWidget {
   final bool? canSelect;
   final List<PublicOpinionBean> selectList;
   final int type;
-  const ListInfoWidget(
-      {Key? key, this.canSelect, required this.selectList, required this.type})
-      : super(key: key);
-
+  final List<PublicOpinionBean> hadSelectList = [];
+  final CheckBoxChange? onChange;
+  ListInfoWidget({
+    Key? key,
+    this.canSelect,
+    required this.selectList,
+    required this.type,
+    this.onChange,
+  }) : super(key: key);
   @override
   State<ListInfoWidget> createState() => _ListInfoWidgetState();
 }
@@ -237,6 +242,13 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
   final _physics = const NeverScrollableScrollPhysics();
   final ScrollController _scrollController = ScrollController();
   bool _slideLeftTag = false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    widget.hadSelectList.clear();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -308,12 +320,8 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
       SizedBox(
         width: 40.sp,
         height: 30.sp,
-        child: Center(
-          child: InkWell(
-              onTap: () {
-                print('asdf');
-              },
-              child: const Text('选择')),
+        child: const Center(
+          child: InkWell(onTap: null, child: Text('选择')),
         ),
       ),
       childItemView('序号', '',
@@ -404,9 +412,16 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
         height: 30.sp,
         alignment: Alignment.center,
         child: CheckBoxWidget(
-          boxTag: bean.no!,
-          value: false,
-          // onChanged: (bool? value) {},
+          boxTag: indexNo,
+          value: widget.hadSelectList.contains(widget.selectList[indexNo - 1]),
+          onChanged: (value, tag) {
+            if (value) {
+              widget.hadSelectList.add(widget.selectList[tag as int]);
+            } else {
+              widget.hadSelectList.remove(widget.selectList[tag as int]);
+            }
+            widget.onChange?.call(value, widget.hadSelectList);
+          },
         ),
       ),
       childItemView("$indexNo", '序号', width: 4 * wordLength, index: index),

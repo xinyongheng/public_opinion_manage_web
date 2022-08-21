@@ -1,7 +1,10 @@
+import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
+import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
+import 'package:public_opinion_manage_web/page/widget/info_public_opinion.dart';
 
 class PressPage extends StatelessWidget {
   final String pressType;
@@ -49,6 +52,8 @@ class PressHeadWidget extends StatefulWidget {
 class _PressHeadWidgetState extends State<PressHeadWidget> {
   final map = <String, TextEditingController>{};
   late TapGestureRecognizer _tapGestureRecognizer;
+  final selectList = <PublicOpinionBean>[];
+  List<PublicOpinionBean>? _allList;
   @override
   void initState() {
     // TODO: implement initState
@@ -56,8 +61,19 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
     _tapGestureRecognizer = TapGestureRecognizer()..onTap = _resetSelect;
   }
 
+  ListInfoWidget? _listInfoWidget;
   @override
   Widget build(BuildContext context) {
+    _listInfoWidget = ListInfoWidget(
+      canSelect: true,
+      type: 1,
+      selectList: _allList ?? [],
+      onChange: (value, tag) {
+        //tag = selectList;
+        selectList.clear();
+        selectList.addAll(tag);
+      },
+    );
     return parentContainer(
       Padding(
         padding:
@@ -75,7 +91,30 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
               ),
             ),
             SizedBox(height: 26.w),
+            firstRow(),
             SizedBox(height: 21.w),
+            secondRow(),
+            selectList.isEmpty
+                ? const SizedBox(width: 0, height: 0)
+                : selectView(selectList.length),
+            _listInfoWidget!,
+            SizedBox(height: 32.w),
+            TextButton(
+              onPressed: () {
+                //7620657
+              },
+              style: TextButton.styleFrom(
+                primary: Colors.white,
+                backgroundColor: Config.fontColorSelect,
+                textStyle:
+                    Config.loadDefaultTextStyle(fontWeight: FontWeight.w400),
+                minimumSize: const Size(1, 1),
+                padding: EdgeInsets.zero,
+                fixedSize: Size(87.w, 43.w),
+              ),
+              child: const Text('确定'),
+            ),
+            SizedBox(height: 32.w),
           ],
         ),
       ),
@@ -246,7 +285,7 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
                         fontWeight: FontWeight.w400,
                       ),
                       recognizer: _tapGestureRecognizer),
-                ]))
+                ])),
           ],
         ),
       ),
@@ -254,5 +293,173 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
   }
 
   ///清空选择的事件
-  void _resetSelect() {}
+  void _resetSelect() {
+    setState(() {
+      selectList.clear();
+      _listInfoWidget!.hadSelectList.clear();
+    });
+  }
+}
+
+class PressCreateWidget extends StatefulWidget {
+  final String pressType;
+  const PressCreateWidget({
+    Key? key,
+    required this.pressType,
+  }) : super(key: key);
+
+  @override
+  State<PressCreateWidget> createState() => _PressCreateWidgetState();
+}
+
+class _PressCreateWidgetState extends State<PressCreateWidget> {
+  final map = <String, TextEditingController>{};
+  @override
+  Widget build(BuildContext context) {
+    return parentContainer(Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(height: 31.w),
+        Text(
+          '${widget.pressType}编写',
+          style: Config.loadDefaultTextStyle(
+            fonstSize: 27.w,
+            fontWeight: FontWeight.w500,
+            color: Colors.black.withOpacity(0.85),
+          ),
+        ),
+        SizedBox(height: 18.w),
+        Row(mainAxisSize: MainAxisSize.min, children: [
+          Text(
+            '报刊类型：',
+            style: Config.loadDefaultTextStyle(
+              fontWeight: FontWeight.w400,
+              color: Colors.black.withOpacity(0.85),
+            ),
+          ),
+          Container(
+            width: 624.w,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5.sp),
+              border: Border.all(color: Config.borderColor),
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 14.w, horizontal: 16.w),
+              child: Text(
+                widget.pressType,
+                style: Config.loadDefaultTextStyle(),
+              ),
+            ),
+          ),
+          SizedBox(height: 48.w),
+          childItem('标题：', 'title'),
+          SizedBox(height: 48.w),
+          childItem('日期：', 'creteDate'),
+          SizedBox(height: 48.w),
+          childItem('刊号：', 'pressNo'),
+          SizedBox(height: 48.w),
+          childItem('内容：', 'context', line: 10),
+          SizedBox(height: 22.w),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '内容：',
+                style: Config.loadDefaultTextStyle(
+                  fontWeight: FontWeight.w400,
+                  color: Colors.transparent,
+                ),
+              ),
+              TextButton(
+                onPressed: () {},
+                style: TextButton.styleFrom(
+                  primary: Colors.white,
+                  backgroundColor: Config.fontColorSelect,
+                  minimumSize: const Size(1, 1),
+                  padding: EdgeInsets.zero,
+                  fixedSize: Size(123.w, 43.w),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.w)),
+                ),
+                child: const Text('生成word'),
+              ),
+              TextButton(
+                onPressed: () {},
+                style: TextButton.styleFrom(
+                  primary: Config.fontColorSelect,
+                  backgroundColor: Colors.white,
+                  minimumSize: const Size(1, 1),
+                  padding: EdgeInsets.zero,
+                  fixedSize: Size(123.w, 43.w),
+                  shape: RoundedRectangleBorder(
+                      side: const BorderSide(color: Color(0xFFD9D9D9)),
+                      borderRadius: BorderRadius.circular(5.w)),
+                ),
+                child: const Text('提交'),
+              ),
+            ],
+          )
+        ]),
+      ],
+    ));
+  }
+
+  TextEditingController loadController(String key) {
+    if (!map.containsKey(key)) {
+      map[key] = TextEditingController();
+    }
+    return map[key]!;
+  }
+
+  Row childItem(String title, String key, {int? line}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          title,
+          style: Config.loadDefaultTextStyle(
+            fontWeight: FontWeight.w400,
+            color: Colors.black.withOpacity(0.85),
+          ),
+        ),
+        SizedBox(
+          width: 624.w,
+          child: title.endsWith('日期')
+              ? dateView(title, loadController(key))
+              : TextField(
+                  controller: loadController(key),
+                  maxLines: line,
+                  minLines: line,
+                  decoration:
+                      Config.defaultInputDecoration(hintText: '请输入$title'),
+                  style: Config.loadDefaultTextStyle(),
+                ),
+        )
+      ],
+    );
+  }
+
+  Widget dateView(explain, controller) {
+    return DateTimePicker(
+      controller: controller,
+      type: DateTimePickerType.date,
+      dateMask: 'yyyy-MM-dd',
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      textInputAction: TextInputAction.next,
+      style: Config.loadDefaultTextStyle(color: Colors.black),
+      decoration: Config.defaultInputDecoration(
+        hintText: '年/月/日',
+        suffixIcon: Image.asset('images/icon_date.png'),
+      ),
+    );
+  }
+
+  void makeWord() async {
+    String title = map['title']!.text;
+    String creteDate = map['creteDate']!.text;
+    String pressNo = map['pressNo']!.text;
+    String context = map['context']!.text;
+    // 生成后直接下载
+  }
 }
