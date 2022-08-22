@@ -3,7 +3,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
+import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
+import 'package:public_opinion_manage_web/data/bean/week_press.dart';
 import 'package:public_opinion_manage_web/page/widget/info_public_opinion.dart';
 
 class PressPage extends StatelessWidget {
@@ -17,14 +19,21 @@ class PressPage extends StatelessWidget {
         title: Text(pressType, style: Config.loadDefaultTextStyle()),
         backgroundColor: Colors.transparent,
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minWidth: 1515.w,
-            maxWidth: 1515.w,
-            minHeight: 925.w,
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(image: AssetImage("images/bg.png")),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const PressHeadWidget(),
+              SizedBox(height: 30.w),
+              pressType != '周报'
+                  ? PressCreateWidget(pressType: pressType)
+                  : const WeekPressCreateWidget(),
+            ],
           ),
-          child: Text('data'),
         ),
       ),
     );
@@ -461,5 +470,316 @@ class _PressCreateWidgetState extends State<PressCreateWidget> {
     String pressNo = map['pressNo']!.text;
     String context = map['context']!.text;
     // 生成后直接下载
+  }
+}
+
+/// 周报创建
+class WeekPressCreateWidget extends StatefulWidget {
+  const WeekPressCreateWidget({Key? key}) : super(key: key);
+
+  @override
+  State<WeekPressCreateWidget> createState() => _WeekPressCreateWidgetState();
+}
+
+class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
+  final map = <String, TextEditingController>{};
+  @override
+  void dispose() {
+    super.dispose();
+    map.forEach((key, value) => value.dispose());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(13.w),
+        color: Colors.white,
+      ),
+      width: 1515.w,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 36.w, vertical: 30.w),
+        child: Column(
+          // crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: Text(
+                '周报编写',
+                style: Config.loadDefaultTextStyle(
+                    fonstSize: 27.w,
+                    color: Colors.black.withOpacity(0.85),
+                    fontWeight: FontWeight.w500),
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('报刊类型：', style: _textStyle()),
+                Container(
+                  width: 624.w,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5.w),
+                    border: Border.all(color: Config.borderColor),
+                  ),
+                  child: Padding(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 14.w, horizontal: 16.w),
+                    child: Text('周报', style: _textStyle()),
+                  ),
+                )
+              ],
+            ),
+            childItem('标题：', 'title'),
+            SizedBox(height: 42.w),
+            dateView('日期：', 'creteDate'),
+            SizedBox(height: 42.w),
+            childItem('刊号：', 'pressNo'),
+            SizedBox(height: 61.w),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('上周舆情总述', style: _textStyleTitle()),
+                SizedBox(width: 638.w),
+              ],
+            ),
+            childItem('总体情况：', '总体情况', line: 3),
+            SizedBox(height: 42.w),
+            childItem('重点舆情：', '重点舆情', line: 10),
+            SizedBox(height: 51.w),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(width: 364.w),
+                Text('一周舆情观察', style: _textStyleTitle()),
+                // SizedBox(width: 638.w),
+              ],
+            ),
+            weekViewList(),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(width: 194.w),
+                TextButton(
+                  onPressed: () {},
+                  style: TextButton.styleFrom(
+                    primary: Colors.white,
+                    backgroundColor: Config.fontColorSelect,
+                    minimumSize: const Size(1, 1),
+                    padding: EdgeInsets.zero,
+                    fixedSize: Size(123.w, 43.w),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.w)),
+                  ),
+                  child: const Text('生成word'),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  style: TextButton.styleFrom(
+                    primary: Config.fontColorSelect,
+                    backgroundColor: Colors.white,
+                    minimumSize: const Size(1, 1),
+                    padding: EdgeInsets.zero,
+                    fixedSize: Size(123.w, 43.w),
+                    shape: RoundedRectangleBorder(
+                        side: const BorderSide(color: Color(0xFFD9D9D9)),
+                        borderRadius: BorderRadius.circular(5.w)),
+                  ),
+                  child: const Text('提交'),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Row childItem(String title, String key, {int? line}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text('$title：', style: _textStyle()),
+        SizedBox(
+          width: 624.w,
+          child: TextField(
+            minLines: line,
+            maxLines: line,
+            controller: loadController(key),
+            decoration: Config.defaultInputDecoration(hintText: '请输入$title'),
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget dateView(explain, controller) {
+    return DateTimePicker(
+      controller: controller,
+      type: DateTimePickerType.date,
+      dateMask: 'yyyy-MM-dd',
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      textInputAction: TextInputAction.next,
+      style: Config.loadDefaultTextStyle(color: Colors.black),
+      decoration: Config.defaultInputDecoration(
+        hintText: '年/月/日',
+        suffixIcon: Image.asset('images/icon_date.png'),
+      ),
+    );
+  }
+
+  TextStyle _textStyle({Color? color}) {
+    return Config.loadDefaultTextStyle(
+      color: color ?? Colors.black.withOpacity(0.85),
+      fontWeight: FontWeight.w400,
+    );
+  }
+
+  TextStyle _textStyleTitle() {
+    return Config.loadDefaultTextStyle(
+      color: Colors.black.withOpacity(0.85),
+      fontWeight: FontWeight.w500,
+    );
+  }
+
+  TextEditingController loadController(String key) {
+    if (!map.containsKey(key)) {
+      map[key] = TextEditingController();
+    }
+    return map[key]!;
+  }
+
+  final List<WeekPressBean> _list = [
+    WeekPressBean(
+      firstRankTitle: '',
+      secondRank: [
+        SecondRank(secondRankTitle: '', content: ''),
+      ],
+    )
+  ];
+
+  ListView weekViewList() {
+    return ListView.builder(
+        itemBuilder: (context, index) {
+          return weekItemView(_list[index], index);
+        },
+        itemCount: _list.length,
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true);
+  }
+
+  Widget weekItemView(WeekPressBean bean, index) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        weekItemChildView(index, bean.firstRankTitle!, 1),
+        SizedBox(height: 42.w),
+        ...secondView(index, bean.secondRank!),
+      ],
+    );
+  }
+
+  List<Widget> secondView(int index, List<SecondRank> list) {
+    final arr = <Widget>[];
+    for (var i = 0; i < list.length; i++) {
+      final bean = list[i];
+      arr.add(
+          weekItemChildView(index, bean.secondRankTitle!, 2, secondIndex: i));
+      arr.add(SizedBox(height: 40.w));
+      arr.add(weekItemChildView(index, bean.content!, 2,
+          secondIndex: i, contentTag: true));
+      arr.add(SizedBox(height: 42.w));
+    }
+    return arr;
+  }
+
+  Row weekItemChildView(int index, String title, int rank,
+      {int line = 1, int secondIndex = -1, bool contentTag = false}) {
+    final arr = [
+      Container(
+        width: rank == 1 ? 128.w : 194.w,
+        alignment: Alignment.centerRight,
+        child: Text('$title：', style: _textStyle()),
+      ),
+      SizedBox(
+        width: rank == 1 ? 624.w : 559.w,
+        child: TextField(
+          minLines: line,
+          maxLines: line,
+          // controller: loadController(key),
+          onChanged: ((value) {
+            if (rank == 1) {
+              _list[index].firstRankTitle = value;
+            } else {
+              if (contentTag) {
+                _list[index].secondRank![secondIndex].content = value;
+              } else {
+                _list[index].secondRank![secondIndex].secondRankTitle = value;
+              }
+            }
+          }),
+          decoration: Config.defaultInputDecoration(hintText: '请输入$title'),
+        ),
+      ),
+    ];
+    if (!contentTag) {
+      arr.addAll([
+        SizedBox(width: 30.w),
+        InkWell(
+          onTap: () {
+            if (rank == 1) {
+              _list.insert(
+                index + 1,
+                WeekPressBean(
+                  firstRankTitle: '',
+                  secondRank: [
+                    SecondRank(secondRankTitle: '', content: ''),
+                  ],
+                ),
+              );
+            } else {
+              _list[index].secondRank!.insert(secondIndex + 1,
+                  SecondRank(secondRankTitle: '', content: ''));
+            }
+            setState(() {});
+          },
+          child: Text(
+            '添加',
+            style: Config.loadDefaultTextStyle(
+              color: Config.fontColorSelect,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ),
+        SizedBox(width: 30.w),
+        InkWell(
+          onTap: () => deleteDialog(rank, index, secondIndex),
+          child: Text(
+            '删除',
+            style: Config.loadDefaultTextStyle(
+              color: Config.fontColorSelect,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        )
+      ]);
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: arr,
+    );
+  }
+
+  void deleteDialog(int rank, int index, int secondeIndex) {
+    showCenterNoticeDialog(context, contentString: '确定删除么？', onPress: () {
+      if (rank == 1) {
+        _list.removeAt(index);
+      } else {
+        _list[index].secondRank!.removeAt(secondeIndex);
+      }
+      setState(() {});
+    });
   }
 }

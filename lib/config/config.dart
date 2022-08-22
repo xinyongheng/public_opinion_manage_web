@@ -111,7 +111,7 @@ class Config {
       ),
       enabledBorder: OutlineInputBorder(
         gapPadding: 0,
-        borderRadius: BorderRadius.circular(5.sp),
+        borderRadius: BorderRadius.circular(5.w),
         borderSide: const BorderSide(color: borderColor),
       ),
       contentPadding: EdgeInsets.symmetric(vertical: 14.w, horizontal: 16.w),
