@@ -170,7 +170,7 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
               decoration: Config.defaultInputDecoration(
                 hintText: '年/月/日',
                 suffixIcon: Image.asset(
-                  'images/op_save.png',
+                  'images/icon_date.png',
                   width: 5.sp,
                   height: 5.sp,
                   color: Colors.grey,

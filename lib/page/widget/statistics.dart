@@ -1,11 +1,8 @@
 import 'dart:math';
 
-// import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
-import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/triangle.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 
@@ -137,7 +134,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
       ],
       defaultRenderer: charts.LineRendererConfig(
         // 圆点大小
-        radiusPx: 8.w,
+        radiusPx: 5.w,
         stacked: false,
         // 线的宽度
         strokeWidthPx: 1.0,

@@ -15,7 +15,8 @@ class ServiceHttp {
   // static void checkToken(String token, Callback callback) {}
   static ServiceHttp? _instance;
   late Dio _dio;
-  static const String parentUrl = 'http://192.168.1.6:8200';
+  static const String parentUrl = 'http://192.168.1.9:8200';
+  // static const String parentUrl = 'http://192.168.1.107:8200';
   static const String loginApi = '/api/login';
   static const String registerApi = '/api/register';
 
