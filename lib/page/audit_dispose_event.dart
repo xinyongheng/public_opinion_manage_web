@@ -30,6 +30,7 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
   // 多家单位处理
   List<DisposeData>? unitList;
   List<String> unitNameList = [];
+  bool submitResult = false;
   // List<Map>? disposeEventUnitMappingList;
   String? dutyCoontent;
   @override
@@ -65,6 +66,7 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
   void dispose() {
     super.dispose();
     _controller3.dispose();
+    _finalController?.dispose();
   }
 
   @override
@@ -349,9 +351,11 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
         ),
         SizedBox(height: 30.w),
         TextButton(
-          onPressed: () {
-            requestCommitDutyContent(_controller3.text);
-          },
+          onPressed: submitResult
+              ? null
+              : () {
+                  requestCommitDutyContent(_controller3.text);
+                },
           style: TextButton.styleFrom(
             primary: Colors.white,
             backgroundColor: Config.fontColorSelect,
@@ -469,7 +473,18 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
     );
   }
 
-  ///提交处理内容
+  Map loadMapFromDisposeContent(DisposeContent bean, String reason) {
+    final map = <String, dynamic>{};
+    map['id'] = bean.id;
+    map['passState'] = _auditType == 1 ? '通过' : '不通过';
+    if (_auditType != 1) {
+      map['reason'] = reason;
+    }
+    map['isPass'] = _auditType == 1 ? 1 : 0;
+    return map;
+  }
+
+  // 提交处理内容
   void requestCommitDutyContent(String text) async {
     final map = <String, dynamic>{};
     if (_auditType == -1) {
@@ -480,15 +495,6 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
     final arr = [];
     if (_auditType != 1) {
       map['reason'] = text;
-      unitList?.forEach((element) {
-        element.list?.forEach((bean) {
-          if (bean.passState == '待审核') {
-            bean.reason = text;
-            arr.add(bean);
-          }
-        });
-      });
-      map['changeMappingList'] = arr;
       map['isPass'] = 0;
     } else {
       map['isPass'] = 1;
@@ -502,13 +508,22 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
       }
       map['finalDutyUnit'] = finalDutyUnit;
     }
+    unitList?.forEach((element) {
+      element.list?.forEach((bean) {
+        if (bean.passState == '待审核') {
+          arr.add(loadMapFromDisposeContent(bean, text));
+        }
+      });
+    });
+    map['changeMappingList'] = arr;
     map['eventId'] = eventInfo!.id;
     map['disposeEventId'] = disposeEvent!.id;
     map['userId'] = await UserUtil.getUserId();
     ServiceHttp().post('/auditDisposeEvent', data: map, success: (data) {
-      if (kDebugMode) {
-        print(data);
-      }
+      setState(() {
+        submitResult = true;
+      });
+      showSuccessDialog('提交成功');
     });
   }
 }

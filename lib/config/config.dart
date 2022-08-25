@@ -128,7 +128,7 @@ class Config {
   }
 
   static Widget dateInputView(explain, controller,
-      {DateTimePickerType? type, DateTime? initialDate}) {
+      {DateTimePickerType? type, DateTime? initialDate, Widget? suffixIcon}) {
     return DateTimePicker(
       controller: controller,
       type: type ?? DateTimePickerType.dateTime,
@@ -140,21 +140,8 @@ class Config {
       initialDate: initialDate,
       textInputAction: TextInputAction.next,
       style: Config.loadDefaultTextStyle(color: Colors.black),
-      decoration: InputDecoration(
-        // label: const Icon(Icons.people),
-        // labelText: '请输入$explain',
-        border: const OutlineInputBorder(gapPadding: 0),
-        contentPadding: EdgeInsets.only(
-          left: 5.sp,
-          right: 20.sp,
-          top: 5.sp,
-          bottom: 5.sp,
-        ),
-        // helperText: '手机号',
-        hintText: "请输入$explain",
-        hintStyle: Config.loadDefaultTextStyle(color: Colors.grey),
-        // errorText: '错误',
-      ),
+      decoration:
+          defaultInputDecoration(hintText: explain, suffixIcon: suffixIcon),
     );
   }
 

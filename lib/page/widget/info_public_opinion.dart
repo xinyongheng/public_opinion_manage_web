@@ -105,6 +105,7 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
               canSelect: false,
               type: 1,
               selectList: _list,
+              onUpdate: () => requestSearch(),
             ),
           ],
         ),
@@ -226,7 +227,6 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
   void requestSearch() async {
     final map = <String, dynamic>{};
     controllerMap.forEach((key, value) => fillFilterData(map, key, value));
-    print(map);
     askInternet(map.isEmpty ? null : map);
   }
 
@@ -244,12 +244,14 @@ class ListInfoWidget extends StatefulWidget {
   final int type;
   final List<PublicOpinionBean> hadSelectList = [];
   final CheckBoxChange? onChange;
+  final VoidCallback? onUpdate;
   ListInfoWidget({
     Key? key,
     this.canSelect,
     required this.selectList,
     required this.type,
     this.onChange,
+    this.onUpdate,
   }) : super(key: key);
   @override
   State<ListInfoWidget> createState() => _ListInfoWidgetState();
@@ -266,6 +268,13 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
   void initState() {
     super.initState();
     widget.hadSelectList.clear();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _timeController?.dispose();
   }
 
   @override
@@ -556,6 +565,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
         }
         break;
       case '上级通报时间':
+        shangJiShiJian(bean.id);
         break;
       case '报刊类型':
         break;
@@ -572,5 +582,131 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
 
   void preDutyUnit(bean) {
     showDutyUnitDialog(context, bean.id);
+  }
+
+  TextEditingController? _timeController;
+  TextEditingController _loadTimeController() {
+    _timeController ??= TextEditingController();
+    return _timeController!;
+  }
+
+  void shangJiShiJian(eventId) {
+    showCenterNoticeDialog(context,
+        barrierDismissible: false,
+        title: '添加回复上级时间',
+        contentWidget: SizedBox(
+          width: 294.w,
+          child: Config.dateInputView(
+            '年/月/日',
+            _loadTimeController(),
+            suffixIcon: Image.asset("images/icon_date.png"),
+          ),
+        ), onPress: () {
+      String time = _timeController!.text;
+      if (time.isEmpty) {
+        toast('请选择时间');
+      } else {
+        _updateShangJiShiJian(time, eventId);
+      }
+    });
+  }
+
+  void _updateShangJiShiJian(String time, eventId) async {
+    final map = await UserUtil.makeUserIdMap();
+    map['eventId'] = eventId;
+    map['changeContent'] = {
+      "replySuperiorTime": time,
+    };
+    ServiceHttp().post("path", data: map, success: (data) {
+      _timeController?.text = '';
+      widget.onUpdate?.call();
+      Config.finishPage(context);
+      showSuccessDialog('上传成功');
+    });
+  }
+
+  // 领导批示
+  String? _name;
+  String? _content;
+  void lingDaoPiShi(eventId) {
+    showCenterNoticeDialog(
+      context,
+      barrierDismissible: false,
+      title: '添加领导批示',
+      contentWidget: SizedBox(
+        width: 294.w,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 23.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('领导姓名：', style: Config.loadDefaultTextStyle()),
+                  TextField(
+                    onChanged: (value) => _name = value,
+                    decoration: Config.defaultInputDecoration(),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('批示时间：', style: Config.loadDefaultTextStyle()),
+                  Config.dateInputView(
+                    '年/月/日',
+                    _loadTimeController(),
+                    suffixIcon: Image.asset("images/icon_date.png"),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('批示内容：', style: Config.loadDefaultTextStyle()),
+                  TextField(
+                    onChanged: (value) => _content = value,
+                    maxLines: 5,
+                    minLines: 5,
+                    decoration: Config.defaultInputDecoration(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      onPress: () async {
+        if (DataUtil.isEmpty(_content)) {
+          toast('请输入批示内容');
+          return;
+        }
+        if (DataUtil.isEmpty(_name)) {
+          toast('请输入领导姓名');
+          return;
+        }
+        String time = _timeController!.text;
+        if (time.isEmpty) {
+          toast('请选择批示时间');
+          return;
+        }
+        final map = await UserUtil.makeUserIdMap();
+        map['eventId'] = eventId;
+        map['changeContent'] = {
+          "leaderInstructionsTime": time,
+          "leaderInstructionsContent": _content,
+          "leaderName": _name,
+        };
+        ServiceHttp().post("path", data: map, success: (data) {
+          _timeController?.text = '';
+          _name = null;
+          _content = null;
+          widget.onUpdate?.call();
+          Config.finishPage(context);
+          showSuccessDialog('上传成功');
+        });
+      },
+    );
   }
 }
