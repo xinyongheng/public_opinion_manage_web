@@ -69,6 +69,8 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
                 ...filterWidget('舆情类别：', 'typeFilter'),
                 SizedBox(width: 45.w),
                 ...filterWidget('舆情报刊类型：', 'pressTypeFilter'),
+                SizedBox(width: 45.w),
+                ...filterWidget('媒体类型：', 'mediaTypeFilter'),
               ],
             ),
             SizedBox(width: 45.w, height: 21.w),
@@ -80,11 +82,18 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
               children: [
                 timeFilter('发现时间：', 'findTimeStart', 'findTimeEnd'),
                 SizedBox(width: 33.w),
-                loadTextButton('查 询', () {}),
+                loadTextButton('查 询', () {
+                  requestSearch();
+                }),
                 SizedBox(width: 33.w),
                 loadTextButton(
                   '重 置',
-                  () {},
+                  () {
+                    controllerMap.forEach((key, value) {
+                      value.text = '';
+                    });
+                    askInternet(null);
+                  },
                   primary: Config.fontColorSelect,
                   backgroundColor: Colors.white,
                 ),
@@ -171,8 +180,6 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
                 hintText: '年/月/日',
                 suffixIcon: Image.asset(
                   'images/icon_date.png',
-                  width: 5.sp,
-                  height: 5.sp,
                   color: Colors.grey,
                 ),
               ),
@@ -195,9 +202,7 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
               decoration: Config.defaultInputDecoration(
                 hintText: '年/月/日',
                 suffixIcon: Image.asset(
-                  'images/op_save.png',
-                  width: 5.sp,
-                  height: 5.sp,
+                  'images/icon_date.png',
                   color: Colors.grey,
                 ),
               ),
@@ -215,6 +220,20 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
         style: Config.loadDefaultTextStyle(color: Colors.black),
       ),
     );
+  }
+
+  void requestSearch() async {
+    final map = <String, dynamic>{};
+    controllerMap.forEach((key, value) => fillFilterData(map, key, value));
+    print(map);
+    askInternet(map.isEmpty ? null : map);
+  }
+
+  void fillFilterData(map, key, value) {
+    final data = value.text;
+    if (data.isNotEmpty) {
+      map[key] = data;
+    }
   }
 }
 
@@ -244,7 +263,6 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
   bool _slideLeftTag = false;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     widget.hadSelectList.clear();
   }
@@ -425,7 +443,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
         ),
       ),
       childItemView("$indexNo", '序号', width: 4 * wordLength, index: index),
-      childItemView(bean.description.toString(), '事件名称',
+      childItemView(bean.description.toString(), '事件描述',
           width: 8 * wordLength, index: index),
       childItemView(bean.mediaType.toString(), '媒体类型',
           width: 8 * wordLength, index: index),
@@ -435,7 +453,8 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
           width: 8 * wordLength, index: index),
       childItemView(bean.type.toString(), '舆情类别',
           width: 6 * wordLength, index: index),
-      childItemView(dutyUnit(bean.dutyUnit) ?? '指定', '责任单位',
+      childItemView(
+          dutyUnit(bean.dutyUnit, bean.passState ?? '') ?? '指定', '责任单位',
           width: 8 * wordLength, index: index),
       childItemView(bean.feedbackTime ?? "—", '反馈时间',
           width: 8 * wordLength, index: index),
@@ -448,7 +467,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
           '是否迟报',
           width: 6 * wordLength,
           index: index),
-      childItemView(leaderInstructions, '领导批示',
+      childItemView(bean.passState == '通过' ? leaderInstructions : '—', '领导批示',
           width: 6 * wordLength, index: index),
       childItemView(bean.leaderInstructionsContent ?? "—", '批示内容',
           width: 6 * wordLength, index: index),
@@ -470,31 +489,46 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
     );
   }
 
-  String? dutyUnit(String? units) {
+  String? dutyUnit(String? units, String passState) {
     if (DataUtil.isEmpty(units)) return null;
-    return units!.substring(1, units.length - 1);
+    return "${units!.substring(1, units.length - 1)}($passState)";
   }
 
   Widget childItemView(String data, String tag,
       {color = Colors.black,
-      bgColor = const Color(0xFFFDFDFD),
+      bgColor = Colors.white,
       double? width,
       double? height,
       int index = 1}) {
     const clickTag = ',添加,指定,查看,编辑,';
     bool isClick = clickTag.contains(data);
     final canClick = isClick || (data != "—" && tag == '批示内容');
-    final child = Text(
+    Widget child;
+    if (data.length > 13) {
+      data = '${data.substring(0, 11)}...';
+    }
+    child = Text(
       data,
       textAlign: TextAlign.center,
       style: Config.loadDefaultTextStyle(
-        color: isClick ? Config.fontColorSelect : color,
+        color: isClick
+            ? Config.fontColorSelect
+            : (tag == '序号' ? Colors.white : color),
         fonstSize: wordLength,
+        fontWeight: tag.isNotEmpty ? FontWeight.w400 : FontWeight.w600,
       ),
-      softWrap: true,
+      // softWrap: true,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );
+    if (tag == '序号') {
+      child = Container(
+          width: 22.w,
+          height: 22.w,
+          color: Config.fontColorSelect,
+          alignment: Alignment.center,
+          child: child);
+    }
     return Container(
       alignment: Alignment.center,
       // color: bgColor,
@@ -526,6 +560,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
       case '是否完结':
         break;
       default:
+        toast('暂未开发');
       //详情
     }
   }

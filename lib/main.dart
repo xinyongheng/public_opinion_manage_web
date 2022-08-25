@@ -4,33 +4,27 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
-import 'package:public_opinion_manage_web/custom/histogram.dart';
+// import 'package:public_opinion_manage_web/custom/histogram.dart';
 import 'package:public_opinion_manage_web/page/login.dart';
 
-// ignore: avoid_web_libraries_in_flutter
-// export ;
-// export 'src/we1b.dart' if (dart.library.io) 'src/model.dart';
-
 import 'package:public_opinion_manage_web/utils/info_save.dart';
-import 'dart:html';
-// ignore: avoid_web_libraries_in_flutter
-// import 'dart:html' if (dart.library.html) 'file_picker_web.dart';
+// import 'dart:html';
+import 'package:universal_html/html.dart' show window;
 
 import 'page/widget/load_dispose_event.dart';
-import 'test/test_page.dart';
 
 void main() {
   String? info;
   if (kIsWeb) {
     var uri = Uri.dataFromString(window.location.href);
-    print("path=" + uri.path);
-    print(uri.pathSegments);
+    // print("path=" + uri.path);
+    // print(uri.pathSegments);
     if (uri.pathSegments.isNotEmpty &&
         uri.pathSegments.last == 'loadDisposeEvent') {
       var qp = uri.queryParameters;
       //获取参娄数ID，或你要找的参数
       info = qp['info'];
-      print(info);
+      // print(info);
     }
   }
   runApp(MyApp(value: info));
@@ -44,39 +38,39 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-        builder: (context, child) {
-          return MaterialApp(
-            navigatorKey: Global.navigatorKey,
-            localizationsDelegates: GlobalMaterialLocalizations.delegates,
-            supportedLocales: const [
-              Locale('zh', 'CH'),
-              Locale('en', 'US'),
-            ],
-            locale: const Locale('zh', 'CH'),
-            title: '舆情台账',
-            builder: EasyLoading.init(builder: (context, child) {
-              EasyLoading.instance.loadingStyle = EasyLoadingStyle.custom;
-              EasyLoading.instance.indicatorColor = Colors.blue;
-              EasyLoading.instance.backgroundColor = Colors.white;
-              EasyLoading.instance.textColor = Colors.black;
-              return child!;
-            }),
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              primaryColor: Config.fontColorSelect,
-              textTheme: Typography.englishLike2018.apply(fontSizeFactor: 1.sp),
-            ),
-            home: child,
-          );
-        },
-        designSize: const Size(1920, 1080),
-        minTextAdapt: true,
-        splitScreenMode: true,
-        child: const HistogramWidget()
-        // !DataUtil.isEmpty(value)
-        //     ? LoadDisposeEventPage(info: value!)
-        //     : const LoginPage(),
+      builder: (context, child) {
+        return MaterialApp(
+          navigatorKey: Global.navigatorKey,
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          supportedLocales: const [
+            Locale('zh', 'CH'),
+            Locale('en', 'US'),
+          ],
+          locale: const Locale('zh', 'CH'),
+          title: '舆情台账',
+          builder: EasyLoading.init(builder: (context, child) {
+            EasyLoading.instance.loadingStyle = EasyLoadingStyle.custom;
+            EasyLoading.instance.indicatorColor = Colors.blue;
+            EasyLoading.instance.backgroundColor = Colors.white;
+            EasyLoading.instance.textColor = Colors.black;
+            return child!;
+          }),
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            primaryColor: Config.fontColorSelect,
+            textTheme: Typography.englishLike2018.apply(fontSizeFactor: 1.sp),
+          ),
+          home: child,
         );
+      },
+      designSize: const Size(1920, 1080),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      child: //const HistogramWidget()
+          !DataUtil.isEmpty(value)
+              ? LoadDisposeEventPage(info: value!)
+              : const LoginPage(),
+    );
   }
 }
 

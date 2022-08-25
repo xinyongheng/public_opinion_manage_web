@@ -129,24 +129,26 @@ class _DutyUnitWidgetState extends State<DutyUnitWidget> {
           ),
         ),
         SizedBox(height: 20.w),
-        Center(
-          child: TextButton(
-            onPressed: link.isEmpty
-                ? () {
-                    makeLink();
-                  }
-                : null,
-            style: TextButton.styleFrom(
-              enableFeedback: true,
-              primary: Colors.white,
-              backgroundColor: Config.fontColorSelect,
-              textStyle: Config.loadDefaultTextStyle(
-                  fonstSize: 19.w, fontWeight: FontWeight.w400),
-              padding: EdgeInsets.all(8.w),
-            ),
-            child: const Text('发送链接'),
-          ),
-        )
+        link.isEmpty
+            ? Center(
+                child: TextButton(
+                  onPressed: link.isEmpty
+                      ? () {
+                          makeLink();
+                        }
+                      : null,
+                  style: TextButton.styleFrom(
+                    enableFeedback: true,
+                    primary: Colors.white,
+                    backgroundColor: Config.fontColorSelect,
+                    textStyle: Config.loadDefaultTextStyle(
+                        fonstSize: 19.w, fontWeight: FontWeight.w400),
+                    padding: EdgeInsets.all(8.w),
+                  ),
+                  child: const Text('发送链接'),
+                ),
+              )
+            : SelectableText(link, style: Config.loadDefaultTextStyle())
       ],
     );
   }
@@ -201,9 +203,9 @@ class _DutyUnitWidgetState extends State<DutyUnitWidget> {
       map["manageRemark"] = remark;
     }
     ServiceHttp().post(api, data: map, success: (data) {
-      // setState(() {
-      //   link = data['linkPath'];
-      // });
+      setState(() {
+        link = ServiceHttp.parentUrl + data['linkPath'];
+      });
     });
   }
 }

@@ -87,53 +87,55 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
               alignment: Alignment.topCenter,
               child: SizedBox(
                 width: 1515.w,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset(
-                      'images/banner.png',
-                      fit: BoxFit.fill,
-                      width: 1424.w,
-                      height: 235.w,
-                    ),
-                    Container(
-                      width: 1515.w,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10.w),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'images/banner.png',
+                        fit: BoxFit.fill,
+                        width: 1424.w,
+                        height: 235.w,
                       ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(height: 68.w),
-                          Text(
-                            '事件处理反馈',
-                            style: Config.loadDefaultTextStyle(
-                              fonstSize: 27.w,
-                              fontWeight: FontWeight.w500,
-                              color: Config.fontColorSelect,
+                      Container(
+                        width: 1515.w,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10.w),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(height: 68.w),
+                            Text(
+                              '事件处理反馈',
+                              style: Config.loadDefaultTextStyle(
+                                fonstSize: 27.w,
+                                fontWeight: FontWeight.w500,
+                                color: Config.fontColorSelect,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 48.w),
-                          childItem("事件名称：", eventInfo['description'] ?? ''),
-                          childItem("原文链接：", eventInfo['link'] ?? ''),
-                          DataUtil.isEmpty(files)
-                              ? childItem("原文图文信息：", '')
-                              : fileItem("原文图文信息：", files!),
-                          childItem("媒体类型：", eventInfo['link'] ?? ''),
-                          childItem("发布时间：", eventInfo['publishTime'] ?? ''),
-                          childItem("舆情类别：", eventInfo['type'] ?? ''),
-                          childItem("发现时间：", eventInfo['findTime'] ?? ''),
-                          ...superiorNotificationView(
-                              eventInfo['superiorNotificationTime']),
-                          childItem("处理内容：", eventInfo['link'] ?? ''),
-                          childItem(
-                              "管理员指定单位备注：", disposeEvent['manageRemark'] ?? ''),
-                          // dutyContent(),
-                        ],
-                      ),
-                    )
-                  ],
+                            SizedBox(height: 48.w),
+                            childItem("事件名称：", eventInfo['description'] ?? ''),
+                            childItem("原文链接：", eventInfo['link'] ?? ''),
+                            DataUtil.isEmpty(files)
+                                ? childItem("原文图文信息：", '无')
+                                : fileItem("原文图文信息：", files!),
+                            childItem("媒体类型：", eventInfo['link'] ?? ''),
+                            childItem("发布时间：", eventInfo['publishTime'] ?? ''),
+                            childItem("舆情类别：", eventInfo['type'] ?? ''),
+                            childItem("发现时间：", eventInfo['findTime'] ?? ''),
+                            ...superiorNotificationView(
+                                eventInfo['superiorNotificationTime']),
+                            childItem("处理内容：", eventInfo['link'] ?? ''),
+                            childItem("管理员指定单位备注：",
+                                disposeEvent['manageRemark'] ?? '无'),
+                            // dutyContent(),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),

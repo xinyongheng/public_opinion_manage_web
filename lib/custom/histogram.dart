@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
+import 'package:public_opinion_manage_web/custom/dialog.dart';
 
 class TriangleWidget extends StatelessWidget {
   final Color color;
@@ -68,24 +69,21 @@ class _HistogramWidgetState extends State<HistogramWidget> {
   Widget build(BuildContext context) {
     double max = 631.w;
     double maxNum = 1000;
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ...titleRow(820 * max / maxNum, 1, '抖音1', '820',
-              color: const Color(0xFF0DDDB8)),
-          ...titleRow(785 * max / maxNum, 2, '快手2', '785',
-              color: const Color(0xFFD85766)),
-          ...titleRow(780 * max / maxNum, 3, '抖音3', '780'),
-          ...titleRow(700 * max / maxNum, 4, '抖音4', '700'),
-          ...titleRow(650 * max / maxNum, 5, '抖音5', '650'),
-          ...titleRow(630 * max / maxNum, 5, '抖音5', '650'),
-          ...titleRow(610 * max / maxNum, 5, '抖音5', '650'),
-          ...titleRow(600 * max / maxNum, 5, '抖音5', '650'),
-        ],
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...titleRow(820 * max / maxNum, 1, '抖音1', '820',
+            color: const Color(0xFF0DDDB8)),
+        ...titleRow(785 * max / maxNum, 2, '快手2', '785',
+            color: const Color(0xFFD85766)),
+        ...titleRow(780 * max / maxNum, 3, '抖音3', '780'),
+        ...titleRow(700 * max / maxNum, 4, '抖音4', '700'),
+        ...titleRow(650 * max / maxNum, 5, '抖音5', '650'),
+        ...titleRow(630 * max / maxNum, 5, '抖音5', '650'),
+        ...titleRow(610 * max / maxNum, 5, '抖音5', '650'),
+        ...titleRow(600 * max / maxNum, 5, '抖音5', '650'),
+      ],
     );
   }
 
@@ -127,13 +125,18 @@ class _HistogramWidgetState extends State<HistogramWidget> {
           ),
         ),
       ),
-      Container(
-        width: width,
-        height: 21.33.w,
-        decoration: const BoxDecoration(
-            gradient: LinearGradient(
-          colors: [Color(0xFF0DDDB8), Color(0xFF3E7BFA)],
-        )),
+      InkWell(
+        onTap: () {
+          toast(title + data);
+        },
+        child: Container(
+          width: width,
+          height: 21.33.w,
+          decoration: const BoxDecoration(
+              gradient: LinearGradient(
+            colors: [Color(0xFF0DDDB8), Color(0xFF3E7BFA)],
+          )),
+        ),
       ),
       SizedBox(height: 28.w),
     ];

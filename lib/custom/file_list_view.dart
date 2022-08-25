@@ -14,6 +14,7 @@ class ShowFileListWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: width,
+      height: 100.w,
       child: GridView.builder(
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
@@ -40,6 +41,7 @@ class ShowFileListWidget extends StatelessWidget {
     Widget image;
     final urlPath = "${ServiceHttp.parentUrl}/$path";
     if (type == "image") {
+      print(urlPath);
       image = Image.network(urlPath);
     } else {
       image = Image.asset("images/ic_xls.png");

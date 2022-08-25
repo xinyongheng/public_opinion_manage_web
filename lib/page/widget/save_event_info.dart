@@ -442,7 +442,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
               color: Colors.transparent,
             );
           });
-  final _fileView = FileListWidget();
+  final _fileView = FileListWidget(allowedExtensions: const ['']);
   Widget titleFileView(title) => Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

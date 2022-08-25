@@ -25,7 +25,7 @@ class ManageHomePage extends StatefulWidget {
 class _ManageHomePageState extends State<ManageHomePage> {
   int newNoticeNum = 0;
   int sumNoticeNum = 0;
-  int _nowIndex = 2;
+  int _nowIndex = 1;
   int _pressIndex = 0;
   late List<Widget> pages;
 

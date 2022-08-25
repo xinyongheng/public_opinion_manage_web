@@ -3,7 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
-import 'package:public_opinion_manage_web/custom/triangle.dart';
+import 'package:public_opinion_manage_web/custom/histogram.dart';
+import 'package:public_opinion_manage_web/custom/triangle.dart' as hTriangle;
 import 'package:charts_flutter/flutter.dart' as charts;
 
 class StatisticsWidget extends StatefulWidget {
@@ -28,7 +29,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: EdgeInsets.only(left: 43.w, right: 43.w),
+        padding: EdgeInsets.only(left: 43.w, right: 43.w, top: 30.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,14 +44,35 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
             SizedBox(height: 36.w),
             Row(
               children: [
-                unitOpinionTypeView(),
-                const Spacer(),
-                unitOpinionView(),
+                Expanded(child: unitOpinionTypeView()),
+                Expanded(child: unitOpinionView())
+              ],
+            ),
+            SizedBox(height: 56.w),
+            Row(
+              children: [
+                Expanded(child: opinionTypeCountView('舆情分类统计')),
+                Expanded(child: opinionTypeCountView('舆情类别统计'))
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget opinionTypeCountView(data) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        titleView(data),
+        SizedBox(height: 28.w),
+        Padding(
+          padding: EdgeInsets.only(left: 4.w),
+          child: const HistogramWidget(),
+        ),
+      ],
     );
   }
 
@@ -63,7 +85,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
       children: [
         lineView(),
         SizedBox(width: 4.w),
-        TriangleWidget(
+        hTriangle.TriangleWidget(
             color: const Color(0xFF0DDDBB), width: 7.w, height: 12.w),
         SizedBox(width: 6.w),
         Text(data,
@@ -317,7 +339,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         ),
         SizedBox(
           width: 631.w,
-          height: 359.w,
+          height: 400.w,
           child: lineChartForUnitOpinion(),
         ),
       ],
@@ -333,7 +355,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         SizedBox(height: 27.w),
         SizedBox(
           width: 631.w,
-          height: 359.w,
+          height: 400.w,
           child: lineChartForUnitOpinion(),
         ),
       ],
