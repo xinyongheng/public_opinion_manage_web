@@ -53,4 +53,10 @@ class UserUtil {
       utime: await getStringValue('utime'),
     );
   }
+
+  static Future<Map<String, dynamic>> makeUserIdMap() async {
+    final map = <String, dynamic>{};
+    map['userId'] = await getUserId();
+    return map;
+  }
 }

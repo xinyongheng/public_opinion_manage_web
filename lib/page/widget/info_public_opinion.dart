@@ -7,6 +7,7 @@ import 'package:public_opinion_manage_web/custom/check_box.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/duty_unit.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
+import 'package:public_opinion_manage_web/page/audit_dispose_event.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
@@ -301,10 +302,9 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
       elevation: 10,
       child: InkWell(
         onTap: () {
-          // print(_scrollController.position.maxScrollExtent);
-          // _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
           if (_slideLeftTag) {
-            _scrollController.jumpTo(0);
+            _scrollController.animateTo(-1800.w,
+                duration: const Duration(seconds: 3), curve: const SawTooth(5));
           } else {
             _scrollController.animateTo(1800.w,
                 duration: const Duration(seconds: 3), curve: const SawTooth(5));
@@ -502,7 +502,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
       int index = 1}) {
     const clickTag = ',添加,指定,查看,编辑,';
     bool isClick = clickTag.contains(data);
-    final canClick = isClick || (data != "—" && tag == '批示内容');
+    final canClick = isClick || (data != "—" && tag == '批示内容') || tag == '责任单位';
     Widget child;
     if (data.length > 13) {
       data = '${data.substring(0, 11)}...';
@@ -539,16 +539,21 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
         // border: Border.all(color: Colors.black, width: 0.5),
       ),
       child: canClick
-          ? InkWell(onTap: () => viewClick(tag, index - 1), child: child)
+          ? InkWell(onTap: () => viewClick(data, tag, index - 1), child: child)
           : child,
     );
   }
 
-  void viewClick(String data, int index) {
+  void viewClick(String data, String tag, int index) {
     final bean = widget.selectList[index];
-    switch (data) {
+    switch (tag) {
       case '责任单位':
-        preDutyUnit(bean);
+        if (data == '指定') {
+          preDutyUnit(bean);
+        } else {
+          Config.startPage(context,
+              AuditDisposeEventPage(eventId: widget.selectList[index].id!));
+        }
         break;
       case '上级通报时间':
         break;

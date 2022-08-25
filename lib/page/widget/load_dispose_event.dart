@@ -10,7 +10,7 @@ import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/str_util.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
-////loadDisposeEvent?info=4O5%2FEaiGr42KlnPoWWI%2FO3I8uu9x6T8h08dYMm%2FUJFOqKqKdPK7Q%2BBtrlSgRlihiKGrTagmMDogvLDP4eE%2FTUA%3D%3D
+//loadDisposeEvent?info=4O5%2FEaiGr42KlnPoWWI%2FO3I8uu9x6T8h08dYMm%2FUJFOqKqKdPK7Q%2BBtrlSgRlihiKGrTagmMDogvLDP4eE%2FTUA%3D%3D
 class LoadDisposeEventPage extends StatefulWidget {
   final String? info;
   const LoadDisposeEventPage({Key? key, required this.info}) : super(key: key);
@@ -23,10 +23,13 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
   final TextEditingController _controller1 = TextEditingController();
   final TextEditingController _controller2 = TextEditingController();
   final TextEditingController _controller3 = TextEditingController();
+  final TextEditingController _feedTimeController = TextEditingController();
   Map eventInfo = {};
   Map disposeEvent = {};
   List? files;
-  List<Map>? disposeEventUnitMappingList;
+  List<dynamic>? disposeEventUnitMappingList;
+  int? userType;
+  bool result = false;
   @override
   void initState() {
     super.initState();
@@ -56,6 +59,8 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
       setState(() {
         files = data['files'];
         eventInfo = data['data'];
+        disposeEvent = data['disposeEvent'];
+        disposeEventUnitMappingList = data['disposeEventUnitMappingList'];
       });
     });
   }
@@ -121,16 +126,17 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
                             DataUtil.isEmpty(files)
                                 ? childItem("原文图文信息：", '无')
                                 : fileItem("原文图文信息：", files!),
+                            SizedBox(height: 46.w),
                             childItem("媒体类型：", eventInfo['link'] ?? ''),
                             childItem("发布时间：", eventInfo['publishTime'] ?? ''),
                             childItem("舆情类别：", eventInfo['type'] ?? ''),
                             childItem("发现时间：", eventInfo['findTime'] ?? ''),
                             ...superiorNotificationView(
                                 eventInfo['superiorNotificationTime']),
-                            childItem("处理内容：", eventInfo['link'] ?? ''),
+                            // childItem("处理内容：", eventInfo['link'] ?? ''),
                             childItem("管理员指定单位备注：",
                                 disposeEvent['manageRemark'] ?? '无'),
-                            // dutyContent(),
+                            ...historyDuty(),
                           ],
                         ),
                       )
@@ -144,7 +150,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
 
   List<Widget> historyDuty() {
     if (DataUtil.isEmpty(disposeEventUnitMappingList)) {
-      return <Widget>[];
+      return <Widget>[dutyContent()];
     }
     // 从小到大排序
     disposeEventUnitMappingList!
@@ -172,11 +178,12 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
       }
     }
     var endList = <Widget>[];
-    if (finalPassState == '未处理') endList = [dutyContent()];
-    if (finalPassState == '待审核') {
-      endList = [childItem('处理内容', lastMap['content'] ?? "")];
-    }
-    if (finalPassState == '通过') {
+    print(finalPassState);
+    if (finalPassState == '未处理') {
+      endList = [dutyContent()];
+    } else if (finalPassState == '待审核') {
+      endList = [childItem('处理内容：', lastMap['content'] ?? "")];
+    } else if (finalPassState == '通过') {
       endList = [
         ...auditTitle(lastMap['utime'], finalPassState),
         childItem("处理内容：\n(${lastMap['time']})", lastMap['content']),
@@ -224,7 +231,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
               fontWeight: FontWeight.w400,
             ),
           ),
-          Radio(value: 1, groupValue: 1, onChanged: (v) {}),
+          const Radio(value: 1, groupValue: 1, onChanged: null),
           Text(
             passText(passState),
             style: Config.loadDefaultTextStyle(
@@ -262,9 +269,32 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
     );
   }
 
+  Widget feedTimeView() {
+    return Container(
+      width: 624.w,
+      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 12.w),
+      child: Config.dateInputView('反馈时间', _feedTimeController,
+          initialDate: DateTime.now()),
+    );
+  }
+
   Widget dutyContent() {
+    final arr = <Widget>[];
+    if (userType == 1) {
+      // 管理员
+      arr.add(Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          bordContentTitle('反馈时间', TextAlign.left),
+          feedTimeView(),
+        ],
+      ));
+      arr.add(SizedBox(height: 23.w));
+    }
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           '处理内容：',
@@ -282,14 +312,18 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
                 controller: _controller3,
                 maxLines: 6,
                 minLines: 6,
+                style: Config.loadDefaultTextStyle(),
                 decoration: Config.defaultInputDecoration(hintText: '请输入处理内容'),
               ),
             ),
             SizedBox(height: 23.w),
+            ...arr,
             TextButton(
-              onPressed: () {
-                requestCommitDutyContent(_controller3.text);
-              },
+              onPressed: result
+                  ? null
+                  : () {
+                      requestCommitDutyContent(_controller3.text);
+                    },
               style: TextButton.styleFrom(
                 primary: Colors.white,
                 backgroundColor: Config.fontColorSelect,
@@ -301,6 +335,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
               ),
               child: const Text('提交'),
             ),
+            SizedBox(height: 30.w),
           ],
         )
       ],
@@ -399,7 +434,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
         border: Border.all(color: const Color(0xFFD9D9D9)),
         borderRadius: BorderRadius.circular(5.w),
       ),
-      child: Text(
+      child: SelectableText(
         content,
         style: Config.loadDefaultTextStyle(
           color: Colors.black.withOpacity(0.65),
@@ -412,11 +447,13 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
   Future<Map<String, dynamic>?> loadToken() async {
     String? token = await UserUtil.getToken();
     int? userId = await UserUtil.getUserId();
+    userType = await UserUtil.getType();
     if (DataUtil.isEmpty(token)) return null;
     if (DataUtil.isEmpty(userId)) return null;
     Map<String, dynamic> map = {};
     map['token'] = token!;
     map['userId'] = userId!;
+    map['userType'] = userType!;
     return map;
   }
 
@@ -552,12 +589,23 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
     }
   }
 
-  ///提交处理内容
+  // 提交处理内容
   void requestCommitDutyContent(String text) async {
-    ServiceHttp().post('', data: {
-      "content": text,
-    }, success: (data) {
-      print(data);
+    final map = await UserUtil.makeUserIdMap();
+    if (userType == 1) {
+      String date = _feedTimeController.text;
+      if (date.isNotEmpty) {
+        map['feedbackTime'] = date;
+      }
+    }
+    map['content'] = text;
+    map['eventId'] = disposeEvent['eventId'];
+    map['disposeEventId'] = disposeEvent['id'];
+    ServiceHttp().post('/disposeEvent', data: map, success: (data) {
+      setState(() {
+        result = true;
+      });
+      showSuccessDialog('提交成功');
     });
   }
 }

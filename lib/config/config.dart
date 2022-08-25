@@ -127,7 +127,8 @@ class Config {
     );
   }
 
-  static Widget dateInputView(explain, controller, {DateTimePickerType? type}) {
+  static Widget dateInputView(explain, controller,
+      {DateTimePickerType? type, DateTime? initialDate}) {
     return DateTimePicker(
       controller: controller,
       type: type ?? DateTimePickerType.dateTime,
@@ -136,6 +137,7 @@ class Config {
           : 'yyyy-MM-dd',
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
+      initialDate: initialDate,
       textInputAction: TextInputAction.next,
       style: Config.loadDefaultTextStyle(color: Colors.black),
       decoration: InputDecoration(
