@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/add_press_word_file.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
+import 'package:public_opinion_manage_web/page/press_page.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
@@ -252,7 +253,7 @@ class _PressListWidgetState extends State<PressListWidget> {
   @override
   void initState() {
     super.initState();
-    _list.add({
+    /* _list.add({
       'title': '专报22期',
       'pressType': '专报',
       'utime': '2022-06-01',
@@ -266,7 +267,8 @@ class _PressListWidgetState extends State<PressListWidget> {
       'title': '专报22期',
       'pressType': '专报',
       'utime': '2022-06-01',
-    });
+    }); */
+    loadList('');
   }
 
   void createPress() {
@@ -274,14 +276,19 @@ class _PressListWidgetState extends State<PressListWidget> {
       toast('请选择创建报刊类型');
       return;
     }
+    Config.startPage(context, PressPage(pressType: _pressType!));
+    switch (_pressType) {
+      case '专报':
+        break;
+      case '快报':
+        break;
+      default:
+    }
   }
 
   void filterPress() {
     String filter = _filterController.value.text;
-    if (filter.isEmpty) {
-      toast('请输入筛选条件');
-      return;
-    }
+    loadList(filter);
   }
 
   void loadList(String filter) async {
@@ -324,15 +331,20 @@ class _PressListWidgetState extends State<PressListWidget> {
     map['userId'] = await UserUtil.getUserId();
     map['description'] = desprice;
     map['pressId'] = id;
-    final list = [];
-    list.add(dio.MultipartFile.fromBytes(fileInfoBean.bytes!,
-        filename: fileInfoBean.name!));
-    map['file'] = list;
-    ServiceHttp().post('/addPressFile', data: map, success: (data) {
-      showSuccessDialog('上传成功', dialogDismiss: () {
-        //关闭上传弹窗
-        Config.finishPage(context);
-      });
-    });
+    final arr = [];
+    arr.add(dio.MultipartFile.fromBytes(fileInfoBean.bytes!,
+        filename: Uri.encodeComponent(fileInfoBean.name!)));
+    map['file'] = arr;
+    ServiceHttp().post(
+      '/addPressFile',
+      data: dio.FormData.fromMap(map),
+      success: (data) {
+        filterPress();
+        showSuccessDialog('上传成功', dialogDismiss: () {
+          //关闭上传弹窗
+          //Config.finishPage(context);
+        });
+      },
+    );
   }
 }

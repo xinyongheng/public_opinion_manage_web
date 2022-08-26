@@ -570,7 +570,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
       case '报刊类型':
         break;
       case '领导批示':
-        toast('暂未开发');
+        lingDaoPiShi(bean.id);
         break;
       case '是否完结':
         break;
@@ -617,7 +617,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
     map['changeContent'] = {
       "replySuperiorTime": time,
     };
-    ServiceHttp().post("path", data: map, success: (data) {
+    ServiceHttp().post("/updateEvent", data: map, success: (data) {
       _timeController?.text = '';
       widget.onUpdate?.call();
       Config.finishPage(context);
@@ -644,32 +644,47 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text('领导姓名：', style: Config.loadDefaultTextStyle()),
-                  TextField(
-                    onChanged: (value) => _name = value,
-                    decoration: Config.defaultInputDecoration(),
+                  SizedBox(
+                    width: 293.w,
+                    child: TextField(
+                      onChanged: (value) => _name = value,
+                      decoration: Config.defaultInputDecoration(),
+                      style: Config.loadDefaultTextStyle(),
+                    ),
                   ),
                 ],
               ),
+              SizedBox(height: 20.w),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text('批示时间：', style: Config.loadDefaultTextStyle()),
-                  Config.dateInputView(
-                    '年/月/日',
-                    _loadTimeController(),
-                    suffixIcon: Image.asset("images/icon_date.png"),
+                  SizedBox(
+                    width: 293.w,
+                    child: Config.dateInputView(
+                      '年/月/日',
+                      _loadTimeController(),
+                      type: DateTimePickerType.date,
+                      suffixIcon: Image.asset("images/icon_date.png"),
+                    ),
                   ),
                 ],
               ),
+              SizedBox(height: 20.w),
               Row(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('批示内容：', style: Config.loadDefaultTextStyle()),
-                  TextField(
-                    onChanged: (value) => _content = value,
-                    maxLines: 5,
-                    minLines: 5,
-                    decoration: Config.defaultInputDecoration(),
+                  SizedBox(
+                    width: 293.w,
+                    child: TextField(
+                      onChanged: (value) => _content = value,
+                      maxLines: 5,
+                      minLines: 5,
+                      decoration: Config.defaultInputDecoration(),
+                      style: Config.loadDefaultTextStyle(),
+                    ),
                   ),
                 ],
               ),
@@ -698,7 +713,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
           "leaderInstructionsContent": _content,
           "leaderName": _name,
         };
-        ServiceHttp().post("path", data: map, success: (data) {
+        ServiceHttp().post("/updateEvent", data: map, success: (data) {
           _timeController?.text = '';
           _name = null;
           _content = null;

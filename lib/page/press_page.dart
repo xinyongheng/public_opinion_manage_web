@@ -7,32 +7,57 @@ import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/data/bean/week_press.dart';
 import 'package:public_opinion_manage_web/page/widget/info_public_opinion.dart';
+import 'package:public_opinion_manage_web/service/service.dart';
+import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 class PressPage extends StatelessWidget {
   final String pressType;
-  const PressPage({Key? key, required this.pressType}) : super(key: key);
+  PressPage({Key? key, required this.pressType}) : super(key: key);
 
+  final headWidget = PressHeadWidget();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(pressType, style: Config.loadDefaultTextStyle()),
-        backgroundColor: Colors.transparent,
+    return Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+            image: AssetImage("images/bg.png"), fit: BoxFit.fill),
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(image: AssetImage("images/bg.png")),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          iconTheme: const IconThemeData(
+            color: Colors.black, //修改颜色
+          ),
+          title: Text(pressType,
+              style: Config.loadDefaultTextStyle(
+                color: Colors.black,
+                fonstSize: Config.appBarTitleSize,
+              )),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const PressHeadWidget(),
-              SizedBox(height: 30.w),
-              pressType != '周报'
-                  ? PressCreateWidget(pressType: pressType)
-                  : const WeekPressCreateWidget(),
-            ],
+        body: Container(
+          alignment: Alignment.topCenter,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 30.w),
+            child: SizedBox(
+              width: 1515.w,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    headWidget,
+                    SizedBox(height: 30.w),
+                    Visibility(
+                      visible: headWidget.selectSize > 0,
+                      child: pressType != '周报'
+                          ? PressCreateWidget(pressType: pressType)
+                          : const WeekPressCreateWidget(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -44,6 +69,7 @@ Widget parentContainer(Widget child, {double? height}) {
   return Container(
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(13.w),
+      color: Colors.white,
     ),
     width: 1515.w,
     height: height,
@@ -52,7 +78,8 @@ Widget parentContainer(Widget child, {double? height}) {
 }
 
 class PressHeadWidget extends StatefulWidget {
-  const PressHeadWidget({Key? key}) : super(key: key);
+  int selectSize = 0;
+  PressHeadWidget({Key? key}) : super(key: key);
 
   @override
   State<PressHeadWidget> createState() => _PressHeadWidgetState();
@@ -65,9 +92,36 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
   List<PublicOpinionBean>? _allList;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _tapGestureRecognizer = TapGestureRecognizer()..onTap = _resetSelect;
+  }
+
+  void requestSearch() async {
+    final map = <String, dynamic>{};
+    map.forEach((key, value) => fillFilterData(map, key, value));
+    askInternet(map.isEmpty ? null : map);
+  }
+
+  // 请求网络列表
+  void askInternet(Map<String, dynamic>? map) async {
+    final finalMap = <String, dynamic>{};
+    if (null != map) {
+      finalMap.addAll(map);
+    }
+    finalMap["userId"] = await UserUtil.getUserId();
+    ServiceHttp().post("/eventList", data: finalMap, success: (data) {
+      selectList.clear();
+      setState(() {
+        selectList.addAll(PublicOpinionBean.fromJsonArray(data));
+      });
+    });
+  }
+
+  void fillFilterData(map, key, value) {
+    final data = value.text;
+    if (data.isNotEmpty) {
+      map[key] = data;
+    }
   }
 
   ListInfoWidget? _listInfoWidget;
@@ -78,9 +132,11 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
       type: 1,
       selectList: _allList ?? [],
       onChange: (value, tag) {
-        //tag = selectList;
         selectList.clear();
         selectList.addAll(tag);
+        setState(() {
+          widget.selectSize = selectList.length;
+        });
       },
     );
     return parentContainer(
@@ -103,12 +159,13 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
             firstRow(),
             SizedBox(height: 21.w),
             secondRow(),
-            selectList.isEmpty
-                ? const SizedBox(width: 0, height: 0)
-                : selectView(selectList.length),
+            SizedBox(height: 21.w),
+            Visibility(
+                visible: selectList.isNotEmpty,
+                child: selectView(selectList.length)),
             _listInfoWidget!,
             SizedBox(height: 32.w),
-            TextButton(
+            /* TextButton(
               onPressed: () {
                 //7620657
               },
@@ -123,7 +180,7 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
               ),
               child: const Text('确定'),
             ),
-            SizedBox(height: 32.w),
+            SizedBox(height: 32.w), */
           ],
         ),
       ),
@@ -151,7 +208,7 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
         searchItem('publishTime', '发布时间：'),
         SizedBox(width: 44.w),
         searchItem('feedbackTime', '反馈时间：'),
-        SizedBox(width: 83.w),
+        SizedBox(width: 44.w),
         searchItem('findTime', '发现时间：'),
         SizedBox(width: 33.w),
         sureButton(),
@@ -163,7 +220,9 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
 
   TextButton sureButton() {
     return TextButton(
-      onPressed: () {},
+      onPressed: () {
+        requestSearch();
+      },
       style: TextButton.styleFrom(
         textStyle: Config.loadDefaultTextStyle(fontWeight: FontWeight.w400),
         minimumSize: const Size(1, 1),
@@ -198,7 +257,7 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
           borderRadius: BorderRadius.circular(5.w),
         ),
       ),
-      child: const Text('确定'),
+      child: const Text('重置'),
     );
   }
 
@@ -325,91 +384,111 @@ class _PressCreateWidgetState extends State<PressCreateWidget> {
   final map = <String, TextEditingController>{};
   @override
   Widget build(BuildContext context) {
-    return parentContainer(Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(height: 31.w),
-        Text(
-          '${widget.pressType}编写',
-          style: Config.loadDefaultTextStyle(
-            fonstSize: 27.w,
-            fontWeight: FontWeight.w500,
-            color: Colors.black.withOpacity(0.85),
-          ),
-        ),
-        SizedBox(height: 18.w),
-        Row(mainAxisSize: MainAxisSize.min, children: [
-          Text(
-            '报刊类型：',
-            style: Config.loadDefaultTextStyle(
-              fontWeight: FontWeight.w400,
-              color: Colors.black.withOpacity(0.85),
-            ),
-          ),
-          Container(
-            width: 624.w,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5.sp),
-              border: Border.all(color: Config.borderColor),
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 14.w, horizontal: 16.w),
-              child: Text(
-                widget.pressType,
-                style: Config.loadDefaultTextStyle(),
-              ),
-            ),
-          ),
-          SizedBox(height: 48.w),
-          childItem('标题：', 'title'),
-          SizedBox(height: 48.w),
-          childItem('日期：', 'creteDate'),
-          SizedBox(height: 48.w),
-          childItem('刊号：', 'pressNo'),
-          SizedBox(height: 48.w),
-          childItem('内容：', 'context', line: 10),
-          SizedBox(height: 22.w),
+    return parentContainer(Padding(
+      padding: EdgeInsets.symmetric(horizontal: 36.w, vertical: 31.w),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
           Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '内容：',
+                '${widget.pressType}编写',
                 style: Config.loadDefaultTextStyle(
-                  fontWeight: FontWeight.w400,
-                  color: Colors.transparent,
+                  fonstSize: 27.w,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black.withOpacity(0.85),
                 ),
               ),
-              TextButton(
-                onPressed: () {},
-                style: TextButton.styleFrom(
-                  primary: Colors.white,
-                  backgroundColor: Config.fontColorSelect,
-                  minimumSize: const Size(1, 1),
-                  padding: EdgeInsets.zero,
-                  fixedSize: Size(123.w, 43.w),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5.w)),
-                ),
-                child: const Text('生成word'),
-              ),
-              TextButton(
-                onPressed: () {},
-                style: TextButton.styleFrom(
-                  primary: Config.fontColorSelect,
-                  backgroundColor: Colors.white,
-                  minimumSize: const Size(1, 1),
-                  padding: EdgeInsets.zero,
-                  fixedSize: Size(123.w, 43.w),
-                  shape: RoundedRectangleBorder(
-                      side: const BorderSide(color: Color(0xFFD9D9D9)),
-                      borderRadius: BorderRadius.circular(5.w)),
-                ),
-                child: const Text('提交'),
-              ),
+              const Spacer(),
             ],
-          )
-        ]),
-      ],
+          ),
+          SizedBox(height: 18.w),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '报刊类型：',
+                    style: Config.loadDefaultTextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black.withOpacity(0.85),
+                    ),
+                  ),
+                  Container(
+                    width: 624.w,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5.sp),
+                      border: Border.all(color: Config.borderColor),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: 14.w, horizontal: 16.w),
+                      child: Text(
+                        widget.pressType,
+                        style: Config.loadDefaultTextStyle(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 48.w),
+              childItem('标题：', 'title'),
+              SizedBox(height: 48.w),
+              childItem('日期：', 'creteDate'),
+              SizedBox(height: 48.w),
+              childItem('刊号：', 'pressNo'),
+              SizedBox(height: 48.w),
+              childItem('内容：', 'context', line: 10),
+              SizedBox(height: 22.w),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '内容：',
+                    style: Config.loadDefaultTextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: Colors.transparent,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    style: TextButton.styleFrom(
+                      primary: Colors.white,
+                      backgroundColor: Config.fontColorSelect,
+                      minimumSize: const Size(1, 1),
+                      padding: EdgeInsets.zero,
+                      fixedSize: Size(123.w, 43.w),
+                      textStyle: Config.loadDefaultTextStyle(),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.w)),
+                    ),
+                    child: const Text('生成word'),
+                  ),
+                  SizedBox(width: 50.w),
+                  TextButton(
+                    onPressed: () {},
+                    style: TextButton.styleFrom(
+                      primary: Config.fontColorSelect,
+                      backgroundColor: Colors.white,
+                      minimumSize: const Size(1, 1),
+                      padding: EdgeInsets.zero,
+                      fixedSize: Size(123.w, 43.w),
+                      textStyle: Config.loadDefaultTextStyle(),
+                      shape: RoundedRectangleBorder(
+                          side: const BorderSide(color: Config.fontColorSelect),
+                          borderRadius: BorderRadius.circular(5.w)),
+                    ),
+                    child: const Text('提交'),
+                  ),
+                ],
+              )
+            ],
+          ),
+        ],
+      ),
     ));
   }
 
@@ -423,7 +502,17 @@ class _PressCreateWidgetState extends State<PressCreateWidget> {
   Row childItem(String title, String key, {int? line}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: line != null && line > 1
+          ? CrossAxisAlignment.start
+          : CrossAxisAlignment.center,
       children: [
+        Text(
+          "空格",
+          style: Config.loadDefaultTextStyle(
+            fontWeight: FontWeight.w400,
+            color: Colors.transparent,
+          ),
+        ),
         Text(
           title,
           style: Config.loadDefaultTextStyle(
@@ -433,7 +522,7 @@ class _PressCreateWidgetState extends State<PressCreateWidget> {
         ),
         SizedBox(
           width: 624.w,
-          child: title.endsWith('日期')
+          child: title.endsWith('日期：')
               ? dateView(title, loadController(key))
               : TextField(
                   controller: loadController(key),

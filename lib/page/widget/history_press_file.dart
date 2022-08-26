@@ -20,6 +20,7 @@ class _HistoryPressFileWidgetState extends State<HistoryPressFileWidget> {
   final _frontColor = Colors.black.withOpacity(0.85);
   final TextEditingController _filterController = TextEditingController();
   final List<OldPressWordFile> _list = <OldPressWordFile>[];
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -206,6 +207,7 @@ class _HistoryPressFileWidgetState extends State<HistoryPressFileWidget> {
   @override
   void initState() {
     super.initState();
+    loadOldFileList(null);
   }
 
   final _fileListWidget = FileListWidget(
@@ -241,8 +243,9 @@ class _HistoryPressFileWidgetState extends State<HistoryPressFileWidget> {
     List arr = [];
     for (int i = 0; i < list.length; i++) {
       final element = list[i];
-      arr.add(
-          dio.MultipartFile.fromBytes(element.bytes!, filename: element.name!));
+      // 为了防止中文乱码，服务器在解码即可
+      final String encode = Uri.encodeComponent(element.name!);
+      arr.add(dio.MultipartFile.fromBytes(element.bytes!, filename: encode));
     }
     map['file'] = arr;
     ServiceHttp().post(
@@ -250,7 +253,6 @@ class _HistoryPressFileWidgetState extends State<HistoryPressFileWidget> {
       data: dio.FormData.fromMap(map),
       success: (data) {
         showSuccessDialog('录入成功', dialogDismiss: () {
-          Config.finishPage(context);
           _filterController.text = '';
           //刷新文件
           loadOldFileList(null);
@@ -262,10 +264,13 @@ class _HistoryPressFileWidgetState extends State<HistoryPressFileWidget> {
   void preReadWord(String wordContent, String path) {
     showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (context) {
           return AlertDialog(
             content: Card(
-              elevation: 20,
+              color: Colors.white,
+              elevation: 2,
+              margin: EdgeInsets.zero,
               child: SizedBox(
                 width: 747.w,
                 height: 784.w,
@@ -274,6 +279,7 @@ class _HistoryPressFileWidgetState extends State<HistoryPressFileWidget> {
                   children: [
                     Row(
                       children: [
+                        SizedBox(width: 32.w),
                         Text(
                           '文件内容预览',
                           style: Config.loadDefaultTextStyle(
@@ -290,7 +296,7 @@ class _HistoryPressFileWidgetState extends State<HistoryPressFileWidget> {
                           icon: Icon(
                             Icons.close,
                             color: Colors.black,
-                            size: 21.w,
+                            size: 30.w,
                           ),
                         ),
                       ],
@@ -304,8 +310,9 @@ class _HistoryPressFileWidgetState extends State<HistoryPressFileWidget> {
                         child: SingleChildScrollView(
                       child: Padding(
                         padding: EdgeInsets.all(32.w),
-                        child: Text(
+                        child: SelectableText(
                           wordContent,
+                          scrollPhysics: const NeverScrollableScrollPhysics(),
                           style: Config.loadDefaultTextStyle(
                             color: Colors.black.withOpacity(0.65),
                             fontWeight: FontWeight.w400,
@@ -339,7 +346,7 @@ class _HistoryPressFileWidgetState extends State<HistoryPressFileWidget> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Image.asset('image/download.png',
+                                  Image.asset('images/download.png',
                                       width: 21.w, height: 21.w),
                                   SizedBox(width: 5.w),
                                   Text(
@@ -364,10 +371,9 @@ class _HistoryPressFileWidgetState extends State<HistoryPressFileWidget> {
   }
 
   void filterPress() {
-    String filter = _filterController.value.text;
+    String? filter = _filterController.value.text;
     if (filter.isEmpty) {
-      toast('请输入筛选条件');
-      return;
+      filter = null;
     }
     loadOldFileList(filter);
   }

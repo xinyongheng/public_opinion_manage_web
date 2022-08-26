@@ -24,23 +24,25 @@ class _AddPressWordFileWidgetState extends State<AddPressWordFileWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 440.w,
+      // width: 440.w,
       // height: 568.w,
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: const Color(0xFFD9D9D9)),
+        borderRadius: BorderRadius.circular(5.w),
       ),
+      // alignment: Alignment.topCenter,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(height: 30.w),
+          SizedBox(height: 10.w),
           Row(
             children: [
-              SizedBox(width: 20.w),
+              SizedBox(width: 30.w),
               Text(
                 '添加报刊附件',
                 style: Config.loadDefaultTextStyle(
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w600,
                   color: Colors.black.withOpacity(0.85),
                 ),
               ),
@@ -64,13 +66,14 @@ class _AddPressWordFileWidgetState extends State<AddPressWordFileWidget> {
               controller: _controller,
               maxLines: 5,
               minLines: 5,
+              style: Config.loadDefaultTextStyle(),
               decoration: Config.defaultInputDecoration(hintText: '添加文件关键词'),
             ),
           ),
           SizedBox(height: 21.w),
           Container(
             width: 396.w,
-            height: 240.w,
+            // height: 240.w,
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(color: const Color(0xFFD9D9D9)),
@@ -108,6 +111,9 @@ class _AddPressWordFileWidgetState extends State<AddPressWordFileWidget> {
                           color: const Color(0xFF666666),
                           fontWeight: FontWeight.w400,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: true,
                       ),
                       SizedBox(height: 20.w),
                     ],
@@ -121,21 +127,27 @@ class _AddPressWordFileWidgetState extends State<AddPressWordFileWidget> {
                           color: const Color(0xFFD9D9D9),
                           child: Image.asset('images/ic_xls.png')),
                       SizedBox(width: 8.w),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(_fileInfoBean!.name!,
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SelectableText(
+                              _fileInfoBean!.name!,
                               style: Config.loadDefaultTextStyle(
                                   color: const Color(0xFF333333),
-                                  fonstSize: 19.w)),
-                          Text("${formatNum(_fileInfoBean!.size! / 1204, 1)}K",
-                              style: Config.loadDefaultTextStyle(
-                                  color: const Color(0xFF333333),
-                                  fonstSize: 19.w)),
-                        ],
+                                  fonstSize: 19.w),
+                              maxLines: 2,
+                              // overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                                "${formatNum(_fileInfoBean!.size! / 1204, 1)}K",
+                                style: Config.loadDefaultTextStyle(
+                                    color: const Color(0xFF333333),
+                                    fonstSize: 19.w)),
+                          ],
+                        ),
                       ),
-                      const Spacer(),
                       TextButton(
                         onPressed: () {
                           showDeleteDialog(context, 0);
@@ -166,6 +178,7 @@ class _AddPressWordFileWidgetState extends State<AddPressWordFileWidget> {
             ),
             child: const Text('确认'),
           ),
+          SizedBox(height: 30.w),
         ],
       ),
     );
@@ -192,7 +205,7 @@ class _AddPressWordFileWidgetState extends State<AddPressWordFileWidget> {
         final fileInfo = FileInfoBean("web_$fileName",
             bytes: fileBytes, name: fileName, size: result.files.single.size);
         _fileInfoBean = fileInfo;
-        // setState(() {});
+        setState(() {});
         // String text = String.fromCharCodes(fileBytes!);
         // final text = const Utf8Decoder().convert(fileBytes!);
         // result.files.single.path
@@ -201,6 +214,7 @@ class _AddPressWordFileWidgetState extends State<AddPressWordFileWidget> {
         // String s = await file.readAsString(encoding: utf8);
         // print(s);
         _fileInfoBean = FileInfoBean(result.files.single.path!);
+        setState(() {});
       }
     } else {}
   }
