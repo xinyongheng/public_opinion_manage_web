@@ -61,45 +61,7 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
           children: [
             Text('舆情列表', style: Config.loadFirstTextStyle()),
             SizedBox(height: 38.w),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                ...filterWidget('事件名称：', 'descriptionFilter'),
-                SizedBox(width: 45.w),
-                ...filterWidget('舆情类别：', 'typeFilter'),
-                SizedBox(width: 45.w),
-                ...filterWidget('舆情报刊类型：', 'pressTypeFilter'),
-                SizedBox(width: 45.w),
-                ...filterWidget('媒体类型：', 'mediaTypeFilter'),
-              ],
-            ),
-            SizedBox(width: 45.w, height: 21.w),
-            timeFilter('发布时间：', 'publishTimeStart', 'publishTimeEnd'),
-            SizedBox(width: 45.w, height: 21.w),
-            timeFilter('反馈时间：', 'feedbackTimeStart', 'feedbackTimeEnd'),
-            SizedBox(width: 45.w, height: 21.w),
-            Row(
-              children: [
-                timeFilter('发现时间：', 'findTimeStart', 'findTimeEnd'),
-                SizedBox(width: 33.w),
-                loadTextButton('查 询', () {
-                  requestSearch();
-                }),
-                SizedBox(width: 33.w),
-                loadTextButton(
-                  '重 置',
-                  () {
-                    controllerMap.forEach((key, value) {
-                      value.text = '';
-                    });
-                    askInternet(null);
-                  },
-                  primary: Config.fontColorSelect,
-                  backgroundColor: Colors.white,
-                ),
-              ],
-            ),
+            ...headFilterView(),
             SizedBox(width: 45.w, height: 60.w),
             ListInfoWidget(
               canSelect: false,
@@ -111,6 +73,50 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
         ),
       ),
     );
+  }
+
+  List<Widget> headFilterView() {
+    return [
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ...filterWidget('事件名称：', 'descriptionFilter'),
+          SizedBox(width: 45.w),
+          ...filterWidget('舆情类别：', 'typeFilter'),
+          SizedBox(width: 45.w),
+          ...filterWidget('舆情报刊类型：', 'pressTypeFilter'),
+          SizedBox(width: 45.w),
+          ...filterWidget('媒体类型：', 'mediaTypeFilter'),
+        ],
+      ),
+      SizedBox(width: 45.w, height: 21.w),
+      timeFilter('发布时间：', 'publishTimeStart', 'publishTimeEnd'),
+      SizedBox(width: 45.w, height: 21.w),
+      timeFilter('反馈时间：', 'feedbackTimeStart', 'feedbackTimeEnd'),
+      SizedBox(width: 45.w, height: 21.w),
+      Row(
+        children: [
+          timeFilter('发现时间：', 'findTimeStart', 'findTimeEnd'),
+          SizedBox(width: 33.w),
+          loadTextButton('查 询', () {
+            requestSearch();
+          }),
+          SizedBox(width: 33.w),
+          loadTextButton(
+            '重 置',
+            () {
+              controllerMap.forEach((key, value) {
+                value.text = '';
+              });
+              askInternet(null);
+            },
+            primary: Config.fontColorSelect,
+            backgroundColor: Colors.white,
+          ),
+        ],
+      ),
+    ];
   }
 
   TextButton loadTextButton(
@@ -242,10 +248,9 @@ class ListInfoWidget extends StatefulWidget {
   final bool? canSelect;
   final List<PublicOpinionBean> selectList;
   final int type;
-  final List<PublicOpinionBean> hadSelectList = [];
   final CheckBoxChange? onChange;
   final VoidCallback? onUpdate;
-  ListInfoWidget({
+  const ListInfoWidget({
     Key? key,
     this.canSelect,
     required this.selectList,
@@ -254,12 +259,13 @@ class ListInfoWidget extends StatefulWidget {
     this.onUpdate,
   }) : super(key: key);
   @override
-  State<ListInfoWidget> createState() => _ListInfoWidgetState();
+  State<ListInfoWidget> createState() => ListInfoWidgetState();
 }
 
-class _ListInfoWidgetState extends State<ListInfoWidget>
+class ListInfoWidgetState extends State<ListInfoWidget>
     with TickerProviderStateMixin {
   final wordLength = 16.w;
+  final List<PublicOpinionBean> _hadSelectList = [];
 
   final _physics = const NeverScrollableScrollPhysics();
   final ScrollController _scrollController = ScrollController();
@@ -267,7 +273,12 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
   @override
   void initState() {
     super.initState();
-    widget.hadSelectList.clear();
+  }
+
+  void clearSelect() {
+    setState(() {
+      _hadSelectList.clear();
+    });
   }
 
   @override
@@ -343,11 +354,15 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
 
   Widget firstTableRowView() {
     final arr = [
-      SizedBox(
-        width: 40.sp,
-        height: 30.sp,
-        child: const Center(
-          child: InkWell(onTap: null, child: Text('选择')),
+      Container(
+        width: 40.w,
+        height: 30.w,
+        color: const Color(0xFFFAFAFA),
+        child: Center(
+          child: InkWell(
+              onTap: null,
+              child: Text('选择',
+                  style: Config.loadDefaultTextStyle(fonstSize: wordLength))),
         ),
       ),
       childItemView('序号', '',
@@ -427,6 +442,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
   }
 
   Widget tableRowView(PublicOpinionBean bean, int indexNo) {
+    // print("tableRowView indexNo=${indexNo} + ${_hadSelectList.length}");
     bool tag = bean.leaderName == null;
     String leaderInstructions = tag
         ? (widget.type == 1 ? '添加' : "—")
@@ -434,20 +450,25 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
     int index = bean.no!;
     final arr = [
       Container(
-        width: 40.sp,
-        height: 30.sp,
+        width: 40.w,
+        height: 30.w,
+        // color: Colors.yellow,
         alignment: Alignment.center,
-        child: CheckBoxWidget(
-          boxTag: indexNo,
-          value: widget.hadSelectList.contains(widget.selectList[indexNo - 1]),
-          onChanged: (value, tag) {
-            if (value) {
-              widget.hadSelectList.add(widget.selectList[tag as int]);
-            } else {
-              widget.hadSelectList.remove(widget.selectList[tag as int]);
-            }
-            widget.onChange?.call(value, widget.hadSelectList);
-          },
+        child: Transform.scale(
+          scale: 0.7,
+          child: CheckBoxWidget(
+            boxTag: indexNo - 1,
+            value: _hadSelectList.contains(widget.selectList[indexNo - 1]),
+            onChanged: (value, tag) {
+              if (value) {
+                _hadSelectList.add(widget.selectList[tag as int]);
+              } else {
+                _hadSelectList.remove(widget.selectList[tag as int]);
+              }
+              //print("2选中数量：${_hadSelectList.length}-value=${value}");
+              widget.onChange?.call(value, _hadSelectList);
+            },
+          ),
         ),
       ),
       childItemView("$indexNo", '序号', width: 4 * wordLength, index: index),

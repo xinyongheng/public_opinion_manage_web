@@ -18,22 +18,24 @@ class CheckBoxWidget extends StatefulWidget {
 }
 
 class _CheckBoxWidgetState extends State<CheckBoxWidget> {
-  bool _value = false;
+  // bool _value = false;
   @override
   void initState() {
     super.initState();
-    _value = widget.value;
+    // _value = widget.value;
+    // print("initState：widget.value=${widget.value}, _value=${_value}");
   }
 
   @override
   Widget build(BuildContext context) {
+    // print("_CheckBoxWidgetState：widget.value=${widget.value}, _value=${true}");
     return Checkbox(
-        value: _value,
+        value: widget.value,
         onChanged: (change) {
           setState(() {});
-          widget.value = _value;
-          _value = change ?? false;
-          widget.onChanged(_value, widget.boxTag);
+          widget.value = change ?? false;
+          //_value = change ?? false;
+          widget.onChanged(widget.value, widget.boxTag);
         });
   }
 }

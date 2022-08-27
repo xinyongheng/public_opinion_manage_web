@@ -10,13 +10,38 @@ import 'package:public_opinion_manage_web/page/widget/info_public_opinion.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
-class PressPage extends StatelessWidget {
+class PressPage extends StatefulWidget {
   final String pressType;
-  PressPage({Key? key, required this.pressType}) : super(key: key);
 
-  final headWidget = PressHeadWidget();
+  const PressPage({Key? key, required this.pressType}) : super(key: key);
+
+  @override
+  State<PressPage> createState() => _PressPageState();
+}
+
+class _PressPageState extends State<PressPage> {
+  int selectSize = 0;
+  late PressHeadWidget headWidget;
+
+  late Widget pressWidget;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    pressWidget = widget.pressType != '周报'
+        ? PressCreateWidget(pressType: widget.pressType)
+        : const WeekPressCreateWidget();
+  }
+
   @override
   Widget build(BuildContext context) {
+    headWidget = PressHeadWidget(
+      valueChanged: <int>(value) {
+        setState(() {
+          selectSize = value;
+        });
+      },
+    );
     return Container(
       decoration: const BoxDecoration(
         image: DecorationImage(
@@ -28,7 +53,7 @@ class PressPage extends StatelessWidget {
           iconTheme: const IconThemeData(
             color: Colors.black, //修改颜色
           ),
-          title: Text(pressType,
+          title: Text(widget.pressType,
               style: Config.loadDefaultTextStyle(
                 color: Colors.black,
                 fonstSize: Config.appBarTitleSize,
@@ -48,11 +73,9 @@ class PressPage extends StatelessWidget {
                   children: [
                     headWidget,
                     SizedBox(height: 30.w),
-                    Visibility(
-                      visible: headWidget.selectSize > 0,
-                      child: pressType != '周报'
-                          ? PressCreateWidget(pressType: pressType)
-                          : const WeekPressCreateWidget(),
+                    Opacity(
+                      opacity: selectSize > 0 ? 1 : 0,
+                      child: pressWidget,
                     ),
                   ],
                 ),
@@ -78,18 +101,21 @@ Widget parentContainer(Widget child, {double? height}) {
 }
 
 class PressHeadWidget extends StatefulWidget {
-  int selectSize = 0;
-  PressHeadWidget({Key? key}) : super(key: key);
+  final ValueChanged? valueChanged;
+  const PressHeadWidget({Key? key, this.valueChanged}) : super(key: key);
 
   @override
   State<PressHeadWidget> createState() => _PressHeadWidgetState();
 }
 
 class _PressHeadWidgetState extends State<PressHeadWidget> {
-  final map = <String, TextEditingController>{};
+  final controllerMap = <String, TextEditingController>{};
   late TapGestureRecognizer _tapGestureRecognizer;
   final selectList = <PublicOpinionBean>[];
   List<PublicOpinionBean>? _allList;
+
+  final GlobalKey<ListInfoWidgetState> _key = GlobalKey<ListInfoWidgetState>();
+
   @override
   void initState() {
     super.initState();
@@ -97,9 +123,9 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
   }
 
   void requestSearch() async {
-    final map = <String, dynamic>{};
-    map.forEach((key, value) => fillFilterData(map, key, value));
-    askInternet(map.isEmpty ? null : map);
+    final mapData = <String, dynamic>{};
+    controllerMap.forEach((key, value) => fillFilterData(mapData, key, value));
+    askInternet(mapData.isEmpty ? null : mapData);
   }
 
   // 请求网络列表
@@ -112,7 +138,7 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
     ServiceHttp().post("/eventList", data: finalMap, success: (data) {
       selectList.clear();
       setState(() {
-        selectList.addAll(PublicOpinionBean.fromJsonArray(data));
+        _allList = PublicOpinionBean.fromJsonArray(data);
       });
     });
   }
@@ -128,15 +154,16 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
   @override
   Widget build(BuildContext context) {
     _listInfoWidget = ListInfoWidget(
+      key: _key,
       canSelect: true,
       type: 1,
       selectList: _allList ?? [],
       onChange: (value, tag) {
         selectList.clear();
-        selectList.addAll(tag);
         setState(() {
-          widget.selectSize = selectList.length;
+          selectList.addAll(tag);
         });
+        widget.valueChanged?.call(tag.length);
       },
     );
     return parentContainer(
@@ -156,9 +183,7 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
               ),
             ),
             SizedBox(height: 26.w),
-            firstRow(),
-            SizedBox(height: 21.w),
-            secondRow(),
+            ...headFilterView(),
             SizedBox(height: 21.w),
             Visibility(
                 visible: selectList.isNotEmpty,
@@ -167,7 +192,11 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
             SizedBox(height: 32.w),
             /* TextButton(
               onPressed: () {
-                //7620657
+                if (selectList.isEmpty) {
+                  toast('请选择事件');
+                  return;
+                }
+                setState(() {});
               },
               style: TextButton.styleFrom(
                 primary: Colors.white,
@@ -188,33 +217,111 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
     );
   }
 
-  Row firstRow() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        searchItem('description', '事件描述：'),
-        SizedBox(width: 44.w),
-        searchItem('type', '事件类型：'),
-        SizedBox(width: 44.w),
-        searchItem('mediaType', '媒体类型：'),
-      ],
+  List<Widget> headFilterView() {
+    return [
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ...filterWidget('事件名称：', 'descriptionFilter'),
+          SizedBox(width: 45.w),
+          ...filterWidget('舆情类别：', 'typeFilter'),
+          SizedBox(width: 45.w),
+          ...filterWidget('舆情报刊类型：', 'pressTypeFilter'),
+          SizedBox(width: 45.w),
+          ...filterWidget('媒体类型：', 'mediaTypeFilter'),
+        ],
+      ),
+      SizedBox(width: 45.w, height: 21.w),
+      timeFilter('发布时间：', 'publishTimeStart', 'publishTimeEnd'),
+      SizedBox(width: 45.w, height: 21.w),
+      timeFilter('反馈时间：', 'feedbackTimeStart', 'feedbackTimeEnd'),
+      SizedBox(width: 45.w, height: 21.w),
+      Row(
+        children: [
+          timeFilter('发现时间：', 'findTimeStart', 'findTimeEnd'),
+          SizedBox(width: 33.w),
+          sureButton(),
+          SizedBox(width: 33.w),
+          resetButton(),
+        ],
+      ),
+    ];
+  }
+
+  Widget filterTitle(data) {
+    return Text(
+      data,
+      style: Config.loadDefaultTextStyle(),
     );
   }
 
-  Row secondRow() {
+  List<Widget> filterWidget(data, key) {
+    return [
+      filterTitle(data),
+      loadTextField(key),
+    ];
+  }
+
+  Widget timeFilter(data, keyStart, keyEnd) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        searchItem('publishTime', '发布时间：'),
-        SizedBox(width: 44.w),
-        searchItem('feedbackTime', '反馈时间：'),
-        SizedBox(width: 44.w),
-        searchItem('findTime', '发现时间：'),
-        SizedBox(width: 33.w),
-        sureButton(),
-        SizedBox(width: 10.w),
-        resetButton(),
-      ],
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          filterTitle(data),
+          SizedBox(
+            width: 213.w,
+            child: DateTimePicker(
+              controller: loadController(keyStart),
+              type: DateTimePickerType.date,
+              dateMask: 'yyyy-MM-dd',
+              firstDate: DateTime(1992),
+              lastDate: DateTime.now(),
+              textInputAction: TextInputAction.next,
+              style: Config.loadDefaultTextStyle(color: Colors.black),
+              decoration: Config.defaultInputDecoration(
+                hintText: '年/月/日',
+                suffixIcon: Image.asset(
+                  'images/icon_date.png',
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 14.w),
+            child: Text('至', style: Config.loadDefaultTextStyle()),
+          ),
+          SizedBox(
+            width: 213.w,
+            child: DateTimePicker(
+              controller: loadController(keyEnd),
+              type: DateTimePickerType.date,
+              dateMask: 'yyyy-MM-dd',
+              firstDate: DateTime(1992),
+              lastDate: DateTime.now(),
+              textInputAction: TextInputAction.next,
+              style: Config.loadDefaultTextStyle(color: Colors.black),
+              decoration: Config.defaultInputDecoration(
+                hintText: '年/月/日',
+                suffixIcon: Image.asset(
+                  'images/icon_date.png',
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          ),
+        ]);
+  }
+
+  Widget loadTextField(String key, {String hint = '请输入'}) {
+    return SizedBox(
+      width: 213.w,
+      child: TextField(
+        controller: loadController(key),
+        decoration: Config.defaultInputDecoration(hintText: hint),
+        style: Config.loadDefaultTextStyle(color: Colors.black),
+      ),
     );
   }
 
@@ -262,55 +369,29 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
   }
 
   void _resetFilter() {
-    map.forEach((key, value) {
+    controllerMap.forEach((key, value) {
       value.text = '';
     });
   }
 
-  Widget searchItem(String key, String explain) {
-    final bool dateTag = explain.endsWith('时间');
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          explain,
-          style: Config.loadDefaultTextStyle(
-            fontWeight: FontWeight.w400,
-            color: Colors.black.withOpacity(0.85),
-          ),
-        ),
-        SizedBox(
-          width: 213.w,
-          child: TextField(
-            controller: loadController(key),
-            decoration: Config.defaultInputDecoration(
-                hintText: dateTag ? '年/月/日' : '请输入',
-                suffixIcon:
-                    dateTag ? Image.asset('images/icon_date.png)') : null),
-          ),
-        ),
-      ],
-    );
-  }
-
   TextEditingController loadController(String key) {
-    if (!map.containsKey(key)) {
-      map[key] = TextEditingController();
+    if (!controllerMap.containsKey(key)) {
+      controllerMap[key] = TextEditingController();
     }
-    return map[key]!;
+    return controllerMap[key]!;
   }
 
   @override
   void dispose() {
     super.dispose();
-    map.forEach((key, value) {
+    controllerMap.forEach((key, value) {
       value.dispose();
     });
   }
 
   Widget selectView(int size) {
     return Padding(
-      padding: EdgeInsets.only(left: 43.w, top: 43.w, bottom: 27.w),
+      padding: EdgeInsets.only(left: 0.w, top: 43.w, bottom: 27.w),
       child: Container(
         width: 1429.w,
         height: 53.w,
@@ -324,9 +405,9 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(width: 33.w),
-            Icon(Icons.info, size: 19.w, color: Config.fontColorSelect),
+            Icon(Icons.info, size: 20.w, color: Config.fontColorSelect),
             SizedBox(width: 11.w),
-            Text("$size项"),
+            // Text("$size项", style: Config.loadDefaultTextStyle()),
             Text.rich(TextSpan(
                 text: '已选择',
                 style: Config.loadDefaultTextStyle(
@@ -335,7 +416,7 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
                 ),
                 children: [
                   TextSpan(
-                      text: "$size ",
+                      text: " $size ",
                       style: Config.loadDefaultTextStyle(
                         color: Config.fontColorSelect,
                         fontWeight: FontWeight.w400,
@@ -364,8 +445,10 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
   void _resetSelect() {
     setState(() {
       selectList.clear();
-      _listInfoWidget!.hadSelectList.clear();
+      _key.currentState?.clearSelect();
+      // _listInfoWidget!.hadSelectList.clear();
     });
+    widget.valueChanged?.call(0);
   }
 }
 
