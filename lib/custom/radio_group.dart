@@ -48,14 +48,16 @@ class _RadioGroupWidgetState extends State<RadioGroupWidget> {
             activeColor: const Color.fromARGB(255, 29, 153, 93),
             value: i,
             groupValue: _selectValue,
-            onChanged: (int? value) {
-              if (value != _selectValue) {
-                setState(() {
-                  _selectValue = value ?? 0;
-                });
-              }
-              widget.change?.call(value);
-            },
+            onChanged: widget.change == null
+                ? null
+                : (int? value) {
+                    if (value != _selectValue) {
+                      setState(() {
+                        _selectValue = value ?? 0;
+                      });
+                    }
+                    widget.change?.call(value);
+                  },
           ),
           // SizedBox(width: 5.sp),
           Text(element, style: Config.loadDefaultTextStyle()),

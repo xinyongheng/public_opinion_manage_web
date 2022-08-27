@@ -272,7 +272,6 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     _timeController?.dispose();
   }
@@ -718,7 +717,7 @@ class _ListInfoWidgetState extends State<ListInfoWidget>
           _name = null;
           _content = null;
           widget.onUpdate?.call();
-          Config.finishPage(context);
+          //Config.finishPage(context);
           showSuccessDialog('上传成功');
         });
       },

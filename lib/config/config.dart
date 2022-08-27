@@ -128,9 +128,13 @@ class Config {
   }
 
   static Widget dateInputView(explain, controller,
-      {DateTimePickerType? type, DateTime? initialDate, Widget? suffixIcon}) {
+      {DateTimePickerType? type,
+      DateTime? initialDate,
+      Widget? suffixIcon,
+      bool readOnly = false}) {
     return DateTimePicker(
       controller: controller,
+      readOnly: readOnly,
       type: type ?? DateTimePickerType.dateTime,
       dateMask: type == DateTimePickerType.dateTime
           ? 'yyyy-MM-dd HH:mm'

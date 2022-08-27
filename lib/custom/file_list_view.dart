@@ -7,7 +7,12 @@ import 'package:public_opinion_manage_web/service/service.dart';
 class ShowFileListWidget extends StatelessWidget {
   final double width;
   final List list;
-  const ShowFileListWidget({Key? key, required this.width, required this.list})
+  final int crossAxisCount;
+  const ShowFileListWidget(
+      {Key? key,
+      required this.width,
+      required this.list,
+      this.crossAxisCount = 3})
       : super(key: key);
 
   @override
@@ -22,8 +27,8 @@ class ShowFileListWidget extends StatelessWidget {
           return fileView(list[index]['path'], list[index]['description']);
         },
         itemCount: list.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
           childAspectRatio: 163 / 43.0,
           crossAxisSpacing: 5,
         ),
