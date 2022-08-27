@@ -8,6 +8,7 @@ import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/duty_unit.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/page/audit_dispose_event.dart';
+import 'package:public_opinion_manage_web/page/public_opinion_info.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
@@ -592,7 +593,8 @@ class ListInfoWidgetState extends State<ListInfoWidget>
       case '领导批示':
         lingDaoPiShi(bean.id);
         break;
-      case '是否完结':
+      case '详情':
+        Config.startPage(context, PublicOpinionInfoPage(eventId: bean.id!));
         break;
       default:
         toast('暂未开发');

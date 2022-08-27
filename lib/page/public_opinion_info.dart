@@ -9,7 +9,9 @@ import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 class PublicOpinionInfoPage extends StatefulWidget {
-  const PublicOpinionInfoPage({Key? key}) : super(key: key);
+  final int eventId;
+  const PublicOpinionInfoPage({Key? key, required this.eventId})
+      : super(key: key);
 
   @override
   State<PublicOpinionInfoPage> createState() => _PublicOpinionInfoPageState();
@@ -27,7 +29,8 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
   }
 
   void _loadEventInfo() async {
-    final map = UserUtil.makeUserIdMap();
+    final map = await UserUtil.makeUserIdMap();
+    map["eventId"] = widget.eventId;
     ServiceHttp().post('/loadEventInfo', data: map, isData: false,
         success: (data) {
       setState(() {
