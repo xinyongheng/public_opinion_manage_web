@@ -1,11 +1,17 @@
+import 'dart:convert';
 import 'dart:math';
 
+import 'package:date_format/date_format.dart';
+import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/histogram.dart';
 import 'package:public_opinion_manage_web/custom/triangle.dart' as hTriangle;
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:public_opinion_manage_web/service/service.dart';
+import 'package:public_opinion_manage_web/utils/date_util.dart';
+import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 class StatisticsWidget extends StatefulWidget {
   const StatisticsWidget({Key? key}) : super(key: key);
@@ -17,6 +23,28 @@ class StatisticsWidget extends StatefulWidget {
 class _StatisticsWidgetState extends State<StatisticsWidget> {
   final startDateController = TextEditingController();
   final endDateController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final dateTime = DateTime.now();
+    String start =
+        formatDate(DateTime(dateTime.year, dateTime.month), DateUtil.formats);
+    String end = DateUtil.nowDate();
+    startDateController.text = start;
+    endDateController.text = end;
+    requestData(start, end);
+  }
+
+  void requestData(String start, String end) async {
+    final map = await UserUtil.makeUserIdMap();
+    map['start'] = start;
+    map['end'] = end;
+    ServiceHttp().post("/loadStatistics", data: map, isData: false,
+        success: (data) {
+      print(jsonEncode(data));
+    });
+  }
 
   @override
   void dispose() {
@@ -110,12 +138,12 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         ),
         SizedBox(
           width: 213.w,
-          child: TextField(
-            controller: startDateController,
-            decoration: Config.defaultInputDecoration(
-              hintText: '年/月/日',
-              suffixIcon: Image.asset("images/op_save.png", color: Colors.grey),
-            ),
+          child: Config.dateInputView(
+            '年/月/日',
+            startDateController,
+            type: DateTimePickerType.date,
+            initialDate: DateTime(2022, DateTime.now().month),
+            suffixIcon: Image.asset("images/op_save.png", color: Colors.grey),
           ),
         ),
         Padding(
@@ -131,14 +159,31 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         ),
         SizedBox(
           width: 213.w,
-          child: TextField(
-            controller: endDateController,
-            decoration: Config.defaultInputDecoration(
-              hintText: '年/月/日',
-              suffixIcon: Image.asset("images/op_save.png", color: Colors.grey),
-            ),
+          child: Config.dateInputView(
+            '年/月/日',
+            endDateController,
+            initialDate: DateTime.now(),
+            type: DateTimePickerType.date,
+            suffixIcon: Image.asset("images/op_save.png", color: Colors.grey),
           ),
         ),
+        SizedBox(width: 30.w),
+        TextButton(
+            onPressed: () {
+              requestData(startDateController.text, endDateController.text);
+            },
+            style: TextButton.styleFrom(
+              primary: Colors.white,
+              backgroundColor: Colors.blue,
+              padding: EdgeInsets.only(
+                left: 20.w,
+                top: 15.sp,
+                right: 20.w,
+                bottom: 15.sp,
+              ),
+              textStyle: Config.loadDefaultTextStyle(),
+            ),
+            child: const Text('筛选'))
       ],
     );
   }

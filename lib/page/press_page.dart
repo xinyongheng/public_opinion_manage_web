@@ -522,7 +522,7 @@ class _PressCreateWidgetState extends State<PressCreateWidget> {
               SizedBox(height: 48.w),
               childItem('日期：', 'creteDate'),
               SizedBox(height: 48.w),
-              childItem('刊号：', 'pressNo'),
+              childItem('刊号：', 'noName'),
               SizedBox(height: 48.w),
               childItem('内容：', 'context', line: 10),
               SizedBox(height: 22.w),
@@ -537,7 +537,9 @@ class _PressCreateWidgetState extends State<PressCreateWidget> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      makeWord();
+                    },
                     style: TextButton.styleFrom(
                       primary: Colors.white,
                       backgroundColor: Config.fontColorSelect,
@@ -548,9 +550,9 @@ class _PressCreateWidgetState extends State<PressCreateWidget> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5.w)),
                     ),
-                    child: const Text('生成word'),
+                    child: const Text('提交'),
                   ),
-                  SizedBox(width: 50.w),
+                  /* SizedBox(width: 50.w),
                   TextButton(
                     onPressed: () {},
                     style: TextButton.styleFrom(
@@ -565,7 +567,7 @@ class _PressCreateWidgetState extends State<PressCreateWidget> {
                           borderRadius: BorderRadius.circular(5.w)),
                     ),
                     child: const Text('提交'),
-                  ),
+                  ), */
                 ],
               )
             ],
@@ -637,11 +639,48 @@ class _PressCreateWidgetState extends State<PressCreateWidget> {
   }
 
   void makeWord() async {
+    int pressType = 1;
+    //1专报， 2快报， 3周报
+    if (widget.pressType == '周报') {
+      pressType = 3;
+    } else if (widget.pressType == '快报') {
+      pressType = 2;
+    }
     String title = map['title']!.text;
+    if (title.isEmpty) {
+      toast("请输入标题");
+      return;
+    }
     String creteDate = map['creteDate']!.text;
-    String pressNo = map['pressNo']!.text;
+    if (title.isEmpty) {
+      toast("请选择时间");
+      return;
+    }
+    String noName = map['noName']!.text;
+    if (title.isEmpty) {
+      toast("请输入刊号");
+      return;
+    }
     String context = map['context']!.text;
+    if (title.isEmpty) {
+      toast("请输入内容");
+      return;
+    }
+    final mapData = await UserUtil.makeUserIdMap();
+    mapData['title'] = title;
+    mapData['creteDate'] = creteDate;
+    mapData['noName'] = noName;
+    mapData['context'] = context;
+    mapData['pressType'] = pressType;
     // 生成后直接下载
+    ServiceHttp().post(
+      "/saveReport",
+      data: mapData,
+      success: ((data) {
+        showSuccessDialog('成功');
+        Config.launch("${ServiceHttp.parentUrl}/${data.toString()}");
+      }),
+    );
   }
 }
 
@@ -697,17 +736,18 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
                   ),
                   child: Padding(
                     padding:
-                        EdgeInsets.symmetric(vertical: 14.w, horizontal: 16.w),
+                        EdgeInsets.symmetric(vertical: 7.w, horizontal: 16.w),
                     child: Text('周报', style: _textStyle()),
                   ),
                 )
               ],
             ),
+            SizedBox(height: 42.w),
             childItem('标题：', 'title'),
             SizedBox(height: 42.w),
             dateView('日期：', 'creteDate'),
             SizedBox(height: 42.w),
-            childItem('刊号：', 'pressNo'),
+            childItem('刊号：', 'noName'),
             SizedBox(height: 61.w),
             Row(
               mainAxisSize: MainAxisSize.min,
@@ -716,6 +756,7 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
                 SizedBox(width: 638.w),
               ],
             ),
+            SizedBox(height: 42.w),
             childItem('总体情况：', '总体情况', line: 3),
             SizedBox(height: 42.w),
             childItem('重点舆情：', '重点舆情', line: 10),
@@ -723,18 +764,24 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(width: 364.w),
                 Text('一周舆情观察', style: _textStyleTitle()),
+                SizedBox(width: 638.w),
                 // SizedBox(width: 638.w),
               ],
             ),
-            weekViewList(),
+            SizedBox(height: 42.w),
+            Padding(
+              padding: EdgeInsets.only(left: 100.w),
+              child: weekViewList(),
+            ),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(width: 194.w),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    makeWord();
+                  },
                   style: TextButton.styleFrom(
                     primary: Colors.white,
                     backgroundColor: Config.fontColorSelect,
@@ -744,9 +791,9 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(5.w)),
                   ),
-                  child: const Text('生成word'),
+                  child: const Text('提交'),
                 ),
-                TextButton(
+                /* TextButton(
                   onPressed: () {},
                   style: TextButton.styleFrom(
                     primary: Config.fontColorSelect,
@@ -759,7 +806,7 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
                         borderRadius: BorderRadius.circular(5.w)),
                   ),
                   child: const Text('提交'),
-                ),
+                ), */
               ],
             )
           ],
@@ -771,8 +818,14 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
   Row childItem(String title, String key, {int? line}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: null != line && line > 1
+          ? CrossAxisAlignment.start
+          : CrossAxisAlignment.center,
       children: [
-        Text('$title：', style: _textStyle()),
+        Visibility(
+            visible: title.length < 4,
+            child: Text("啊啊", style: _textStyle(color: Colors.transparent))),
+        Text(title, style: _textStyle()),
         SizedBox(
           width: 624.w,
           child: TextField(
@@ -786,19 +839,29 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
     );
   }
 
-  Widget dateView(explain, controller) {
-    return DateTimePicker(
-      controller: controller,
-      type: DateTimePickerType.date,
-      dateMask: 'yyyy-MM-dd',
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-      textInputAction: TextInputAction.next,
-      style: Config.loadDefaultTextStyle(color: Colors.black),
-      decoration: Config.defaultInputDecoration(
-        hintText: '年/月/日',
-        suffixIcon: Image.asset('images/icon_date.png'),
-      ),
+  Widget dateView(explain, key) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text("啊啊", style: _textStyle(color: Colors.transparent)),
+        Text(explain, style: _textStyle()),
+        SizedBox(
+          width: 624.w,
+          child: DateTimePicker(
+            controller: loadController(key),
+            type: DateTimePickerType.date,
+            dateMask: 'yyyy-MM-dd',
+            firstDate: DateTime(2000),
+            lastDate: DateTime.now(),
+            textInputAction: TextInputAction.next,
+            style: Config.loadDefaultTextStyle(color: Colors.black),
+            decoration: Config.defaultInputDecoration(
+              hintText: '年/月/日',
+              suffixIcon: Image.asset('images/icon_date.png'),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -846,7 +909,7 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        weekItemChildView(index, bean.firstRankTitle!, 1),
+        weekItemChildView(index, '一级标题', 1),
         SizedBox(height: 42.w),
         ...secondView(index, bean.secondRank!),
       ],
@@ -857,11 +920,10 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
     final arr = <Widget>[];
     for (var i = 0; i < list.length; i++) {
       final bean = list[i];
-      arr.add(
-          weekItemChildView(index, bean.secondRankTitle!, 2, secondIndex: i));
+      arr.add(weekItemChildView(index, "二级标题", 2, secondIndex: i));
       arr.add(SizedBox(height: 40.w));
-      arr.add(weekItemChildView(index, bean.content!, 2,
-          secondIndex: i, contentTag: true));
+      arr.add(weekItemChildView(index, '内容', 2,
+          secondIndex: i, contentTag: true, line: 3));
       arr.add(SizedBox(height: 42.w));
     }
     return arr;
@@ -878,10 +940,11 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
       SizedBox(
         width: rank == 1 ? 624.w : 559.w,
         child: TextField(
-          minLines: line,
-          maxLines: line,
+          minLines: contentTag ? null : line,
+          maxLines: contentTag ? null : line,
+          keyboardType: contentTag ? TextInputType.multiline : null,
           // controller: loadController(key),
-          onChanged: ((value) {
+          onChanged: (value) {
             if (rank == 1) {
               _list[index].firstRankTitle = value;
             } else {
@@ -891,32 +954,40 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
                 _list[index].secondRank![secondIndex].secondRankTitle = value;
               }
             }
-          }),
+          },
           decoration: Config.defaultInputDecoration(hintText: '请输入$title'),
         ),
       ),
     ];
-    if (!contentTag) {
-      arr.addAll([
-        SizedBox(width: 30.w),
-        InkWell(
-          onTap: () {
-            if (rank == 1) {
-              _list.insert(
-                index + 1,
-                WeekPressBean(
-                  firstRankTitle: '',
-                  secondRank: [
-                    SecondRank(secondRankTitle: '', content: ''),
-                  ],
-                ),
-              );
-            } else {
-              _list[index].secondRank!.insert(secondIndex + 1,
-                  SecondRank(secondRankTitle: '', content: ''));
-            }
-            setState(() {});
-          },
+    // if (!contentTag) {
+    bool deleteTag = rank == 1
+        ? (_list.length > 1 ? !contentTag : false)
+        : (_list[index].secondRank!.length > 1 ? !contentTag : false);
+    arr.addAll([
+      SizedBox(width: 30.w),
+      Opacity(
+        opacity: !contentTag ? 1 : 0,
+        // maintainSize: true,
+        child: InkWell(
+          onTap: contentTag
+              ? null
+              : () {
+                  if (rank == 1) {
+                    _list.insert(
+                      index + 1,
+                      WeekPressBean(
+                        firstRankTitle: '',
+                        secondRank: [
+                          SecondRank(secondRankTitle: '', content: ''),
+                        ],
+                      ),
+                    );
+                  } else {
+                    _list[index].secondRank!.insert(secondIndex + 1,
+                        SecondRank(secondRankTitle: '', content: ''));
+                  }
+                  setState(() {});
+                },
           child: Text(
             '添加',
             style: Config.loadDefaultTextStyle(
@@ -925,9 +996,14 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
             ),
           ),
         ),
-        SizedBox(width: 30.w),
-        InkWell(
-          onTap: () => deleteDialog(rank, index, secondIndex),
+      ),
+      SizedBox(width: 30.w),
+      Opacity(
+        opacity: deleteTag ? 1 : 0,
+        // maintainSize: true,
+        child: InkWell(
+          onTap:
+              !deleteTag ? null : () => deleteDialog(rank, index, secondIndex),
           child: Text(
             '删除',
             style: Config.loadDefaultTextStyle(
@@ -935,11 +1011,14 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
               fontWeight: FontWeight.w400,
             ),
           ),
-        )
-      ]);
-    }
+        ),
+      )
+    ]);
+    // }
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment:
+          contentTag ? CrossAxisAlignment.start : CrossAxisAlignment.center,
       children: arr,
     );
   }
@@ -949,9 +1028,44 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
       if (rank == 1) {
         _list.removeAt(index);
       } else {
-        _list[index].secondRank!.removeAt(secondeIndex);
+        if (_list[index].secondRank!.length > 1) {
+          _list[index].secondRank!.removeAt(secondeIndex);
+        }
       }
       setState(() {});
     });
+  }
+
+  void makeWord() async {
+    String title = map['title']!.text;
+    if (title.isEmpty) {
+      toast("请输入标题");
+      return;
+    }
+    String creteDate = map['creteDate']!.text;
+    if (title.isEmpty) {
+      toast("请选择时间");
+      return;
+    }
+    String noName = map['noName']!.text;
+    if (title.isEmpty) {
+      toast("请输入刊号");
+      return;
+    }
+    final mapData = await UserUtil.makeUserIdMap();
+    mapData['title'] = title;
+    mapData['creteDate'] = creteDate;
+    mapData['noName'] = noName;
+    mapData['context'] = context;
+    mapData['pressType'] = 3;
+    // 生成后直接下载
+    ServiceHttp().post(
+      "/saveReport",
+      data: mapData,
+      success: ((data) {
+        showSuccessDialog('成功');
+        Config.launch("${ServiceHttp.parentUrl}/${data.toString()}");
+      }),
+    );
   }
 }
