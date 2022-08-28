@@ -28,7 +28,7 @@ class _AddPressWordFileWidgetState extends State<AddPressWordFileWidget> {
       // height: 568.w,
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: const Color(0xFFD9D9D9)),
+        // border: Border.all(color: const Color(0xFFD9D9D9)),
         borderRadius: BorderRadius.circular(5.w),
       ),
       // alignment: Alignment.topCenter,
@@ -38,7 +38,7 @@ class _AddPressWordFileWidgetState extends State<AddPressWordFileWidget> {
           SizedBox(height: 10.w),
           Row(
             children: [
-              SizedBox(width: 30.w),
+              // SizedBox(width: 30.w),
               Text(
                 '添加报刊附件',
                 style: Config.loadDefaultTextStyle(
@@ -178,7 +178,7 @@ class _AddPressWordFileWidgetState extends State<AddPressWordFileWidget> {
             ),
             child: const Text('确认'),
           ),
-          SizedBox(height: 30.w),
+          SizedBox(height: 10.w),
         ],
       ),
     );
