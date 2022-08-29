@@ -453,6 +453,7 @@ class ListInfoWidgetState extends State<ListInfoWidget>
     String leaderInstructions = tag
         ? (widget.type == 1 && widget.isOnlyShow != true ? '添加' : "—")
         : "${bean.leaderName}\n${bean.leaderInstructionsTime}";
+    print(leaderInstructions);
     int index = bean.no!;
     final arr = [
       Container(
@@ -545,7 +546,7 @@ class ListInfoWidgetState extends State<ListInfoWidget>
     bool isClick = clickTag.contains(data);
     final canClick = isClick || (data != "—" && tag == '批示内容') || tag == '责任单位';
     Widget child;
-    if (data.length > 13) {
+    if (data.length > 13 && tag != '领导批示') {
       data = '${data.substring(0, 11)}...';
     }
     child = Text(
@@ -604,11 +605,21 @@ class ListInfoWidgetState extends State<ListInfoWidget>
       case '领导批示':
         lingDaoPiShi(bean.id);
         break;
+      case '批示内容':
+        showCenterNoticeDialog(
+          context,
+          title: '批示内容',
+          contentWidget: SelectableText(bean.leaderInstructionsContent!,
+              style: Config.loadDefaultTextStyle(
+                color: Colors.black,
+              )),
+        );
+        break;
       case '详情':
         Config.startPage(context, PublicOpinionInfoPage(eventId: bean.id!));
         break;
       default:
-        toast('暂未开发');
+      // toast('暂未开发');
       //详情
     }
   }
@@ -667,7 +678,7 @@ class ListInfoWidgetState extends State<ListInfoWidget>
       barrierDismissible: false,
       title: '添加领导批示',
       contentWidget: SizedBox(
-        width: 294.w,
+        // width: 294.w,
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 23.w),
           child: Column(
@@ -740,8 +751,9 @@ class ListInfoWidgetState extends State<ListInfoWidget>
           return;
         }
         final map = await UserUtil.makeUserIdMap();
-        map['eventId'] = eventId;
+        // map['id'] = eventId;
         map['changeContent'] = {
+          "id": eventId,
           "leaderInstructionsTime": time,
           "leaderInstructionsContent": _content,
           "leaderName": _name,

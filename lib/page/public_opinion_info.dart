@@ -1,3 +1,4 @@
+import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
@@ -35,14 +36,22 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
         success: (data) {
       setState(() {
         _publicOpinionBean = PublicOpinionBean.fromJson(data['data']);
+        initControllerValue();
         files = data['files'];
       });
     });
   }
 
+  void initControllerValue() {
+    if (null != _publicOpinionBean) {
+      mapController.forEach((key, value) {
+        value.text = _defaultValue(key);
+      });
+    }
+  }
+
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     mapController.forEach((key, value) {
       value.dispose();
@@ -57,6 +66,7 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
             image: AssetImage("images/bg.png"), fit: BoxFit.fill),
       ),
       child: Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: Text('查看详情',
               style: Config.loadDefaultTextStyle(color: Colors.black)),
@@ -82,9 +92,13 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          SizedBox(width: 35.w),
                           firstColumn(),
+                          const Spacer(),
                           secondColumn(),
-                          thirdColumn(),
+                          const Spacer(),
+                          SizedBox(width: 455.w, child: thirdColumn()),
+                          SizedBox(width: 68.w),
                         ],
                       ),
                       TextButton(
@@ -127,34 +141,47 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
     );
   }
 
-  firstColumn() {
+  Widget firstColumn() {
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _itemView('事件名称：', 'description'),
+        SizedBox(height: 30.w),
         _itemView('原文链接：', 'link'),
+        SizedBox(height: 30.w),
         Visibility(
             visible: files?.isNotEmpty == true,
-            child: fileItem('原文图文信息：', files!)),
+            child: fileItem('原文图文信息：', files ?? [])),
         _itemView('媒体类型：', 'mediaType'),
+        SizedBox(height: 30.w),
         _itemView('发布时间：', 'publishTime'),
       ],
     );
   }
 
-  secondColumn() {
+  Widget secondColumn() {
     bool tag = _publicOpinionBean?.superiorNotificationTime?.isNotEmpty == true;
     if (!_canChange) {
       _selectRadio = tag ? 0 : 1;
     }
-    return Column(mainAxisSize: MainAxisSize.min, children: [
-      _itemView('舆情类别：', 'type'),
-      _itemView('发现时间：', 'findTime'),
-      _itemView('反馈时间：', 'feedbackTime', isDate: true, readOnly: _canChange),
-      // _itemView('上级是否通报：', 'description'),
-      _radioView(tag),
-      _tongBaoView(),
-    ]);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        _itemView('舆情类别：', 'type'),
+        SizedBox(height: 30.w),
+        _itemView('发现时间：', 'findTime'),
+        SizedBox(height: 30.w),
+        _itemView('反馈时间：', 'feedbackTime', isDate: true, readOnly: !_canChange),
+        // _itemView('上级是否通报：', 'description'),
+        SizedBox(height: 30.w),
+        _radioView(tag),
+        SizedBox(height: 30.w),
+        _tongBaoView(),
+        SizedBox(height: 30.w),
+      ],
+    );
   }
 
   int _selectRadio = 1;
@@ -165,9 +192,11 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _itemView('通报时间：', 'superiorNotificationTime',
-                isDate: true, readOnly: _canChange),
+                isDate: true, readOnly: !_canChange),
+            SizedBox(height: 30.w),
             _itemView('回复上级时间：', 'superiorNotificationTime',
-                isDate: true, readOnly: _canChange),
+                isDate: true, readOnly: !_canChange),
+            SizedBox(height: 30.w),
           ],
         ));
   }
@@ -177,6 +206,7 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text('上级是否通报：', style: _textStyle()),
+        SizedBox(height: 30.w),
         RadioGroupWidget(
           defaultSelectIndex: tag ? 0 : 1,
           list: const ['通报', '未通报'],
@@ -192,23 +222,26 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
     );
   }
 
-  thirdColumn() {
-    return Row(
+  Widget thirdColumn() {
+    return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         _itemView('领导批示时间：', 'leaderInstructionsTime',
-            isDate: true, readOnly: _canChange),
-        _itemView('领导姓名：', 'leaderName', isDate: false, readOnly: _canChange),
+            isDate: true, readOnly: !_canChange),
+        SizedBox(height: 30.w),
+        _itemView('领导姓名：', 'leaderName', isDate: false, readOnly: !_canChange),
+        SizedBox(height: 30.w),
         _itemView('领导批示内容：', 'leaderInstructionsContent',
-            isDate: true, readOnly: _canChange),
+            isDate: false, readOnly: !_canChange),
       ],
     );
   }
 
   Widget _itemView(String title, String key,
-      {bool isDate = false, bool readOnly = false}) {
+      {bool isDate = false, bool readOnly = true}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           title,
@@ -216,7 +249,9 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
         ),
         SizedBox(
             width: 213.w,
-            child: isDate ? _dateInputView(key) : _textField(key)),
+            child: isDate
+                ? _dateInputView(key, readOnly)
+                : _textField(key, readOnly: readOnly)),
       ],
     );
   }
@@ -275,32 +310,40 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
         decoration: Config.defaultInputDecoration(),
         style: _textStyle(),
       );
-  Widget _dateInputView(String key) =>
-      Config.dateInputView('年/月/日', _controller(key));
+  Widget _dateInputView(String key, readOnly) => Config.dateInputView(
+        '年/月/日',
+        _controller(key),
+        readOnly: readOnly,
+        type: DateTimePickerType.date,
+      );
   // 图文信息 列表
   Widget fileItem(String data, List list) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          data,
-          style: Config.loadDefaultTextStyle(
-            color: Colors.black.withOpacity(0.85),
-            fontWeight: FontWeight.w400,
+    return Padding(
+      padding: EdgeInsets.only(bottom: 30.w),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            data,
+            style: Config.loadDefaultTextStyle(
+              color: Colors.black.withOpacity(0.85),
+              fontWeight: FontWeight.w400,
+            ),
           ),
-        ),
-        ShowFileListWidget(
-          list: list,
-          width: 344.w,
-          crossAxisCount: 2,
-        ),
-      ],
+          ShowFileListWidget(
+            list: list,
+            width: 344.w,
+            crossAxisCount: 2,
+          ),
+        ],
+      ),
     );
   }
 
   void submitInfo() async {
-    final map = await UserUtil.makeUserIdMap();
-    if (_selectRadio == 1) {
+    final mapData = await UserUtil.makeUserIdMap();
+    final map = <String, dynamic>{}; //
+    if (_selectRadio == 0) {
       String superiorNotificationTime =
           _controller('superiorNotificationTime').text;
       if (superiorNotificationTime.isEmpty) {
@@ -319,11 +362,14 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
         _publicOpinionBean?.leaderInstructionsContent ?? '');
     fillInfoForKey('leaderName', map, _publicOpinionBean?.leaderName ?? '');
     if (map.length > 1) {
-      ServiceHttp().post('/updateEvent', data: map, success: (data) {
-        showSuccessDialog('上传成功');
+      map['id'] = widget.eventId;
+      mapData["changeContent"] = map;
+      ServiceHttp().post('/updateEvent', data: mapData, success: (data) {
+        _publicOpinionBean = PublicOpinionBean.fromJson(data);
         setState(() {
-          _publicOpinionBean = PublicOpinionBean.fromJson(data);
+          initControllerValue();
         });
+        showSuccessDialog('上传成功');
       });
     } else {
       toast('没有更改，无需提交');

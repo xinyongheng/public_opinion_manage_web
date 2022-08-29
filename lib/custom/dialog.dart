@@ -81,7 +81,7 @@ showCenterNoticeDialog(BuildContext context,
             height: 50.sp,
             // color: Colors.grey,
             alignment: Alignment.center,
-            child: Text(
+            child: SelectableText(
               contentString ?? '请输入提示文体',
               style: Config.loadDefaultTextStyle(),
             ),

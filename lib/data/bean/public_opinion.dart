@@ -93,6 +93,7 @@ class PublicOpinionBean {
     dutyUnit = json['dutyUnit'];
     isComplete = json['isComplete'];
     passState = json['passState'];
+    leaderName = json['leaderName'];
   }
 
   static List<PublicOpinionBean> fromJsonArray(List data) {
@@ -129,6 +130,7 @@ class PublicOpinionBean {
     data['dutyUnit'] = dutyUnit;
     data['isComplete'] = isComplete;
     data['passState'] = passState;
+    data['leaderName'] = leaderName;
     return data;
   }
 

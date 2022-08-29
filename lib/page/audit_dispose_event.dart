@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
@@ -45,17 +44,19 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
     map['eventId'] = widget.eventId;
     ServiceHttp().post('/loadAutoDisposeEvent', data: map, isData: false,
         success: (data) {
+      final _unitList = <DisposeData>[];
+      data['unitList']?.forEach((bean) {
+        _unitList.add(DisposeData.fromJson(bean));
+      });
+      final _unitNameList = <String>[];
+      for (var element in _unitList) {
+        _unitNameList.add(element.unit!);
+        // print(element.list?.length ?? 0);
+      }
       setState(() {
         files = data['files'];
-        unitList = [];
-        data['unitList']?.forEach((bean) {
-          unitList!.add(DisposeData.fromJson(bean));
-        });
-        unitNameList.clear();
-        unitList?.forEach((element) {
-          unitNameList.add(element.unit!);
-          // print(element.list?.length ?? 0);
-        });
+        unitList = _unitList;
+        unitNameList = _unitNameList;
         eventInfo = PublicOpinionBean.fromJson(data['data']);
         disposeEvent = DisposeEvent.fromJson(data['disposeEvent']);
       });
@@ -79,7 +80,7 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
           ? childItem("原文图文信息：", '')
           : fileItem("原文图文信息：", files!),
       SizedBox(height: 46.w),
-      childItem("媒体类型：", eventInfo?.link ?? ''),
+      childItem("媒体类型：", eventInfo?.mediaType ?? ''),
       childItem("发布时间：", eventInfo?.publishTime ?? ''),
       childItem("舆情类别：", eventInfo?.type ?? ''),
       childItem("发现时间：", eventInfo?.findTime ?? ''),
@@ -148,7 +149,7 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
 
   void addAuditWidget(arr) {
     String passState = eventInfo?.passState ?? '';
-    if (passState != '通过' && passState != '未处理') {
+    if (passState != '通过' && passState != '未处理' && passState != '未通过') {
       arr.add(auditContent());
     }
   }
@@ -476,11 +477,11 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
   Map loadMapFromDisposeContent(DisposeContent bean, String reason) {
     final map = <String, dynamic>{};
     map['id'] = bean.id;
-    map['passState'] = _auditType == 1 ? '通过' : '不通过';
-    if (_auditType != 1) {
+    map['passState'] = _auditType == 0 ? '通过' : '未通过';
+    if (_auditType != 0) {
       map['reason'] = reason;
     }
-    map['isPass'] = _auditType == 1 ? 1 : 0;
+    map['isPass'] = _auditType == 0 ? 1 : 0;
     return map;
   }
 
@@ -493,7 +494,7 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
     }
     final finalDutyUnit = _finalController!.text.trim();
     final arr = [];
-    if (_auditType != 1) {
+    if (_auditType != 0) {
       map['reason'] = text;
       map['isPass'] = 0;
     } else {
@@ -524,6 +525,14 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
         submitResult = true;
       });
       showSuccessDialog('提交成功');
+      if (_auditType == 1) {
+        showCenterNoticeDialog(context,
+            title: '新的链接',
+            contentWidget: SelectableText(
+              "${ServiceHttp.parentUrl}${data['linkPath']}",
+              style: Config.loadDefaultTextStyle(color: Colors.black),
+            ));
+      }
     });
   }
 }
@@ -544,9 +553,10 @@ class DutyUnitList extends StatelessWidget {
         final DisposeData bean = list[index];
         final String unit = bean.unit ?? "";
         final List<DisposeContent>? childList = bean.list;
+        // print('处理单位列表 ${childList?.length ?? 0}');
         return ExpansionTile(
           title: titleView('单位名称', unit),
-          childrenPadding: EdgeInsets.only(left: 0.w),
+          childrenPadding: EdgeInsets.only(left: 90.w),
           initiallyExpanded: true,
           children: historyDuty(childList),
         );
@@ -628,9 +638,10 @@ class DutyUnitList extends StatelessWidget {
   Widget historyDutyItem(String passState, String auditDate,
       String feedbackDate, String reason, String content) {
     return SizedBox(
-      width: 744.w,
+      // width: 744.w,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ...auditTitle(auditDate, passState),
           childItem("不通过原因：", reason),
@@ -648,7 +659,7 @@ class DutyUnitList extends StatelessWidget {
       Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(width: 32.w),
+          SizedBox(width: 60.w),
           Text(
             '审核：',
             style: Config.loadDefaultTextStyle(
@@ -656,7 +667,7 @@ class DutyUnitList extends StatelessWidget {
               fontWeight: FontWeight.w400,
             ),
           ),
-          Radio(value: 1, groupValue: 1, onChanged: (v) {}),
+          const Radio(value: 1, groupValue: 1, onChanged: null),
           Text(
             passText(passState),
             style: Config.loadDefaultTextStyle(
@@ -666,7 +677,8 @@ class DutyUnitList extends StatelessWidget {
           ),
           const Spacer(),
         ],
-      )
+      ),
+      SizedBox(height: 30.w),
     ];
   }
 

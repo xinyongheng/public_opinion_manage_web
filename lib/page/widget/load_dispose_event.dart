@@ -30,6 +30,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
   List<dynamic>? disposeEventUnitMappingList;
   int? userType;
   bool result = false;
+  int? mappingId;
   @override
   void initState() {
     super.initState();
@@ -49,6 +50,8 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
   void askInternet(map) async {
     // String token = map['token']!;
     int userId = map['userId']!;
+    int userType = await UserUtil.getType();
+    String unit = await UserUtil.getUnit();
     ServiceHttp().post('/loadDisposeEvent',
         data: {
           'userId': userId,
@@ -56,6 +59,20 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
         },
         isData: false, success: (data) {
       print(data);
+      List mappsings = data['mappings'];
+      for (var element in mappsings) {
+        if (element['dutyUnit'] == unit) {
+          mappingId = element['id'];
+          break;
+        }
+      }
+      if (mappingId == null) {
+        if (userType != 1) {
+          showNoticeDialog('单位不匹配', seconds: 5);
+        } else {
+          mappingId = mappsings.first['id'];
+        }
+      }
       setState(() {
         files = data['files'];
         eventInfo = data['data'];
@@ -127,7 +144,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
                                 ? childItem("原文图文信息：", '无')
                                 : fileItem("原文图文信息：", files!),
                             SizedBox(height: 46.w),
-                            childItem("媒体类型：", eventInfo['link'] ?? ''),
+                            childItem("媒体类型：", eventInfo['mediaType'] ?? ''),
                             childItem("发布时间：", eventInfo['publishTime'] ?? ''),
                             childItem("舆情类别：", eventInfo['type'] ?? ''),
                             childItem("发现时间：", eventInfo['findTime'] ?? ''),
@@ -189,9 +206,11 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
         childItem("处理内容：\n(${lastMap['time']})", lastMap['content']),
       ];
     } else {
+      //未通过
       endList = [
         historyDutyItem(finalPassState, lastMap['utime'], lastMap['time'],
-            lastMap['reason'], lastMap['content'])
+            lastMap['reason'], lastMap['content']),
+        dutyContent(),
       ];
     }
     return [
@@ -203,9 +222,10 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
   Widget historyDutyItem(String passState, String auditDate,
       String feedbackDate, String reason, String content) {
     return SizedBox(
-      width: 744.w,
+      width: 880.w,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ...auditTitle(auditDate, passState),
           childItem("不通过原因：", reason),
@@ -601,6 +621,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
     map['content'] = text;
     map['eventId'] = disposeEvent['eventId'];
     map['disposeEventId'] = disposeEvent['id'];
+    map['disposeEventUnitMappingId'] = mappingId;
     ServiceHttp().post('/disposeEvent', data: map, success: (data) {
       setState(() {
         result = true;
