@@ -11,6 +11,7 @@ import 'package:public_opinion_manage_web/custom/triangle.dart' as hTriangle;
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/date_util.dart';
+import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 class StatisticsWidget extends StatefulWidget {
@@ -23,7 +24,18 @@ class StatisticsWidget extends StatefulWidget {
 class _StatisticsWidgetState extends State<StatisticsWidget> {
   final startDateController = TextEditingController();
   final endDateController = TextEditingController();
-
+  List<charts.TickSpec<double>>? tickSpec;
+  final colorArr = const [
+    Color(0xFFFF9900),
+    Color(0xFF89BFFF),
+    Color(0xFF54E0FF),
+    Color(0xFF67FFB6),
+    Color(0xFF8692FF),
+    Color(0xFFFF3300),
+    Color.fromARGB(255, 57, 57, 160),
+    Color(0xFF007B92),
+  ];
+  Map<String, List<OrdinalSales>>? unitMediaTypeClassifyStatisticsMap;
   @override
   void initState() {
     super.initState();
@@ -43,7 +55,53 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
     ServiceHttp().post("/loadStatistics", data: map, isData: false,
         success: (data) {
       print(jsonEncode(data));
+      makeOrdinalSalesData(data['unitMediaTypeClassifyStatistics']);
     });
+  }
+
+  //各单位舆情分类
+  void makeOrdinalSalesData(Map? unitMediaTypeClassifyStatistics) {
+    //  <charts.TickSpec<double>>[
+    //   const charts.TickSpec(0,)]
+    if (null == unitMediaTypeClassifyStatistics) return;
+    final unitArr = [];
+    final ordinalSalesMap = <String, List<OrdinalSales>>{};
+    int count = -1;
+    unitMediaTypeClassifyStatistics.forEach((unit, value) {
+      unitArr.add(unit);
+      ++count;
+      value.forEach((mediaType, data) {
+        int num = data['num']!;
+        data['mediaType'] = mediaType;
+        data['unit'] = unit;
+        if (ordinalSalesMap[mediaType] == null) {
+          ordinalSalesMap[mediaType] = <OrdinalSales>[
+            OrdinalSales(num, count, data: data)
+          ];
+        } else {
+          ordinalSalesMap[mediaType]!.add(OrdinalSales(num, count, data: data));
+        }
+      });
+    });
+    final xArray = <charts.TickSpec<double>>[];
+    for (int i = 0; i < unitArr.length; i++) {
+      var unit = unitArr[i];
+      xArray.add(charts.TickSpec(
+        i.toDouble(),
+        label: unit,
+        style: _textStyleSpec(),
+      ));
+    }
+    setState(() {
+      tickSpec = xArray;
+      unitMediaTypeClassifyStatistics = ordinalSalesMap;
+    });
+  }
+
+  charts.TextStyleSpec _textStyleSpec() {
+    return const charts.TextStyleSpec(
+      color: charts.Color(r: 51, g: 51, b: 51, a: 153),
+    );
   }
 
   @override
@@ -190,15 +248,10 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
 
   Widget lineChartForUnitOpinion() {
     // GestureDetector
-    final list = <charts.Series<OrdinalSales, num>>[];
-    fillList(list);
+    final list = fillList(unitMediaTypeClassifyStatisticsMap);
     return charts.LineChart(
       list,
       animate: true,
-      behaviors: [
-        // eventTrigger
-        // ChartBehavior<num>()
-      ],
       defaultRenderer: charts.LineRendererConfig(
         // 圆点大小
         radiusPx: 5.w,
@@ -237,132 +290,46 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         ),
       ],
       domainAxis: charts.NumericAxisSpec(
-          tickProviderSpec: charts.StaticNumericTickProviderSpec(tickSpec()),
+          tickProviderSpec: DataUtil.isEmpty(tickSpec)
+              ? null
+              : charts.StaticNumericTickProviderSpec(tickSpec!),
           tickFormatterSpec: charts.BasicNumericTickFormatterSpec(
               (measure) => exp(measure ?? 0).toString())),
     );
   }
 
-  List<charts.TickSpec<num>> tickSpec() {
-    final ticks = <charts.TickSpec<double>>[
-      const charts.TickSpec(0,
-          label: '公安局',
-          style: charts.TextStyleSpec(
-              //可对x轴设置颜色等
-              color: charts.Color(r: 0x4C, g: 0xFF, b: 0x50))),
-      const charts.TickSpec(1,
-          label: '卫健委',
-          style: charts.TextStyleSpec(
-              //可对x轴设置颜色等
-              color: charts.Color(r: 0x4C, g: 0xAF, b: 0x50))),
-      const charts.TickSpec(2,
-          label: '1.3',
-          style: charts.TextStyleSpec(
-              //可对x轴设置颜色等
-              color: charts.Color(r: 0x4C, g: 0xAF, b: 0x50))),
-      const charts.TickSpec(3,
-          label: '1.4',
-          style: charts.TextStyleSpec(
-              //可对x轴设置颜色等
-              color: charts.Color(r: 0x4C, g: 0xAF, b: 0x50))),
-      const charts.TickSpec(4,
-          label: '1.5',
-          style: charts.TextStyleSpec(
-              //可对x轴设置颜色等
-              color: charts.Color(r: 0x4C, g: 0xAF, b: 0x50))),
-      const charts.TickSpec(5,
-          label: '1.6',
-          style: charts.TextStyleSpec(
-              //可对x轴设置颜色等
-              color: charts.Color(r: 0x4C, g: 0xAF, b: 0x50))),
-      const charts.TickSpec(6,
-          label: '1.7',
-          style: charts.TextStyleSpec(
-              //可对x轴设置颜色等
-              color: charts.Color(r: 0x4C, g: 0xAF, b: 0x50))),
-    ];
-    return ticks;
-  }
-
-  void fillList(list) {
-    var random = Random();
-    final data = [
-      OrdinalSales('县公安局1', 13, 0),
-      OrdinalSales('县公安局2', 13, 1),
-      OrdinalSales('县卫健委3', 24, 2),
-      OrdinalSales('县民政局4', 12, 3),
-      OrdinalSales('县住建局1', 12, 4),
-      OrdinalSales('县住建局2', random.nextInt(100), 5),
-      OrdinalSales('县住建局3', random.nextInt(100), 6),
-      OrdinalSales('县住建局4', random.nextInt(100), 7),
-      OrdinalSales('县住建局5', random.nextInt(100), 8),
-    ];
-    final data2 = [
-      OrdinalSales('县公安局', random.nextInt(100), 0),
-      OrdinalSales('县公安局', random.nextInt(100), 1),
-      OrdinalSales('县卫健委', random.nextInt(100), 2),
-      OrdinalSales('县民政局', random.nextInt(100), 3),
-      OrdinalSales('县住建局1', random.nextInt(100), 4),
-      OrdinalSales('县住建局2', random.nextInt(100), 5),
-      OrdinalSales('县住建局3', random.nextInt(100), 6),
-      OrdinalSales('县住建局4', random.nextInt(100), 7),
-      OrdinalSales('县住建局5', random.nextInt(100), 8),
-    ];
-    final data3 = [
-      OrdinalSales('县公安局', random.nextInt(100), 0),
-      OrdinalSales('县公安局', random.nextInt(100), 1),
-      OrdinalSales('县卫健委', random.nextInt(100), 2),
-      OrdinalSales('县民政局', random.nextInt(100), 3),
-      OrdinalSales('县住建局1', random.nextInt(100), 4),
-      OrdinalSales('县住建局2', random.nextInt(100), 5),
-      OrdinalSales('县住建局3', random.nextInt(100), 6),
-      OrdinalSales('县住建局4', random.nextInt(100), 7),
-      OrdinalSales('县住建局5', random.nextInt(100), 8),
-    ];
-
-    list.add(charts.Series<OrdinalSales, int>(
-      id: 'Sales',
-      colorFn: (_, __) =>
-          charts.ColorUtil.fromDartColor(const Color(0xFFE41E31)),
-      domainFn: (OrdinalSales sales, _) => sales.index,
-      measureFn: (OrdinalSales sales, _) => sales.y,
-
-      // labelAccessorFn: (sales, index) => sales.x,
-      // keyFn: (OrdinalSales sales, _) => sales.x,
-      // domainFormatterFn: (OrdinalSales sales, index) {
-      //   return (v) => '$v';
-      // },
-      measureFormatterFn: (sales, index) {
-        return (measure) => "${sales.y}拉拉";
-      },
-      // dashPatternFn: (datum, index) => [8, 2, 4, 2],
-      data: data,
-    ));
-    list.addAll([
-      charts.Series<OrdinalSales, int>(
-        id: 'User',
-        colorFn: (_, __) =>
-            charts.ColorUtil.fromDartColor(const Color(0xFF13A331)),
-        domainFn: (OrdinalSales sales, _) => sales.index,
-        measureFn: (OrdinalSales sales, _) => sales.y,
-        // dashPatternFn: (_, __) => [8, 2, 4, 2],
-        data: data2,
-      ),
-      charts.Series<OrdinalSales, int>(
-        id: 'Dart',
-        colorFn: (_, __) =>
-            charts.ColorUtil.fromDartColor(const Color(0xFF6300A1)),
-        domainFn: (OrdinalSales sales, _) => sales.index,
-        measureFn: (OrdinalSales sales, _) => sales.y,
-        // dashPatternFn: (_, __) => [8, 2, 4, 2],
-        data: data3,
-      ),
-    ]);
+  List<charts.Series<OrdinalSales, num>> fillList(
+      Map<String, List<OrdinalSales>>? dataMap) {
+    final list = <charts.Series<OrdinalSales, num>>[];
+    if (dataMap?.isNotEmpty == true) {
+      int count = 0;
+      dataMap!.forEach((String mediaPlay, List<OrdinalSales> childList) {
+        list.add(charts.Series<OrdinalSales, int>(
+          id: mediaPlay,
+          colorFn: (_, __) => charts.ColorUtil.fromDartColor(colorArr[count]),
+          domainFn: (OrdinalSales sales, _) => sales.index,
+          measureFn: (OrdinalSales sales, _) => sales.y,
+          // dashPatternFn: (datum, index) => [8, 2, 4, 2],
+          data: childList,
+        ));
+        count++;
+      });
+    }
+    return list;
   }
 
   final random = Random();
 
   Widget unitOpinionTypeView() {
+    final arr = <Widget>[];
+    if (unitMediaTypeClassifyStatisticsMap?.isNotEmpty == true) {
+      int count = 0;
+      for (var e in unitMediaTypeClassifyStatisticsMap!.keys) {
+        arr.addAll(unitOpinionViewItem(colorArr[count], e));
+        arr.add(SizedBox(width: 28.w));
+        count++;
+      }
+    }
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -371,16 +338,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         SizedBox(height: 27.w),
         Row(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            ...unitOpinionViewItem(const Color(0xFFFF9900), '抖音'),
-            SizedBox(width: 28.w),
-            ...unitOpinionViewItem(const Color(0xFF89BFFF), '快手'),
-            SizedBox(width: 28.w),
-            ...unitOpinionViewItem(const Color(0xFF54E0FF), '天涯论坛'),
-            SizedBox(width: 28.w),
-            ...unitOpinionViewItem(const Color(0xFF67FFB6), '西瓜视频'),
-            SizedBox(width: 28.w),
-          ],
+          children: arr,
         ),
         SizedBox(
           width: 631.w,
@@ -429,14 +387,17 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
   void _showListDialog(List<OrdinalSales> list) {
     // final unit = list.first.x;
     final arr = <Widget>[];
-    arr.add(Text('标题***', style: dialogTextStyle()));
-    for (OrdinalSales element in list) {
+    var unit = list.first.data['unit'];
+    arr.add(Text(unit, style: dialogTextStyle()));
+    for (int i = 0; i < list.length; i++) {
+      OrdinalSales element = list[i];
       arr.add(SizedBox(height: 10.w));
-      arr.add(listDialogItem(element));
+      arr.add(listDialogItem(element, i));
     }
-    for (OrdinalSales element in list) {
+    for (int j = 0; j < list.length; j++) {
+      OrdinalSales element = list[j];
       arr.add(SizedBox(height: 10.w));
-      arr.add(listDialogItem(element));
+      arr.add(listDialogItem(element, j));
     }
     final child = Column(
       mainAxisSize: MainAxisSize.min,
@@ -470,14 +431,14 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         color: Colors.white, fonstSize: 16.w, fontWeight: FontWeight.w400);
   }
 
-  Row listDialogItem(OrdinalSales bean) {
+  Row listDialogItem(OrdinalSales bean, int index) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Container(width: 13.w, height: 13.w, color: randomColor()),
+        Container(width: 13.w, height: 13.w, color: colorArr[index]),
         SizedBox(width: 13.w),
-        Text(bean.x, style: dialogTextStyle()),
+        Text(bean.data['mediaType'], style: dialogTextStyle()),
         const Spacer(),
         Text(bean.y.toString(), style: dialogTextStyle())
       ],
@@ -491,14 +452,14 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
 }
 
 class OrdinalSales {
-  final String x;
+  final dynamic data;
   final int y;
   final int index;
 
-  OrdinalSales(this.x, this.y, this.index);
+  OrdinalSales(this.y, this.index, {this.data});
 
   @override
   String toString() {
-    return 'OrdinalSales{x: $x, y: $y, index: $index}';
+    return 'OrdinalSales{x: $data, y: $y, index: $index}';
   }
 }
