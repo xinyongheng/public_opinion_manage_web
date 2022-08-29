@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/add_press_word_file.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
+import 'package:public_opinion_manage_web/page/press_info_page.dart';
 import 'package:public_opinion_manage_web/page/press_page.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/info_save.dart';
@@ -19,7 +20,7 @@ class PressListWidget extends StatefulWidget {
 class _PressListWidgetState extends State<PressListWidget> {
   final _frontColor = Colors.black.withOpacity(0.85);
   final TextEditingController _filterController = TextEditingController();
-  final List _list = <dynamic>[];
+  List _list = <dynamic>[];
   String? _pressType;
   @override
   void dispose() {
@@ -208,8 +209,18 @@ class _PressListWidgetState extends State<PressListWidget> {
       );
   Text listViewItemText(data) =>
       Text(data, style: listViewItemTextStyle(Colors.black.withOpacity(0.65)));
+
+  String pressTypeString(int pressType) {
+    if (pressType == 1) return '专报';
+    if (pressType == 2) return '快报';
+    return '周报';
+  }
+
   Widget listViewItem(index) {
-    final item = _list[index - 1];
+    final item = _list[index - 1]['report'];
+    final filePath = _list[index - 1]['file'] != null
+        ? _list[index - 1]['file']['path']
+        : null;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -226,19 +237,21 @@ class _PressListWidgetState extends State<PressListWidget> {
             ),
             70.w),
         tableChildView(listViewItemText(item['title']), 370.w),
-        tableChildView(listViewItemText(item['pressType']), 190.w), //63
-        tableChildView(listViewItemText(item['utime']), 402.w), //169
+        tableChildView(
+            listViewItemText(pressTypeString(item['pressType'])), 190.w), //63
+        tableChildView(listViewItemText(item['creteDate']), 402.w), //169
         InkWell(
             onTap: () {
-              clickPress(item['id']);
+              clickPress(item, pressTypeString(item['pressType']), filePath,
+                  _list[index - 1]['weekList']);
             },
             child: tableChildView(listViewItemText('查看'), 84.w)), //26
         InkWell(
             onTap: () {
-              clickFile(item['file'], item['id']);
+              clickFile(filePath, item['id']);
             },
             child: tableChildView(
-                listViewItemText(DataUtil.isEmpty(item['file']) ? '添加' : '查看'),
+                listViewItemText(DataUtil.isEmpty(filePath) ? '添加' : '查看'),
                 294.w)),
       ],
     );
@@ -253,21 +266,6 @@ class _PressListWidgetState extends State<PressListWidget> {
   @override
   void initState() {
     super.initState();
-    /* _list.add({
-      'title': '专报22期',
-      'pressType': '专报',
-      'utime': '2022-06-01',
-    });
-    _list.add({
-      'title': '专报22期',
-      'pressType': '专报',
-      'utime': '2022-06-01',
-    });
-    _list.add({
-      'title': '专报22期',
-      'pressType': '专报',
-      'utime': '2022-06-01',
-    }); */
     loadList('');
   }
 
@@ -277,13 +275,6 @@ class _PressListWidgetState extends State<PressListWidget> {
       return;
     }
     Config.startPage(context, PressPage(pressType: _pressType!));
-    switch (_pressType) {
-      case '专报':
-        break;
-      case '快报':
-        break;
-      default:
-    }
   }
 
   void filterPress() {
@@ -297,18 +288,29 @@ class _PressListWidgetState extends State<PressListWidget> {
     if (!DataUtil.isEmpty(filter)) {
       map['filter'] = filter;
     }
-    ServiceHttp().post('/pressList', data: map, success: (data) {});
+    ServiceHttp().post('/pressList', data: map, success: (data) {
+      setState(() {
+        _list = data;
+      });
+    });
   }
 
-  void clickPress(id) {
-    // Config.startPage(context, page);
+  void clickPress(map, pressType, filePath, weekList) {
+    Config.startPage(
+        context,
+        PressInfoPage(
+          pressType: pressType,
+          report: map,
+          filePath: filePath,
+          list: weekList,
+        ));
   }
 
-  void clickFile(file, id) {
-    if (null == file) {
+  void clickFile(filePath, id) {
+    if (null == filePath) {
       showAddFileDialog(id);
     } else {
-      Config.launch('${ServiceHttp.parentUrl}/${file['path']}');
+      Config.launch('${ServiceHttp.parentUrl}/$filePath');
     }
   }
 
@@ -342,7 +344,7 @@ class _PressListWidgetState extends State<PressListWidget> {
         filterPress();
         showSuccessDialog('上传成功', dialogDismiss: () {
           //关闭上传弹窗
-          //Config.finishPage(context);
+          Config.finishPage(context);
         });
       },
     );

@@ -8,6 +8,7 @@ import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/data/bean/week_press.dart';
 import 'package:public_opinion_manage_web/page/widget/info_public_opinion.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
+import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 class PressPage extends StatefulWidget {
@@ -24,18 +25,48 @@ class _PressPageState extends State<PressPage> {
   late PressHeadWidget headWidget;
 
   late Widget pressWidget;
+  //
+  // GlobalKey _keyHead = GlobalKey()
+  final GlobalKey<_PressHeadWidgetState> _keyHead =
+      GlobalKey<_PressHeadWidgetState>();
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     pressWidget = widget.pressType != '周报'
-        ? PressCreateWidget(pressType: widget.pressType)
-        : const WeekPressCreateWidget();
+        ? PressCreateWidget(
+            pressType: widget.pressType,
+            valueChanged: <Map>(Map mapData) {
+              saveReport(mapData);
+            },
+          )
+        : WeekPressCreateWidget(valueChanged: <Map>(Map mapData) {
+            saveReport(mapData);
+          });
+  }
+
+  void saveReport(mapData) {
+    List eventList = _keyHead.currentState!.selectList;
+    final eventIds = [];
+    for (var element in eventList) {
+      eventIds.add(element.id);
+    }
+    mapData['eventIds'] = eventIds;
+    // 生成后直接下载
+    ServiceHttp().post(
+      "/saveReport",
+      data: mapData,
+      success: ((data) {
+        showSuccessDialog('成功');
+        Config.launch("${ServiceHttp.parentUrl}/${data.toString()}");
+      }),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     headWidget = PressHeadWidget(
+      key: _keyHead,
       valueChanged: <int>(value) {
         setState(() {
           selectSize = value;
@@ -454,9 +485,11 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
 
 class PressCreateWidget extends StatefulWidget {
   final String pressType;
+  final ValueChanged valueChanged;
   const PressCreateWidget({
     Key? key,
     required this.pressType,
+    required this.valueChanged,
   }) : super(key: key);
 
   @override
@@ -465,6 +498,7 @@ class PressCreateWidget extends StatefulWidget {
 
 class _PressCreateWidgetState extends State<PressCreateWidget> {
   final map = <String, TextEditingController>{};
+  bool submitState = false;
   @override
   Widget build(BuildContext context) {
     return parentContainer(Padding(
@@ -524,7 +558,7 @@ class _PressCreateWidgetState extends State<PressCreateWidget> {
               SizedBox(height: 48.w),
               childItem('刊号：', 'noName'),
               SizedBox(height: 48.w),
-              childItem('内容：', 'context', line: 10),
+              childItem('内容：', 'content', line: 10),
               SizedBox(height: 22.w),
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -537,9 +571,11 @@ class _PressCreateWidgetState extends State<PressCreateWidget> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {
-                      makeWord();
-                    },
+                    onPressed: submitState
+                        ? null
+                        : () {
+                            makeWord();
+                          },
                     style: TextButton.styleFrom(
                       primary: Colors.white,
                       backgroundColor: Config.fontColorSelect,
@@ -652,17 +688,17 @@ class _PressCreateWidgetState extends State<PressCreateWidget> {
       return;
     }
     String creteDate = map['creteDate']!.text;
-    if (title.isEmpty) {
+    if (creteDate.isEmpty) {
       toast("请选择时间");
       return;
     }
     String noName = map['noName']!.text;
-    if (title.isEmpty) {
+    if (noName.isEmpty) {
       toast("请输入刊号");
       return;
     }
-    String context = map['context']!.text;
-    if (title.isEmpty) {
+    String content = map['content']!.text;
+    if (content.isEmpty) {
       toast("请输入内容");
       return;
     }
@@ -670,23 +706,18 @@ class _PressCreateWidgetState extends State<PressCreateWidget> {
     mapData['title'] = title;
     mapData['creteDate'] = creteDate;
     mapData['noName'] = noName;
-    mapData['context'] = context;
+    mapData['content'] = content;
     mapData['pressType'] = pressType;
-    // 生成后直接下载
-    ServiceHttp().post(
-      "/saveReport",
-      data: mapData,
-      success: ((data) {
-        showSuccessDialog('成功');
-        Config.launch("${ServiceHttp.parentUrl}/${data.toString()}");
-      }),
-    );
+    widget.valueChanged.call(mapData);
+    // 生成后直接下载  回调
   }
 }
 
 /// 周报创建
 class WeekPressCreateWidget extends StatefulWidget {
-  const WeekPressCreateWidget({Key? key}) : super(key: key);
+  final ValueChanged valueChanged;
+  const WeekPressCreateWidget({Key? key, required this.valueChanged})
+      : super(key: key);
 
   @override
   State<WeekPressCreateWidget> createState() => _WeekPressCreateWidgetState();
@@ -700,6 +731,7 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
     map.forEach((key, value) => value.dispose());
   }
 
+  bool submitState = false;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -779,9 +811,11 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
               children: [
                 SizedBox(width: 194.w),
                 TextButton(
-                  onPressed: () {
-                    makeWord();
-                  },
+                  onPressed: submitState
+                      ? null
+                      : () {
+                          makeWord();
+                        },
                   style: TextButton.styleFrom(
                     primary: Colors.white,
                     backgroundColor: Config.fontColorSelect,
@@ -1056,16 +1090,39 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
     mapData['title'] = title;
     mapData['creteDate'] = creteDate;
     mapData['noName'] = noName;
-    mapData['context'] = context;
+    // mapData['context'] = context;
     mapData['pressType'] = 3;
+    String lastWeekWholeContent = map["总体情况"]!.text;
+    if (lastWeekWholeContent.isNotEmpty) {
+      mapData["lastWeekWholeContent"] = lastWeekWholeContent;
+    }
+    String lastWeekFocusContent = map["重点舆情"]!.text;
+    if (lastWeekFocusContent.isNotEmpty) {
+      mapData["lastWeekFocusContent"] = lastWeekFocusContent;
+    }
+    if (!_checkWeekEmpty()) {
+      toast("请补充一周舆情观察信息");
+      return;
+    }
+    mapData["weekReportObserves"] = _list;
     // 生成后直接下载
-    ServiceHttp().post(
-      "/saveReport",
-      data: mapData,
-      success: ((data) {
-        showSuccessDialog('成功');
-        Config.launch("${ServiceHttp.parentUrl}/${data.toString()}");
-      }),
-    );
+    widget.valueChanged.call(mapData);
+  }
+
+  bool _checkWeekEmpty() {
+    for (WeekPressBean element in _list) {
+      if (DataUtil.isEmpty(element.firstRankTitle)) {
+        return false;
+      }
+      for (SecondRank second in element.secondRank!) {
+        if (DataUtil.isEmpty(second.secondRankTitle)) {
+          return false;
+        }
+        if (DataUtil.isEmpty(second.content)) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 }
