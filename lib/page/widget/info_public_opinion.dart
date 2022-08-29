@@ -251,6 +251,7 @@ class ListInfoWidget extends StatefulWidget {
   final int type;
   final CheckBoxChange? onChange;
   final VoidCallback? onUpdate;
+  final bool? isOnlyShow;
   const ListInfoWidget({
     Key? key,
     this.canSelect,
@@ -258,6 +259,7 @@ class ListInfoWidget extends StatefulWidget {
     required this.type,
     this.onChange,
     this.onUpdate,
+    this.isOnlyShow,
   }) : super(key: key);
   @override
   State<ListInfoWidget> createState() => ListInfoWidgetState();
@@ -431,6 +433,9 @@ class ListInfoWidgetState extends State<ListInfoWidget>
     if (widget.canSelect != true) {
       arr.removeAt(0);
     }
+    if (widget.isOnlyShow == true) {
+      arr.removeLast();
+    }
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: _physics,
@@ -446,7 +451,7 @@ class ListInfoWidgetState extends State<ListInfoWidget>
     // print("tableRowView indexNo=${indexNo} + ${_hadSelectList.length}");
     bool tag = bean.leaderName == null;
     String leaderInstructions = tag
-        ? (widget.type == 1 ? '添加' : "—")
+        ? (widget.type == 1 && widget.isOnlyShow != true ? '添加' : "—")
         : "${bean.leaderName}\n${bean.leaderInstructionsTime}";
     int index = bean.no!;
     final arr = [
@@ -484,8 +489,11 @@ class ListInfoWidgetState extends State<ListInfoWidget>
       childItemView(bean.type.toString(), '舆情类别',
           width: 6 * wordLength, index: index),
       childItemView(
-          dutyUnit(bean.dutyUnit, bean.passState ?? '') ?? '指定', '责任单位',
-          width: 8 * wordLength, index: index),
+          dutyUnit(bean.dutyUnit, bean.passState ?? '') ??
+              (widget.isOnlyShow != true ? '指定' : '—'),
+          '责任单位',
+          width: 8 * wordLength,
+          index: index),
       childItemView(bean.feedbackTime ?? "—", '反馈时间',
           width: 8 * wordLength, index: index),
       childItemView(bean.superiorNotificationTime ?? "—", '上级通报时间',
@@ -507,6 +515,9 @@ class ListInfoWidgetState extends State<ListInfoWidget>
     ];
     if (widget.canSelect != true) {
       arr.removeAt(0);
+    }
+    if (widget.isOnlyShow == true) {
+      arr.removeLast();
     }
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,

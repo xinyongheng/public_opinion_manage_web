@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:date_format/date_format.dart';
@@ -6,9 +5,12 @@ import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
+import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/histogram.dart';
 import 'package:public_opinion_manage_web/custom/triangle.dart' as hTriangle;
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
+import 'package:public_opinion_manage_web/page/statistics_event_info_list_page.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/date_util.dart';
 import 'package:public_opinion_manage_web/utils/info_save.dart';
@@ -24,7 +26,6 @@ class StatisticsWidget extends StatefulWidget {
 class _StatisticsWidgetState extends State<StatisticsWidget> {
   final startDateController = TextEditingController();
   final endDateController = TextEditingController();
-  List<charts.TickSpec<double>>? tickSpec;
   final colorArr = const [
     Color(0xFFFF9900),
     Color(0xFF89BFFF),
@@ -35,7 +36,14 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
     Color.fromARGB(255, 57, 57, 160),
     Color(0xFF007B92),
   ];
-  Map<String, List<OrdinalSales>>? unitMediaTypeClassifyStatisticsMap;
+  Map<String, List<OrdinalSales>>? _unitMediaTypeClassifyStatisticsMap;
+  List<charts.TickSpec<double>>? tickSpec;
+
+  Map<String, List<OrdinalSales>>? _unitSumStatistics;
+
+  List<MapEntry>? _mediaTypeSumStatisticsList;
+
+  List<MapEntry>? _typeClassifyStatisticsList;
   @override
   void initState() {
     super.initState();
@@ -52,10 +60,12 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
     final map = await UserUtil.makeUserIdMap();
     map['start'] = start;
     map['end'] = end;
-    ServiceHttp().post("/loadStatistics", data: map, isData: false,
-        success: (data) {
-      print(jsonEncode(data));
+    ServiceHttp().post("/loadStatistics", data: map, success: (data) {
+      // print(jsonEncode(data));
       makeOrdinalSalesData(data['unitMediaTypeClassifyStatistics']);
+      makeUnitSumStatisticsData(data['unitSumStatistics']);
+      makeMediaTypeSumStatisticsData(data['mediaTypeSumStatistics']);
+      makeTypeClassifyStatisticsData(data['typeClassifyStatistics']);
     });
   }
 
@@ -94,7 +104,49 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
     }
     setState(() {
       tickSpec = xArray;
-      unitMediaTypeClassifyStatistics = ordinalSalesMap;
+      _unitMediaTypeClassifyStatisticsMap = ordinalSalesMap;
+    });
+  }
+
+  void makeUnitSumStatisticsData(Map? unitSumStatistics) {
+    if (null == unitSumStatistics) return;
+    final ordinalSalesMap = <String, List<OrdinalSales>>{};
+    int count = -1;
+    unitSumStatistics.forEach((key, value) {
+      count++;
+      int num = value['num'];
+      if (ordinalSalesMap[key] == null) {
+        ordinalSalesMap[key] = <OrdinalSales>[
+          OrdinalSales(num, count, data: value)
+        ];
+      } else {
+        ordinalSalesMap[key]!.add(OrdinalSales(num, count, data: value));
+      }
+    });
+    setState(() {
+      _unitSumStatistics = ordinalSalesMap;
+    });
+  }
+
+  void makeMediaTypeSumStatisticsData(Map? mediaTypeSumStatistics) {
+    if (null == mediaTypeSumStatistics) return;
+    final list = mediaTypeSumStatistics.entries.toList();
+    list.sort((a, b) {
+      return a.value['num'] - b.value['num'];
+    });
+    setState(() {
+      _mediaTypeSumStatisticsList = list;
+    });
+  }
+
+  void makeTypeClassifyStatisticsData(Map? typeClassifyStatistics) {
+    if (null == typeClassifyStatistics) return;
+    final list = typeClassifyStatistics.entries.toList();
+    list.sort((a, b) {
+      return a.value['num'] - b.value['num'];
+    });
+    setState(() {
+      _typeClassifyStatisticsList = list;
     });
   }
 
@@ -137,8 +189,12 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
             SizedBox(height: 56.w),
             Row(
               children: [
-                Expanded(child: opinionTypeCountView('舆情分类统计')),
-                Expanded(child: opinionTypeCountView('舆情类别统计'))
+                Expanded(
+                    child: opinionTypeCountView(
+                        '舆情分类统计', _mediaTypeSumStatisticsList)),
+                Expanded(
+                    child: opinionTypeCountView(
+                        '舆情类别统计', _typeClassifyStatisticsList))
               ],
             ),
           ],
@@ -147,7 +203,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
     );
   }
 
-  Widget opinionTypeCountView(data) {
+  Widget opinionTypeCountView(data, List<MapEntry>? list) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,7 +212,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         SizedBox(height: 28.w),
         Padding(
           padding: EdgeInsets.only(left: 4.w),
-          child: const HistogramWidget(),
+          child: HistogramWidget(list),
         ),
       ],
     );
@@ -246,9 +302,9 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
     );
   }
 
-  Widget lineChartForUnitOpinion() {
+  Widget lineChartForUnitOpinion(map, String tag) {
     // GestureDetector
-    final list = fillList(unitMediaTypeClassifyStatisticsMap);
+    final list = fillList(map);
     return charts.LineChart(
       list,
       animate: true,
@@ -285,7 +341,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
             for (var element in value.selectedDatum) {
               list.add(element.datum);
             }
-            _showListDialog(list);
+            _showListDialog(list, tag);
           },
         ),
       ],
@@ -321,10 +377,10 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
   final random = Random();
 
   Widget unitOpinionTypeView() {
-    final arr = <Widget>[];
-    if (unitMediaTypeClassifyStatisticsMap?.isNotEmpty == true) {
+    final arr = <Widget>[SizedBox(width: 28.w)];
+    if (_unitMediaTypeClassifyStatisticsMap?.isNotEmpty == true) {
       int count = 0;
-      for (var e in unitMediaTypeClassifyStatisticsMap!.keys) {
+      for (var e in _unitMediaTypeClassifyStatisticsMap!.keys) {
         arr.addAll(unitOpinionViewItem(colorArr[count], e));
         arr.add(SizedBox(width: 28.w));
         count++;
@@ -343,7 +399,8 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         SizedBox(
           width: 631.w,
           height: 400.w,
-          child: lineChartForUnitOpinion(),
+          child: lineChartForUnitOpinion(
+              _unitMediaTypeClassifyStatisticsMap, '各单位舆情分类'),
         ),
       ],
     );
@@ -355,11 +412,16 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         titleView('各单位舆情总数'),
+        Text('空格',
+            style: Config.loadDefaultTextStyle(
+              color: Colors.transparent,
+              fonstSize: 16.w,
+            )),
         SizedBox(height: 27.w),
         SizedBox(
           width: 631.w,
           height: 400.w,
-          child: lineChartForUnitOpinion(),
+          child: lineChartForUnitOpinion(_unitSumStatistics, '各单位舆情总数'),
         ),
       ],
     );
@@ -384,20 +446,19 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
     ];
   }
 
-  void _showListDialog(List<OrdinalSales> list) {
+  void _showListDialog(List<OrdinalSales> list, String tag) {
     // final unit = list.first.x;
     final arr = <Widget>[];
     var unit = list.first.data['unit'];
-    arr.add(Text(unit, style: dialogTextStyle()));
-    for (int i = 0; i < list.length; i++) {
-      OrdinalSales element = list[i];
-      arr.add(SizedBox(height: 10.w));
-      arr.add(listDialogItem(element, i));
-    }
-    for (int j = 0; j < list.length; j++) {
-      OrdinalSales element = list[j];
-      arr.add(SizedBox(height: 10.w));
-      arr.add(listDialogItem(element, j));
+    if (tag == '各单位舆情总数') {
+      arr.add(listSingleUnitDialogItem(list.first, 0));
+    } else {
+      arr.add(Text(unit, style: dialogTextStyle()));
+      for (int i = 0; i < list.length; i++) {
+        OrdinalSales element = list[i];
+        arr.add(SizedBox(height: 10.w));
+        arr.add(listDialogItem(element, i));
+      }
     }
     final child = Column(
       mainAxisSize: MainAxisSize.min,
@@ -431,23 +492,54 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         color: Colors.white, fonstSize: 16.w, fontWeight: FontWeight.w400);
   }
 
-  Row listDialogItem(OrdinalSales bean, int index) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(width: 13.w, height: 13.w, color: colorArr[index]),
-        SizedBox(width: 13.w),
-        Text(bean.data['mediaType'], style: dialogTextStyle()),
-        const Spacer(),
-        Text(bean.y.toString(), style: dialogTextStyle())
-      ],
+  Widget listSingleUnitDialogItem(OrdinalSales bean, int index) {
+    return InkWell(
+      onTap: () {
+        _startEventInfoPage(bean.data['unit'], bean.data['eventList']);
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(width: 13.w),
+          Text(bean.data['unit'], style: dialogTextStyle()),
+          const Spacer(),
+          Text(bean.y.toString(), style: dialogTextStyle()),
+        ],
+      ),
+    );
+  }
+
+  Widget listDialogItem(OrdinalSales bean, int index) {
+    return InkWell(
+      onTap: () {
+        _startEventInfoPage(bean.data['unit'] + " · " + bean.data['mediaType'],
+            bean.data['eventList']);
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(width: 13.w, height: 13.w, color: colorArr[index]),
+          SizedBox(width: 13.w),
+          Text(bean.data['mediaType'], style: dialogTextStyle()),
+          const Spacer(),
+          Text(bean.y.toString(), style: dialogTextStyle())
+        ],
+      ),
     );
   }
 
   Color randomColor() {
     return Color.fromRGBO(
         Random().nextInt(256), Random().nextInt(256), Random().nextInt(256), 1);
+  }
+
+  void _startEventInfoPage(title, eventList) {
+    // toast(title);
+    Config.startPage(
+        context,
+        StatisticsEventInfoPage(
+            title: title, list: PublicOpinionBean.fromJsonArray(eventList)));
   }
 }
 

@@ -1,7 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
+import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
+import 'package:public_opinion_manage_web/page/statistics_event_info_list_page.dart';
 
 class TriangleWidget extends StatelessWidget {
   final Color color;
@@ -58,7 +62,8 @@ class _TrianglePainter extends CustomPainter {
 }
 
 class HistogramWidget extends StatefulWidget {
-  const HistogramWidget({Key? key}) : super(key: key);
+  final List<MapEntry>? list;
+  const HistogramWidget(this.list, {Key? key}) : super(key: key);
 
   @override
   State<HistogramWidget> createState() => _HistogramWidgetState();
@@ -69,26 +74,33 @@ class _HistogramWidgetState extends State<HistogramWidget> {
   Widget build(BuildContext context) {
     double max = 631.w;
     double maxNum = 1000;
+    final arr = <Widget>[];
+    if (widget.list?.isNotEmpty == true) {
+      maxNum = math.max(
+          widget.list!.first.value['num'], widget.list!.last.value['num']);
+      int count = -1;
+      for (MapEntry element in widget.list!) {
+        count++;
+        String mediaType = element.key;
+        var num = element.value['num'];
+        Color color = count == 1
+            ? const Color(0xFF0DDDB8)
+            : (count == 2 ? const Color(0xFFD85766) : Colors.blue);
+        arr.addAll(titleRow(
+            num * max / maxNum, count, mediaType, num.toString(),
+            color: color, dataTag: element.value));
+      }
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ...titleRow(820 * max / maxNum, 1, '抖音1', '820',
-            color: const Color(0xFF0DDDB8)),
-        ...titleRow(785 * max / maxNum, 2, '快手2', '785',
-            color: const Color(0xFFD85766)),
-        ...titleRow(780 * max / maxNum, 3, '抖音3', '780'),
-        ...titleRow(700 * max / maxNum, 4, '抖音4', '700'),
-        ...titleRow(650 * max / maxNum, 5, '抖音5', '650'),
-        ...titleRow(630 * max / maxNum, 5, '抖音5', '650'),
-        ...titleRow(610 * max / maxNum, 5, '抖音5', '650'),
-        ...titleRow(600 * max / maxNum, 5, '抖音5', '650'),
-      ],
+      children: arr,
     );
   }
 
   List<Widget> titleRow(double width, int no, String title, String data,
-      {Color color = Colors.blue}) {
+      {Color color = Colors.blue, dynamic dataTag}) {
     final arr = <Widget>[];
     if (no < 3) {
       arr.add(TriangleWidget(color: color, size: 13.33.w, isTop: no == 1));
@@ -127,7 +139,7 @@ class _HistogramWidgetState extends State<HistogramWidget> {
       ),
       InkWell(
         onTap: () {
-          toast(title + data);
+          _startEventInfoPage(title, dataTag['eventList']);
         },
         child: Container(
           width: width,
@@ -140,5 +152,13 @@ class _HistogramWidgetState extends State<HistogramWidget> {
       ),
       SizedBox(height: 28.w),
     ];
+  }
+
+  void _startEventInfoPage(title, eventList) {
+    // toast(title);
+    Config.startPage(
+        context,
+        StatisticsEventInfoPage(
+            title: title, list: PublicOpinionBean.fromJsonArray(eventList)));
   }
 }

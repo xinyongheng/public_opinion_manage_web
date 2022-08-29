@@ -181,4 +181,45 @@ class Config {
       throw 'Could not launch $_uri';
     }
   }
+
+  static Widget pageScaffold({String? title, required Widget body}) {
+    return Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+            image: AssetImage("images/bg.png"), fit: BoxFit.fill),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          iconTheme: const IconThemeData(
+            color: Colors.black, //修改颜色
+          ),
+          title: Text(title ?? '',
+              style: Config.loadDefaultTextStyle(
+                color: Colors.black,
+                fonstSize: Config.appBarTitleSize,
+              )),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: Container(
+          alignment: Alignment.topCenter,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 30.w),
+            child: Container(
+              width: 1515.w,
+              height: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(13.w),
+              ),
+              child: SingleChildScrollView(
+                child: body,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

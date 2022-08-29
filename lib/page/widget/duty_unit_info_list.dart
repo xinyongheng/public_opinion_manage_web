@@ -41,7 +41,8 @@ class _DutyUnitInfoListWidgetState extends State<DutyUnitInfoListWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('全部信息', style: Config.loadFirstTextStyle()),
-          ListInfoWidget(selectList: _list, canSelect: false, type: 0),
+          ListInfoWidget(
+              selectList: _list, canSelect: false, type: 0, isOnlyShow: true),
         ],
       ),
     );

@@ -185,18 +185,18 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
   @override
   Widget build(BuildContext context) {
     _listInfoWidget = ListInfoWidget(
-      key: _key,
-      canSelect: true,
-      type: 1,
-      selectList: _allList ?? [],
-      onChange: (value, tag) {
-        selectList.clear();
-        setState(() {
-          selectList.addAll(tag);
-        });
-        widget.valueChanged?.call(tag.length);
-      },
-    );
+        key: _key,
+        canSelect: true,
+        type: 1,
+        selectList: _allList ?? [],
+        onChange: (value, tag) {
+          selectList.clear();
+          setState(() {
+            selectList.addAll(tag);
+          });
+          widget.valueChanged?.call(tag.length);
+        },
+        isOnlyShow: true);
     return parentContainer(
       Padding(
         padding:
