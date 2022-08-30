@@ -42,7 +42,7 @@ class _MakeAccountWidgetState extends State<MakeAccountWidget> {
                 style: Config.loadDefaultTextStyle(),
                 maxLength: 11,
                 inputFormatters: [
-                  FilteringTextInputFormatter(RegExp('[0-9X]'), allow: true)
+                  FilteringTextInputFormatter(RegExp('[0-9]'), allow: true)
                 ],
                 // Text('手机号：', style: Config.loadDefaultTextStyle())
                 decoration: InputDecoration(
@@ -91,9 +91,6 @@ class _MakeAccountWidgetState extends State<MakeAccountWidget> {
                 keyboardType: TextInputType.number,
                 style: Config.loadDefaultTextStyle(),
                 // maxLength: 11,
-                inputFormatters: [
-                  FilteringTextInputFormatter(RegExp('[0-9X]'), allow: true)
-                ],
                 decoration: InputDecoration(
                   icon: Text('单位名称：', style: Config.loadDefaultTextStyle()),
                   hintText: '请输入单位',

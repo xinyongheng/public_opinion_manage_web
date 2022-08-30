@@ -3,34 +3,29 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/page/widget/info_public_opinion.dart';
-import 'package:public_opinion_manage_web/service/service.dart';
-import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 class DutyUnitInfoListWidget extends StatefulWidget {
-  const DutyUnitInfoListWidget({Key? key}) : super(key: key);
+  final ValueChanged? valueChanged;
+  final String title;
+  final List<PublicOpinionBean>? list;
+  const DutyUnitInfoListWidget(
+      {Key? key, required this.title, this.valueChanged, required this.list})
+      : super(key: key);
 
   @override
-  State<DutyUnitInfoListWidget> createState() => _DutyUnitInfoListWidgetState();
+  State<DutyUnitInfoListWidget> createState() => DutyUnitInfoListWidgetState();
 }
 
-class _DutyUnitInfoListWidgetState extends State<DutyUnitInfoListWidget> {
-  final List<PublicOpinionBean> _list = [];
-  @override
-  void initState() {
-    super.initState();
-    askInternet();
-  }
+class DutyUnitInfoListWidgetState extends State<DutyUnitInfoListWidget> {
+  // final List<PublicOpinionBean> _list = [];
 
-  void askInternet() async {
-    final finalMap = <String, dynamic>{};
-    finalMap["userId"] = await UserUtil.getUserId();
-    ServiceHttp().post("/eventList", data: finalMap, success: (data) {
-      setState(() {
-        _list.clear();
-        _list.addAll(PublicOpinionBean.fromJsonArray(data));
-      });
-    });
-  }
+  // void updateList(List<PublicOpinionBean> list) {
+  //   _list.clear();
+  //   setState(() {
+  //     print("${widget.title}: ${list.length}");
+  //     _list.addAll(list);
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -40,9 +35,13 @@ class _DutyUnitInfoListWidgetState extends State<DutyUnitInfoListWidget> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('全部信息', style: Config.loadFirstTextStyle()),
+          Text(widget.title, style: Config.loadFirstTextStyle()),
+          SizedBox(height: 30.w),
           ListInfoWidget(
-              selectList: _list, canSelect: false, type: 0, isOnlyShow: true),
+              selectList: widget.list ?? [],
+              canSelect: false,
+              type: 0,
+              isOnlyShow: true),
         ],
       ),
     );

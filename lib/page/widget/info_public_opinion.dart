@@ -13,6 +13,8 @@ import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
+import 'load_dispose_event.dart';
+
 ///舆情列表
 class PublicOpinionListWidget extends StatefulWidget {
   const PublicOpinionListWidget({Key? key}) : super(key: key);
@@ -593,8 +595,18 @@ class ListInfoWidgetState extends State<ListInfoWidget>
         if (data == '指定') {
           preDutyUnit(bean);
         } else {
-          Config.startPage(context,
-              AuditDisposeEventPage(eventId: widget.selectList[index].id!));
+          if (widget.type == 1) {
+            //管理员
+            Config.startPage(context,
+                AuditDisposeEventPage(eventId: widget.selectList[index].id!));
+          } else {
+            String linkPath = widget.selectList[index].linkPath ?? '';
+
+            Config.startPage(
+                context,
+                LoadDisposeEventPage(
+                    info: linkPath.replaceAll('/loadDisposeEvent?info=', '')));
+          }
         }
         break;
       case '上级通报时间':

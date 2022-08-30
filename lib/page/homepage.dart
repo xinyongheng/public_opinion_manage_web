@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
+import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/page/widget/duty_unit_info_list.dart';
 import 'package:public_opinion_manage_web/page/widget/save_event_info.dart';
+import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 import 'widget/history_press_file.dart';
@@ -352,23 +354,48 @@ class _DutyUnitHomePageState extends State<DutyUnitHomePage> {
   int sumNoticeNum = 0;
   int _nowIndex = 0;
   int _pressIndex = 0;
-  late List<Widget> pages;
-
   final Color lineColor = Colors.grey;
   final arr = ['全部信息', '未处理', '已处理'];
   String unit = "";
+  List<PublicOpinionBean>? allList;
+  List<PublicOpinionBean>? weiChuLiList;
+  List<PublicOpinionBean>? tongGuoList;
+  List<PublicOpinionBean>? weiTongGuoList;
+  List<PublicOpinionBean>? daiShenHeList;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    pages = [
-      DutyUnitInfoListWidget(),
-      Text('未处理'),
-      Text('通过'),
-      Text('未通过'),
-      Text('待审核'),
-    ];
+    askInternet();
     UserUtil.getUnit().then((value) => setState(() => unit = value));
+  }
+
+  void askInternet() async {
+    final finalMap = <String, dynamic>{};
+    finalMap["userId"] = await UserUtil.getUserId();
+    ServiceHttp().post("/eventList", data: finalMap, success: (data) {
+      allList = PublicOpinionBean.fromJsonArray(data);
+      weiChuLiList = fileterList(allList, '未处理');
+      tongGuoList = fileterList(allList, '通过');
+      weiTongGuoList = fileterList(allList, '未通过');
+      daiShenHeList = fileterList(allList, '待审核');
+      setState(() {
+        newNoticeNum = weiChuLiList!.length + weiTongGuoList!.length;
+        sumNoticeNum = allList!.length;
+        print("$newNoticeNum/$sumNoticeNum");
+      });
+    });
+  }
+
+  List<PublicOpinionBean> fileterList(
+      List<PublicOpinionBean>? allList, String filter) {
+    final List<PublicOpinionBean> filterList = [];
+    // int needDutyCout = 0;
+    allList?.forEach((element) {
+      if (element.passState == filter) {
+        filterList.add(element);
+      }
+    });
+    return filterList;
   }
 
   @override
@@ -403,8 +430,8 @@ class _DutyUnitHomePageState extends State<DutyUnitHomePage> {
                             color: Colors.white,
                           ),
                           child: _nowIndex != 2
-                              ? pages[_nowIndex]
-                              : pages[_nowIndex + _pressIndex]),
+                              ? loadCenterWidget(_nowIndex)
+                              : loadCenterWidget(_nowIndex + _pressIndex)),
                     ),
                     SizedBox(width: 32.w),
                   ],
@@ -415,6 +442,21 @@ class _DutyUnitHomePageState extends State<DutyUnitHomePage> {
         ],
       ),
     );
+  }
+
+  Widget loadCenterWidget(int index) {
+    switch (index) {
+      case 0:
+        return DutyUnitInfoListWidget(title: '全部信息', list: allList);
+      case 1:
+        return DutyUnitInfoListWidget(title: '未处理', list: weiChuLiList);
+      case 2:
+        return DutyUnitInfoListWidget(title: '通过', list: tongGuoList);
+      case 3:
+        return DutyUnitInfoListWidget(title: '未通过', list: weiTongGuoList);
+      default:
+        return DutyUnitInfoListWidget(title: '待审核', list: daiShenHeList);
+    }
   }
 
   Widget headView() {
@@ -659,7 +701,7 @@ class _DutyUnitHomePageState extends State<DutyUnitHomePage> {
     setState(() {
       _nowIndex = index;
     });
-    toast(text);
+    /* toast(text);
     switch (text) {
       case '舆情录入':
         break;
@@ -673,6 +715,6 @@ class _DutyUnitHomePageState extends State<DutyUnitHomePage> {
         break;
       default:
         toast('未知类型');
-    }
+    } */
   }
 }

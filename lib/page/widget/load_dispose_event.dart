@@ -243,7 +243,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
       Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(width: 32.w),
+          SizedBox(width: 369.w),
           Text(
             '审核：',
             style: Config.loadDefaultTextStyle(
@@ -276,6 +276,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
   Widget titleView(data) {
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         lineView(),
         SizedBox(width: 4.w),
@@ -285,6 +286,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
         Text("审核日期：$data",
             style: Config.loadDefaultTextStyle(
                 fonstSize: 20.w, fontWeight: FontWeight.w500)),
+        SizedBox(width: 560.w),
       ],
     );
   }

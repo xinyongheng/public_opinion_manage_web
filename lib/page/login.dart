@@ -27,8 +27,8 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _controller1 = TextEditingController(text: '17600666716');
-    _controller2 = TextEditingController(text: '123456');
+    _controller1 = TextEditingController(text: '');
+    _controller2 = TextEditingController(text: '');
   }
 
   @override
@@ -71,8 +71,8 @@ class _LoginPageState extends State<LoginPage> {
   Row loginRowView() {
     return Row(
       children: [
-        Container(
-          color: Colors.yellow,
+        SizedBox(
+          // color: Colors.yellow,
           width: 1200.w,
           height: double.infinity,
           child: Image.asset(

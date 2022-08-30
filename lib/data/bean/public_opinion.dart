@@ -45,6 +45,9 @@ class PublicOpinionBean {
   String? leaderInstructionsTime;
   String? leaderName;
 
+  //事件处理链接
+  String? linkPath;
+
   // 是否完结 0否1是
   int? isComplete = 0;
   //此事件综合（多单位）处理状态；通过（完成）、未通过、待审核、未处理
@@ -69,6 +72,7 @@ class PublicOpinionBean {
     this.leaderName,
     this.isComplete,
     this.passState,
+    this.linkPath,
   });
 
   PublicOpinionBean.fromJson(Map<String, dynamic> json) {
@@ -94,6 +98,7 @@ class PublicOpinionBean {
     isComplete = json['isComplete'];
     passState = json['passState'];
     leaderName = json['leaderName'];
+    linkPath = json['linkPath'];
   }
 
   static List<PublicOpinionBean> fromJsonArray(List data) {
@@ -131,6 +136,7 @@ class PublicOpinionBean {
     data['isComplete'] = isComplete;
     data['passState'] = passState;
     data['leaderName'] = leaderName;
+    data['linkPath'] = linkPath;
     return data;
   }
 
