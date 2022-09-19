@@ -10,6 +10,7 @@ import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/page/audit_dispose_event.dart';
 import 'package:public_opinion_manage_web/page/public_opinion_info.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
+import 'package:public_opinion_manage_web/utils/date_util.dart';
 import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
@@ -416,11 +417,11 @@ class ListInfoWidgetState extends State<ListInfoWidget>
           bgColor: const Color(0xFFFAFAFA),
           height: 72.w),
       childItemView('领导批示', '',
-          width: 6 * wordLength,
+          width: 8 * wordLength,
           bgColor: const Color(0xFFFAFAFA),
           height: 72.w),
       childItemView('批示内容', '',
-          width: 6 * wordLength,
+          width: 8 * wordLength,
           bgColor: const Color(0xFFFAFAFA),
           height: 72.w),
       childItemView('是否完结', '',
@@ -454,8 +455,8 @@ class ListInfoWidgetState extends State<ListInfoWidget>
     bool tag = bean.leaderName == null;
     String leaderInstructions = tag
         ? (widget.type == 1 && widget.isOnlyShow != true ? '添加' : "—")
-        : "${bean.leaderName}\n${bean.leaderInstructionsTime}";
-    print(leaderInstructions);
+        : "${bean.leaderName}\n${DateUtil.subDate(bean.leaderInstructionsTime ?? '')}";
+    // print(leaderInstructions);
     int index = bean.no!;
     final arr = [
       Container(
@@ -509,9 +510,9 @@ class ListInfoWidgetState extends State<ListInfoWidget>
           width: 6 * wordLength,
           index: index),
       childItemView(bean.passState == '通过' ? leaderInstructions : '—', '领导批示',
-          width: 6 * wordLength, index: index),
+          width: 8 * wordLength, index: index),
       childItemView(bean.leaderInstructionsContent ?? "—", '批示内容',
-          width: 6 * wordLength, index: index),
+          width: 8 * wordLength, index: index),
       childItemView(bean.isComplete == 1 ? '是' : '否', '是否完结',
           width: 6 * wordLength, index: index),
       childItemView('查看', '详情', width: 4 * wordLength, index: index),
@@ -546,13 +547,21 @@ class ListInfoWidgetState extends State<ListInfoWidget>
       int index = 1}) {
     const clickTag = ',添加,指定,查看,编辑,';
     bool isClick = clickTag.contains(data);
-    final canClick = isClick || (data != "—" && tag == '批示内容') || tag == '责任单位';
+    bool canClick = isClick || (data != "—" && tag == '批示内容') || tag == '责任单位';
     Widget child;
-    if (data.length > 13 && tag != '领导批示') {
-      data = '${data.substring(0, 11)}...';
+    String dataTem = data;
+    // print('111$tag-${data.length}');
+    if (data.length > 13 && !tag.contains('时间') && tag != '领导批示') {
+      //dataTem = '${data.substring(0, 9)}…';
+      // print('222$tag-${dataTem}');
+      if (tag == '事件描述') {
+        canClick = true;
+      }
+    } else if (tag.contains('时间') && data.length > 10) {
+      dataTem = data.substring(0, 10);
     }
     child = Text(
-      data,
+      dataTem,
       textAlign: TextAlign.center,
       style: Config.loadDefaultTextStyle(
         color: isClick
@@ -591,6 +600,9 @@ class ListInfoWidgetState extends State<ListInfoWidget>
   void viewClick(String data, String tag, int index) {
     final bean = widget.selectList[index];
     switch (tag) {
+      case '事件描述':
+        showNotice(tag, data);
+        break;
       case '责任单位':
         if (data == '指定') {
           preDutyUnit(bean);
@@ -621,10 +633,13 @@ class ListInfoWidgetState extends State<ListInfoWidget>
         showCenterNoticeDialog(
           context,
           title: '批示内容',
-          contentWidget: SelectableText(bean.leaderInstructionsContent!,
-              style: Config.loadDefaultTextStyle(
-                color: Colors.black,
-              )),
+          contentWidget: SizedBox(
+            width: 400.w,
+            child: SelectableText(bean.leaderInstructionsContent!,
+                style: Config.loadDefaultTextStyle(
+                  color: Colors.black,
+                )),
+          ),
         );
         break;
       case '详情':
@@ -634,6 +649,19 @@ class ListInfoWidgetState extends State<ListInfoWidget>
       // toast('暂未开发');
       //详情
     }
+  }
+
+  void showNotice(String title, String msg) {
+    showCenterNoticeDialog(context,
+        title: title,
+        contentWidget: SizedBox(
+          width: 400.w,
+          child: SelectableText(
+            msg,
+            style: Config.loadDefaultTextStyle(
+                color: Colors.black, fontWeight: FontWeight.w400),
+          ),
+        ));
   }
 
   void preDutyUnit(bean) {

@@ -18,15 +18,21 @@ void main() {
   String? info;
   if (kIsWeb) {
     var uri = Uri.dataFromString(window.location.href);
-    // print("path=" + uri.path);
-    // print(uri.pathSegments);
-    if (uri.pathSegments.isNotEmpty &&
-        uri.pathSegments.last == 'loadDisposeEvent') {
-      var qp = uri.queryParameters;
-      //获取参娄数ID，或你要找的参数
-      info = qp['info'];
-      // print(info);
-    }
+    /* print("path=" + uri.path);
+    print("pathSegments=${uri.pathSegments}");
+    if (uri.pathSegments.isNotEmpty) {
+      print("last=${uri.pathSegments.last}");
+      for (String element in uri.pathSegments) {
+        print(element);
+      }
+      print("***************");
+      print("queryParameters=${uri.queryParameters}");
+      潘国珍 25
+    } */
+    var qp = uri.queryParameters;
+    //获取参娄数ID，或你要找的参数
+    info = qp['info'];
+    print(info);
   }
   runApp(MyApp(value: info));
   // SystemUiOverlayStyle systemUiOverlayStyle =
@@ -47,8 +53,15 @@ class MyApp extends StatelessWidget {
           navigatorKey: Global.navigatorKey,
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
           supportedLocales: const [
-            Locale('zh', 'CH'),
-            Locale('en', 'US'),
+            // Locale('zh', 'CH'),
+            // Locale('en', 'US'),
+            Locale("zh", "CN"),
+            Locale.fromSubtags(
+                languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
+            Locale('zh'),
+            Locale.fromSubtags(
+                languageCode: 'zh', scriptCode: 'Hant', countryCode: 'TW'),
+            Locale('en')
           ],
           locale: const Locale('zh', 'CH'),
           title: '舆情台账',
@@ -63,6 +76,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primaryColor: Config.fontColorSelect,
             textTheme: Typography.englishLike2018.apply(fontSizeFactor: 1.sp),
+            fontFamily: 'PingFang',
           ),
           home: child,
         );
@@ -156,6 +170,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   style: TextStyle(
                     color: _textColor,
                     fontSize: _textFront,
+                    height: 1.2,
                   ),
                   duration: const Duration(seconds: 1),
                   child: const Text('文字演示'),

@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
-import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/page/statistics_event_info_list_page.dart';
 
@@ -36,7 +35,7 @@ class _TrianglePainter extends CustomPainter {
       ..strokeWidth = 1.0
       ..style = PaintingStyle.fill;
     var path = Path();
-    print(size.toString());
+    // print(size.toString());
     if (isTop) {
       path
         ..moveTo(size.width / 2.0, 0)
@@ -90,6 +89,9 @@ class _HistogramWidgetState extends State<HistogramWidget> {
             num * max / maxNum, count, mediaType, num.toString(),
             color: color, dataTag: element.value));
       }
+    } else {
+      arr.add(Text('暂无数据', style: Config.loadDefaultTextStyle()));
+      arr.add(SizedBox(height: 30.w));
     }
 
     return Column(

@@ -7,6 +7,7 @@ import 'package:public_opinion_manage_web/custom/file_list_view.dart';
 import 'package:public_opinion_manage_web/custom/radio_group.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
+import 'package:public_opinion_manage_web/utils/date_util.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 class PublicOpinionInfoPage extends StatefulWidget {
@@ -146,9 +147,19 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _itemView('事件名称：', 'description'),
+        _itemView('事件名称：', 'description', line: 5),
         SizedBox(height: 30.w),
-        _itemView('原文链接：', 'link'),
+        Material(
+          elevation: 0,
+          color: Colors.transparent,
+          child: InkWell(
+              onTap: _publicOpinionBean?.link.isNotEmpty == true
+                  ? () {
+                      Config.launch(_publicOpinionBean!.link);
+                    }
+                  : null,
+              child: _itemView('原文链接：', 'link', line: 1)),
+        ),
         SizedBox(height: 30.w),
         Visibility(
             visible: files?.isNotEmpty == true,
@@ -190,6 +201,7 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
         visible: true,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             _itemView('通报时间：', 'superiorNotificationTime',
                 isDate: true, readOnly: !_canChange),
@@ -225,6 +237,7 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
   Widget thirdColumn() {
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         _itemView('领导批示时间：', 'leaderInstructionsTime',
             isDate: true, readOnly: !_canChange),
@@ -232,26 +245,29 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
         _itemView('领导姓名：', 'leaderName', isDate: false, readOnly: !_canChange),
         SizedBox(height: 30.w),
         _itemView('领导批示内容：', 'leaderInstructionsContent',
-            isDate: false, readOnly: !_canChange),
+            isDate: false, readOnly: !_canChange, line: 10),
       ],
     );
   }
 
   Widget _itemView(String title, String key,
-      {bool isDate = false, bool readOnly = true}) {
+      {bool isDate = false, bool readOnly = true, int line = 1}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment:
+          line == 1 ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [
         Text(
           title,
           style: Config.loadDefaultTextStyle(),
+          maxLines: line,
+          softWrap: true,
         ),
         SizedBox(
             width: 213.w,
             child: isDate
                 ? _dateInputView(key, readOnly)
-                : _textField(key, readOnly: readOnly)),
+                : _textField(key, readOnly: readOnly, line: line)),
       ],
     );
   }
@@ -272,20 +288,22 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
       case 'mediaType':
         return _publicOpinionBean?.mediaType ?? "";
       case 'publishTime':
-        return _publicOpinionBean?.publishTime ?? "";
+        return DateUtil.subDate(_publicOpinionBean?.publishTime ?? "");
       case 'type':
         return _publicOpinionBean?.type ?? "";
       case 'findTime':
-        return _publicOpinionBean?.findTime ?? "";
+        return DateUtil.subDate(_publicOpinionBean?.findTime ?? "");
       case 'superiorNotificationTime':
-        return _publicOpinionBean?.superiorNotificationTime ?? "";
+        return DateUtil.subDate(
+            _publicOpinionBean?.superiorNotificationTime ?? "");
       case 'feedbackTime':
-        return _publicOpinionBean?.feedbackTime ?? "";
+        return DateUtil.subDate(_publicOpinionBean?.feedbackTime ?? "");
 
       case 'replySuperiorTime':
-        return _publicOpinionBean?.replySuperiorTime ?? "";
+        return DateUtil.subDate(_publicOpinionBean?.replySuperiorTime ?? "");
       case 'leaderInstructionsTime':
-        return _publicOpinionBean?.leaderInstructionsTime ?? "";
+        return DateUtil.subDate(
+            _publicOpinionBean?.leaderInstructionsTime ?? "");
 
       case 'leaderName':
         return _publicOpinionBean?.leaderName ?? "";
@@ -350,10 +368,13 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
         toast('请选择通报时间');
         return;
       }
-      map['superiorNotificationTime'] = superiorNotificationTime;
+      // map['superiorNotificationTime'] = superiorNotificationTime;
+      fillInfoForKey('superiorNotificationTime', map,
+          _publicOpinionBean?.superiorNotificationTime ?? "");
       fillInfoForKey('replySuperiorTime', map,
           _publicOpinionBean?.replySuperiorTime ?? '');
     }
+
     fillInfoForKey('feedbackTime', map, _publicOpinionBean?.feedbackTime ?? '');
 
     fillInfoForKey('leaderInstructionsTime', map,

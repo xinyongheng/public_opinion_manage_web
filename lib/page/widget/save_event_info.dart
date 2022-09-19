@@ -3,6 +3,7 @@ import 'package:dio/dio.dart' as dio;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
+import 'package:public_opinion_manage_web/custom/auto_complete_view.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/radio_group.dart';
 import 'package:public_opinion_manage_web/custom/select_file.dart';
@@ -144,24 +145,26 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
           titleView(title),
           SizedBox(
             width: 624.w,
-            child: Autocomplete(
+            child: Autocomplete<String>(
               optionsBuilder: (textEditingValue) {
                 final v = textEditingValue.text;
                 final candidates = searchList;
                 return candidates.where(
                     (String c) => c.toUpperCase().contains(v.toUpperCase()));
               },
+              optionsViewBuilder: (context, onSelected, options) {
+                return AutocompleteOptions(
+                  displayStringForOption:
+                      RawAutocomplete.defaultStringForOption,
+                  onSelected: onSelected,
+                  options: options,
+                  maxOptionsHeight: 200,
+                );
+              },
               fieldViewBuilder: (BuildContext context,
                   TextEditingController textEditingController,
                   FocusNode focusNode,
                   VoidCallback onFieldSubmitted) {
-                // return TextFormField(
-                //   controller: textEditingController,
-                //   focusNode: focusNode,
-                //   onFieldSubmitted: (String value) {
-                //     onFieldSubmitted();
-                //   },
-                // );
                 _controllerMap['type'] = textEditingController;
                 return TextFormField(
                   controller: textEditingController,
@@ -305,13 +308,14 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
       SizedBox(height: 25.sp),
       loadListView('事件链接', _listLink),
       spaceWidget(),
-      titleAddIconView('媒体类型：', '请输入媒体类型', _listMediaType.first, () {
+      selectTextAddIconView('媒体类型：', '请输入媒体类型', _listMediaType.first, () {
         setState(() {
           _listMediaType.add(TextEditingController());
         });
       }),
+      //childAutocomplete('媒体类型：', '请输入媒体类型', Config.mediaTypeArr),
       SizedBox(height: 25.sp),
-      loadListView('事件链接', _listMediaType),
+      loadSelectListView('事件链接', _listMediaType),
       spaceWidget(),
       titleFileView('原文图文信息：'),
       spaceWidget(),
@@ -377,6 +381,90 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
           )
         ],
       );
+  selectTextAddIconView(title, hintText, controller, onPressed) => Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(width: 440.w),
+          titleView(title),
+          SizedBox(
+            width: 624.w,
+            child: RawAutocomplete<String>(
+              displayStringForOption: RawAutocomplete.defaultStringForOption,
+              textEditingController: controller,
+              focusNode: FocusNode(),
+              optionsViewBuilder: (context, onSelected, options) {
+                return AutocompleteOptions(
+                  displayStringForOption:
+                      RawAutocomplete.defaultStringForOption,
+                  onSelected: onSelected,
+                  options: options,
+                  maxOptionsHeight: 200,
+                );
+              },
+              optionsBuilder: (textEditingValue) {
+                final v = textEditingValue.text;
+                const candidates = Config.mediaTypeArr;
+                return candidates.where(
+                    (String c) => c.toUpperCase().contains(v.toUpperCase()));
+              },
+              fieldViewBuilder: (context, textEditingController, focusNode,
+                  onFieldSubmitted) {
+                return TextFormField(
+                  controller: textEditingController,
+                  maxLines: 1,
+                  minLines: 1,
+                  focusNode: focusNode,
+                  scrollPadding: EdgeInsets.zero,
+                  textInputAction: TextInputAction.next,
+                  style: Config.loadDefaultTextStyle(color: Colors.black),
+                  onFieldSubmitted: (String value) {
+                    onFieldSubmitted();
+                  },
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      gapPadding: 0,
+                      borderRadius: BorderRadius.circular(5.sp),
+                      borderSide: BorderSide(color: borderColor),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      gapPadding: 0,
+                      borderRadius: BorderRadius.circular(5.sp),
+                      borderSide: BorderSide(color: borderColor),
+                    ),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 14.w, horizontal: 16.w),
+                    counterText: '',
+                    isDense: true,
+                    hintText: hintText,
+                    hintStyle: Config.loadDefaultTextStyle(color: borderColor),
+                  ),
+                );
+              },
+            ),
+          ),
+          SizedBox(width: 31.w),
+          Material(
+            color: Colors.white,
+            child: InkWell(
+              onTap: onPressed,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.add, size: 19.sp, color: Config.fontColorSelect),
+                  SizedBox(width: 8.sp),
+                  Text(
+                    '添加',
+                    style: Config.loadDefaultTextStyle(
+                        color: Config.fontColorSelect),
+                  ),
+                ],
+              ),
+            ),
+          )
+        ],
+      );
+
   ListView loadListView(String explain, List<TextEditingController> list) =>
       ListView.separated(
           itemCount: list.length - 1,
@@ -393,7 +481,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
                 SizedBox(
                   width: 624.w,
                   child: TextField(
-                    controller: list[index],
+                    controller: list[index + 1],
                     maxLines: 1,
                     minLines: 1,
                     scrollPadding: EdgeInsets.all(0.sp),
@@ -418,6 +506,100 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
                       hintStyle:
                           Config.loadDefaultTextStyle(color: borderColor),
                     ),
+                  ),
+                ),
+                SizedBox(width: 15.w),
+                IconButton(
+                    onPressed: () {
+                      setState(() {
+                        list.removeAt(index);
+                      });
+                    },
+                    icon: Icon(
+                      Icons.close,
+                      color: Colors.blue,
+                      size: 20.w,
+                    )),
+              ],
+            );
+          },
+          separatorBuilder: (BuildContext context, int index) {
+            return Divider(
+              height: 25.sp,
+              thickness: 25.sp,
+              color: Colors.transparent,
+            );
+          });
+  ListView loadSelectListView(
+          String explain, List<TextEditingController> list) =>
+      ListView.separated(
+          itemCount: list.length - 1,
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemBuilder: (context, index) {
+            return Row(
+              children: [
+                SizedBox(width: 440.w),
+                Opacity(
+                  opacity: 0,
+                  child: titleView('原文链接：'),
+                ),
+                SizedBox(
+                  width: 624.w,
+                  child: RawAutocomplete<String>(
+                    displayStringForOption:
+                        RawAutocomplete.defaultStringForOption,
+                    textEditingController: list[index + 1],
+                    focusNode: FocusNode(),
+                    optionsViewBuilder: (context, onSelected, options) {
+                      return AutocompleteOptions(
+                        displayStringForOption:
+                            RawAutocomplete.defaultStringForOption,
+                        onSelected: onSelected,
+                        options: options,
+                        maxOptionsHeight: 200,
+                      );
+                    },
+                    optionsBuilder: (textEditingValue) {
+                      final v = textEditingValue.text;
+                      const candidates = Config.mediaTypeArr;
+                      return candidates.where((String c) =>
+                          c.toUpperCase().contains(v.toUpperCase()));
+                    },
+                    fieldViewBuilder: (context, textEditingController,
+                        focusNode, onFieldSubmitted) {
+                      return TextFormField(
+                        controller: textEditingController,
+                        focusNode: focusNode,
+                        onFieldSubmitted: (value) {
+                          onFieldSubmitted();
+                        },
+                        maxLines: 1,
+                        minLines: 1,
+                        scrollPadding: EdgeInsets.all(0.sp),
+                        textInputAction: TextInputAction.next,
+                        style: Config.loadDefaultTextStyle(color: Colors.black),
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            gapPadding: 0,
+                            borderRadius: BorderRadius.circular(5.sp),
+                            borderSide: BorderSide(color: borderColor),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            gapPadding: 0,
+                            borderRadius: BorderRadius.circular(5.sp),
+                            borderSide: BorderSide(color: borderColor),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 14.w, horizontal: 16.w),
+                          counterText: '',
+                          isDense: true,
+                          hintText: "请输入$explain-${index + 2}",
+                          hintStyle:
+                              Config.loadDefaultTextStyle(color: borderColor),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 SizedBox(width: 15.w),
@@ -531,6 +713,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
   }
 
   void requestInternet(map, bool tag) {
+    // print(jsonEncode(map));
     if (tag) {
       List arr = [];
       for (int i = 0; i < _fileView.list.length; i++) {

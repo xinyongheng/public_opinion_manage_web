@@ -7,8 +7,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/histogram.dart';
+import 'package:public_opinion_manage_web/custom/line_chart_view.dart';
 import 'package:public_opinion_manage_web/custom/triangle.dart' as hTriangle;
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:public_opinion_manage_web/data/bean/line_data.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/page/statistics_event_info_list_page.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
@@ -36,10 +38,13 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
     Color.fromARGB(255, 57, 57, 160),
     Color(0xFF007B92),
   ];
-  Map<String, List<OrdinalSales>>? _unitMediaTypeClassifyStatisticsMap;
-  List<charts.TickSpec<double>>? tickSpec;
+  // Map<String, List<OrdinalSales>>? _unitMediaTypeClassifyStatisticsMap;
+  List<LinePoint>? _unitMediaTypeClassifyStatisticsList;
+  // List<charts.TickSpec<double>>? tickSpec;
+  List<String>? xAxisInfos;
 
-  Map<String, List<OrdinalSales>>? _unitSumStatistics;
+  // Map<String, List<OrdinalSales>>? _unitSumStatistics;
+  List<LinePoint>? _unitSumStatisticsList;
 
   List<MapEntry>? _mediaTypeSumStatisticsList;
 
@@ -61,7 +66,16 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
     map['start'] = start;
     map['end'] = end;
     ServiceHttp().post("/loadStatistics", data: map, success: (data) {
-      // print(jsonEncode(data));
+      if (data is List) {
+        setState(() {
+          _unitMediaTypeClassifyStatisticsList = null;
+          xAxisInfos = null;
+          _unitSumStatisticsList = null;
+          _mediaTypeSumStatisticsList = null;
+          _typeClassifyStatisticsList = null;
+        });
+        return;
+      }
       makeOrdinalSalesData(data['unitMediaTypeClassifyStatistics']);
       makeUnitSumStatisticsData(data['unitSumStatistics']);
       makeMediaTypeSumStatisticsData(data['mediaTypeSumStatistics']);
@@ -71,60 +85,64 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
 
   //各单位舆情分类
   void makeOrdinalSalesData(Map? unitMediaTypeClassifyStatistics) {
-    //  <charts.TickSpec<double>>[
-    //   const charts.TickSpec(0,)]
-    if (null == unitMediaTypeClassifyStatistics) return;
-    final unitArr = [];
-    final ordinalSalesMap = <String, List<OrdinalSales>>{};
-    int count = -1;
-    unitMediaTypeClassifyStatistics.forEach((unit, value) {
-      unitArr.add(unit);
-      ++count;
+    if (unitMediaTypeClassifyStatistics?.isNotEmpty != true) return;
+    xAxisInfos = [];
+    var listAll = <LinePoint>[];
+    final mediaTypeMap = <String, List<PointInfo>>{};
+
+    //构建所需list
+    unitMediaTypeClassifyStatistics!.forEach((unit, value) {
+      xAxisInfos!.add(unit);
+      int count = 0;
       value.forEach((mediaType, data) {
+        ++count;
         int num = data['num']!;
         data['mediaType'] = mediaType;
         data['unit'] = unit;
-        if (ordinalSalesMap[mediaType] == null) {
-          ordinalSalesMap[mediaType] = <OrdinalSales>[
-            OrdinalSales(num, count, data: data)
+        if (mediaTypeMap[mediaType] == null) {
+          mediaTypeMap[mediaType] = [
+            PointInfo.make(Point(count.toDouble(), num.toDouble(), data: data))
           ];
         } else {
-          ordinalSalesMap[mediaType]!.add(OrdinalSales(num, count, data: data));
+          List<PointInfo> list = mediaTypeMap[mediaType]!;
+          list.add(PointInfo.make(
+              Point(count.toDouble(), num.toDouble(), data: data)));
         }
       });
     });
-    final xArray = <charts.TickSpec<double>>[];
-    for (int i = 0; i < unitArr.length; i++) {
-      var unit = unitArr[i];
-      xArray.add(charts.TickSpec(
-        i.toDouble(),
-        label: unit,
-        style: _textStyleSpec(),
-      ));
-    }
-    setState(() {
-      tickSpec = xArray;
-      _unitMediaTypeClassifyStatisticsMap = ordinalSalesMap;
+    int xCount = 0;
+    mediaTypeMap.forEach((key, value) {
+      listAll.add(LinePoint(key, value, _loadColor(xCount)));
+      xCount++;
     });
+    setState(() {
+      _unitMediaTypeClassifyStatisticsList = listAll;
+    });
+  }
+
+  Color _loadColor(int index) {
+    if (index < colorArr.length) {
+      return colorArr[index];
+    }
+    return Color.fromRGBO(
+        Random().nextInt(256), Random().nextInt(256), Random().nextInt(256), 1);
   }
 
   void makeUnitSumStatisticsData(Map? unitSumStatistics) {
     if (null == unitSumStatistics) return;
-    final ordinalSalesMap = <String, List<OrdinalSales>>{};
+
     int count = -1;
+    var listInfo = <PointInfo>[];
     unitSumStatistics.forEach((key, value) {
       count++;
       int num = value['num'];
-      if (ordinalSalesMap[key] == null) {
-        ordinalSalesMap[key] = <OrdinalSales>[
-          OrdinalSales(num, count, data: value)
-        ];
-      } else {
-        ordinalSalesMap[key]!.add(OrdinalSales(num, count, data: value));
-      }
+      listInfo.add(
+          PointInfo.make(Point(count.toDouble(), num.toDouble(), data: value)));
     });
+    var allList = <LinePoint>[];
+    allList.add(LinePoint('', listInfo, const Color(0xFF268AFF)));
     setState(() {
-      _unitSumStatistics = ordinalSalesMap;
+      _unitSumStatisticsList = allList;
     });
   }
 
@@ -140,7 +158,10 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
   }
 
   void makeTypeClassifyStatisticsData(Map? typeClassifyStatistics) {
-    if (null == typeClassifyStatistics) return;
+    if (null == typeClassifyStatistics) {
+      setState(() {});
+      return;
+    }
     final list = typeClassifyStatistics.entries.toList();
     list.sort((a, b) {
       return a.value['num'] - b.value['num'];
@@ -182,8 +203,8 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
             SizedBox(height: 36.w),
             Row(
               children: [
-                Expanded(child: unitOpinionTypeView()),
-                Expanded(child: unitOpinionView())
+                Expanded(child: unitOpinionTypeView(context)),
+                Expanded(child: unitOpinionView(context))
               ],
             ),
             SizedBox(height: 56.w),
@@ -302,88 +323,32 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
     );
   }
 
-  Widget lineChartForUnitOpinion(map, String tag) {
-    // GestureDetector
-    final list = fillList(map);
-    return charts.LineChart(
-      list,
-      animate: true,
-      defaultRenderer: charts.LineRendererConfig(
-        // 圆点大小
-        radiusPx: 5.w,
-        stacked: false,
-        // 线的宽度
-        strokeWidthPx: 1.0,
-        // 是否显示线
-        includeLine: true,
-        // 是否显示圆点
-        includePoints: true,
-        // 是否显示包含区域
-        includeArea: true,
-        // 区域颜色透明度 0.0-1.0
-        areaOpacity: 0.2,
-      ),
-      selectionModels: [
-        charts.SelectionModelConfig(
-          type: charts.SelectionModelType.info,
-          changedListener: (charts.SelectionModel<num> value) {
-            /*int index = value.selectedDatum.first.index!;
-            final clickSeries = value.selectedSeries.first;
-            final tag = clickSeries.id;
-            toast("$tag ,第$index个");
-            final clickBean = value.selectedDatum.firstWhere((element) {
-              return element.series.id == tag;
-            });
-            toast(clickBean.toString());*/
-            //throw Error('故意的');
-            final list = <OrdinalSales>[];
-            // value.selectedDatum[4];
-            for (var element in value.selectedDatum) {
-              list.add(element.datum);
-            }
-            _showListDialog(list, tag);
-          },
-        ),
-      ],
-      domainAxis: charts.NumericAxisSpec(
-          tickProviderSpec: DataUtil.isEmpty(tickSpec)
-              ? null
-              : charts.StaticNumericTickProviderSpec(tickSpec!),
-          tickFormatterSpec: charts.BasicNumericTickFormatterSpec(
-              (measure) => exp(measure ?? 0).toString())),
+  Widget lineChartForUnitOpinion(linePoints, String tag, context) {
+    return LineChartWidget(
+      size: Size(631.w, 400.w),
+      linePoints: linePoints ?? [],
+      xAxisInfos: xAxisInfos ?? [],
+      showPopupMenu: tag != '各单位舆情总数',
+      tooltipValueGetter: (m) {
+        //_loadAxisInfoForX(index)}-$tag:${point.y
+        if (tag == '各单位舆情总数') {
+          return m[0] + ':' + m[2].toString();
+        } else {
+          return m[0] + "-" + m[1] + ": " + m[2].toString();
+        }
+      },
+      itemClick: (value) {
+        _startEventInfoPage(context, value['unit'], value['eventList']);
+      },
     );
   }
 
-  List<charts.Series<OrdinalSales, num>> fillList(
-      Map<String, List<OrdinalSales>>? dataMap) {
-    final list = <charts.Series<OrdinalSales, num>>[];
-    if (dataMap?.isNotEmpty == true) {
-      int count = 0;
-      dataMap!.forEach((String mediaPlay, List<OrdinalSales> childList) {
-        list.add(charts.Series<OrdinalSales, int>(
-          id: mediaPlay,
-          colorFn: (_, __) => charts.ColorUtil.fromDartColor(colorArr[count]),
-          domainFn: (OrdinalSales sales, _) => sales.index,
-          measureFn: (OrdinalSales sales, _) => sales.y,
-          // dashPatternFn: (datum, index) => [8, 2, 4, 2],
-          data: childList,
-        ));
-        count++;
-      });
-    }
-    return list;
-  }
-
-  final random = Random();
-
-  Widget unitOpinionTypeView() {
+  Widget unitOpinionTypeView(context) {
     final arr = <Widget>[SizedBox(width: 28.w)];
-    if (_unitMediaTypeClassifyStatisticsMap?.isNotEmpty == true) {
-      int count = 0;
-      for (var e in _unitMediaTypeClassifyStatisticsMap!.keys) {
-        arr.addAll(unitOpinionViewItem(colorArr[count], e));
+    if (_unitMediaTypeClassifyStatisticsList?.isNotEmpty == true) {
+      for (var e in _unitMediaTypeClassifyStatisticsList!) {
+        arr.addAll(unitOpinionViewItem(e.background, e.tag));
         arr.add(SizedBox(width: 28.w));
-        count++;
       }
     }
     return Column(
@@ -396,17 +361,18 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
           mainAxisSize: MainAxisSize.min,
           children: arr,
         ),
+        SizedBox(height: 27.w),
         SizedBox(
           width: 631.w,
           height: 400.w,
           child: lineChartForUnitOpinion(
-              _unitMediaTypeClassifyStatisticsMap, '各单位舆情分类'),
+              _unitMediaTypeClassifyStatisticsList, '各单位舆情分类', context),
         ),
       ],
     );
   }
 
-  Widget unitOpinionView() {
+  Widget unitOpinionView(context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -421,7 +387,8 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         SizedBox(
           width: 631.w,
           height: 400.w,
-          child: lineChartForUnitOpinion(_unitSumStatistics, '各单位舆情总数'),
+          child: lineChartForUnitOpinion(
+              _unitSumStatisticsList, '各单位舆情总数', context),
         ),
       ],
     );
@@ -446,112 +413,11 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
     ];
   }
 
-  void _showListDialog(List<OrdinalSales> list, String tag) {
-    // final unit = list.first.x;
-    final arr = <Widget>[];
-    var unit = list.first.data['unit'];
-    if (tag == '各单位舆情总数') {
-      arr.add(listSingleUnitDialogItem(list.first, 0));
-    } else {
-      arr.add(Text(unit, style: dialogTextStyle()));
-      for (int i = 0; i < list.length; i++) {
-        OrdinalSales element = list[i];
-        arr.add(SizedBox(height: 10.w));
-        arr.add(listDialogItem(element, i));
-      }
-    }
-    final child = Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: arr,
-    );
-
-    //179,220,5 #4B4F52
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF4B4F52),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.sp)),
-          content: SizedBox(
-            width: 179.w,
-            child: Padding(
-              padding: EdgeInsets.all(10.w),
-              child: child,
-            ),
-          ),
-        );
-      },
-      barrierColor: Colors.transparent,
-    );
-  }
-
-  TextStyle dialogTextStyle() {
-    return Config.loadDefaultTextStyle(
-        color: Colors.white, fonstSize: 16.w, fontWeight: FontWeight.w400);
-  }
-
-  Widget listSingleUnitDialogItem(OrdinalSales bean, int index) {
-    return InkWell(
-      onTap: () {
-        _startEventInfoPage(bean.data['unit'], bean.data['eventList']);
-      },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(width: 13.w),
-          Text(bean.data['unit'], style: dialogTextStyle()),
-          const Spacer(),
-          Text(bean.y.toString(), style: dialogTextStyle()),
-        ],
-      ),
-    );
-  }
-
-  Widget listDialogItem(OrdinalSales bean, int index) {
-    return InkWell(
-      onTap: () {
-        _startEventInfoPage(bean.data['unit'] + " · " + bean.data['mediaType'],
-            bean.data['eventList']);
-      },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(width: 13.w, height: 13.w, color: colorArr[index]),
-          SizedBox(width: 13.w),
-          Text(bean.data['mediaType'], style: dialogTextStyle()),
-          const Spacer(),
-          Text(bean.y.toString(), style: dialogTextStyle())
-        ],
-      ),
-    );
-  }
-
-  Color randomColor() {
-    return Color.fromRGBO(
-        Random().nextInt(256), Random().nextInt(256), Random().nextInt(256), 1);
-  }
-
-  void _startEventInfoPage(title, eventList) {
-    // toast(title);
+  void _startEventInfoPage(context, title, eventList) {
+    toast(title);
+    var list = PublicOpinionBean.fromJsonArray(eventList);
+    // Config.finishPage(context);
     Config.startPage(
-        context,
-        StatisticsEventInfoPage(
-            title: title, list: PublicOpinionBean.fromJsonArray(eventList)));
-  }
-}
-
-class OrdinalSales {
-  final dynamic data;
-  final int y;
-  final int index;
-
-  OrdinalSales(this.y, this.index, {this.data});
-
-  @override
-  String toString() {
-    return 'OrdinalSales{x: $data, y: $y, index: $index}';
+        context, StatisticsEventInfoPage(title: title, list: list));
   }
 }

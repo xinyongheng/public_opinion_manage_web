@@ -95,8 +95,10 @@ class _PressInfoPageState extends State<PressInfoPage> {
                       ),
                     ),
                     SizedBox(height: 16.w),
-                    ListInfoWidget(
-                        canSelect: false, selectList: _list ?? [], type: 1),
+                    _list?.isNotEmpty == true
+                        ? ListInfoWidget(
+                            canSelect: false, selectList: _list!, type: 1)
+                        : const SizedBox(width: 0, height: 0),
                   ],
                 ),
               ),

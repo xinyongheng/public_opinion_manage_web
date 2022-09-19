@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 T checkEmpty<T>(T? data, String hint) {
   if (data == null) throw AssertionError(hint);
   if (data is String && data.isEmpty) throw AssertionError(hint);
@@ -17,5 +19,19 @@ String formatNum(double num, int fractionDigits) {
     return num.toString()
         .substring(0, num.toString().lastIndexOf(".") + fractionDigits + 1)
         .toString();
+  }
+}
+
+///防止文字自动换行
+String autoLineString(String str) {
+  if (str.isNotEmpty) {
+    return str.fixAutoLines();
+  }
+  return "";
+}
+
+extension FixAutoLines on String {
+  String fixAutoLines() {
+    return Characters(this).join('\u{200B}');
   }
 }

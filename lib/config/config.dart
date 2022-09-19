@@ -14,12 +14,22 @@ class Config {
   static final defaultSize = 19.w;
   static const fontColorSelect = Color(0xFF3E7BFA);
   static const Color borderColor = Color.fromRGBO(0, 0, 0, 0.15);
-
+  static const mediaTypeArr = [
+    '抖音',
+    '微博',
+    '微信',
+    '快手',
+    '小红书',
+    '百度贴吧',
+    '今日头条',
+    '西瓜视频'
+  ];
   // static const fontColorDefault = Color(0xFF333333);
   static TextStyle loadAppBarTextStyle() {
     return TextStyle(
       color: Colors.white,
       fontSize: appBarTitleSize,
+      // height: 1.2,
     );
   }
 
@@ -29,6 +39,7 @@ class Config {
       color: color,
       fontSize: fonstSize ?? defaultSize,
       fontWeight: fontWeight,
+      // height: 1.2,
       // textBaseline: TextBaseline.alphabetic,
     );
   }
@@ -48,6 +59,7 @@ class Config {
       fontSize: firstSize,
       fontWeight: FontWeight.bold,
       backgroundColor: backgroundColor,
+      // height: 1.1,
     );
   }
 

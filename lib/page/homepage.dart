@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
+import 'package:public_opinion_manage_web/page/login.dart';
 import 'package:public_opinion_manage_web/page/widget/duty_unit_info_list.dart';
 import 'package:public_opinion_manage_web/page/widget/save_event_info.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
@@ -116,13 +117,13 @@ class _ManageHomePageState extends State<ManageHomePage> {
           Text('舆情台账管理', style: Config.loadFirstTextStyle()),
           const Spacer(),
 
-          Text('($newNoticeNum/$sumNoticeNum)',
-              style: Config.loadDefaultTextStyle()),
+          /* Text('($newNoticeNum/$sumNoticeNum)',
+              style: Config.loadDefaultTextStyle()), 
           Image.asset(
             'images/notice.png',
             height: 21.w,
             width: 21.w,
-          ),
+          ),*/
           SizedBox(width: 47.w),
           //Icon(Icons.people, size: Config.firstSize, color: Colors.blue),
           Container(
@@ -140,7 +141,30 @@ class _ManageHomePageState extends State<ManageHomePage> {
             ),
           ),
           SizedBox(width: 20.w),
-          Text('管理员', style: Config.loadDefaultTextStyle()),
+          PopupMenuButton(
+            tooltip: '点击退出登录',
+            offset: Offset(0, 45.w),
+            padding: EdgeInsets.zero,
+            // constraints: BoxConstraints.expand(height: 40.w, width: 100.w),
+            color: const Color(0xFFFAFAFA),
+            itemBuilder: (context) {
+              return [
+                PopupMenuItem(
+                  onTap: () {
+                    unLogin();
+                  },
+                  height: 35,
+                  value: "logitOut",
+                  padding: EdgeInsets.only(left: 50.w),
+                  child: Text(
+                    "退出登录",
+                    style: Config.loadDefaultTextStyle(fonstSize: 13.w),
+                  ),
+                ),
+              ];
+            },
+            child: Text('管理员', style: Config.loadDefaultTextStyle()),
+          ),
           SizedBox(width: 32.w),
         ],
       ),
@@ -337,6 +361,14 @@ class _ManageHomePageState extends State<ManageHomePage> {
         toast('未知类型');
     }
   }
+
+  void unLogin() {
+    ServiceHttp().get("/unlogin", success: (data) {
+      UserUtil.clearUser().then((value) {
+        Config.startPageAndFinishOther(context, const LoginPage());
+      });
+    });
+  }
 }
 
 ///处理单位首页
@@ -503,7 +535,29 @@ class _DutyUnitHomePageState extends State<DutyUnitHomePage> {
           ),
         ),
         SizedBox(width: 20.w),
-        Text(unit, style: Config.loadDefaultTextStyle()),
+        PopupMenuButton(
+          tooltip: '点击退出登录',
+          offset: Offset(0, 48.w),
+          padding: EdgeInsets.zero,
+          // constraints: BoxConstraints.expand(height: 40.w, width: 100.w),
+          color: const Color(0xFFFAFAFA),
+          itemBuilder: (context) {
+            return [
+              PopupMenuItem(
+                onTap: () {
+                  unLogin();
+                },
+                value: "logitOut",
+                padding: EdgeInsets.only(left: 60.w),
+                child: Text(
+                  "退出登录",
+                  style: Config.loadDefaultTextStyle(fonstSize: 13.w),
+                ),
+              ),
+            ];
+          },
+          child: Text(unit, style: Config.loadDefaultTextStyle()),
+        ),
         SizedBox(width: 32.w),
       ],
     );
@@ -716,5 +770,13 @@ class _DutyUnitHomePageState extends State<DutyUnitHomePage> {
       default:
         toast('未知类型');
     } */
+  }
+
+  void unLogin() {
+    ServiceHttp().get("/unlogin", success: (data) {
+      UserUtil.clearUser().then((value) {
+        Config.startPageAndFinishOther(context, const LoginPage());
+      });
+    });
   }
 }

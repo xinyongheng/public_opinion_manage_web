@@ -23,7 +23,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   late TextEditingController _controller1;
   late TextEditingController _controller2;
-
+  int? oldType;
   @override
   void initState() {
     super.initState();
@@ -134,6 +134,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<Map<String, dynamic>?> loadToken() async {
     if (widget.comeFrom == UserUtil.reLogin) {
+      oldType = await UserUtil.getType();
       await UserUtil.clearUser();
       return null;
     }
@@ -237,7 +238,9 @@ class _LoginPageState extends State<LoginPage> {
           User user = User.fromJson(data);
           await UserUtil.save(user.data!, token: user.token);
           if (!mounted) return;
-          if (widget.comeFrom == UserUtil.reLogin) {
+          if (widget.comeFrom == UserUtil.reLogin &&
+              null != oldType &&
+              oldType == user.data!.type) {
             Config.finishPage(context);
           } else {
             final int? type = user.data?.type;
