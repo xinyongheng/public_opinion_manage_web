@@ -12,21 +12,18 @@ void showDutyUnitDialog(context, eventId) {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Center(
-            child: Text(
-              "指定单位",
-              style: Config.loadDefaultTextStyle(
-                fonstSize: 19.w,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ),
-          titlePadding: EdgeInsets.only(top: 37.w, bottom: 17.w),
+          insetPadding: EdgeInsets.zero,
+          titlePadding: EdgeInsets.zero,
+          buttonPadding: EdgeInsets.zero,
+          actionsPadding: EdgeInsets.zero,
+          contentPadding: EdgeInsets.zero,
+          // titlePadding: EdgeInsets.only(top: 37.w, bottom: 17.w),
           content: SizedBox(
               width: 374.w,
               child: DutyUnitWidget(width: 294.w, eventId: eventId)),
         );
-      });
+      },
+      barrierDismissible: false);
 }
 
 class DutyUnitWidget extends StatefulWidget {
@@ -63,6 +60,37 @@ class _DutyUnitWidgetState extends State<DutyUnitWidget> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        Stack(
+          children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: IconButton(
+                onPressed: () {
+                  Config.finishPage(context);
+                },
+                splashRadius: 30.w,
+                // iconSize: 25.w,
+                // color: Colors.black,
+                icon: Icon(
+                  Icons.close,
+                  color: Colors.blue,
+                  size: 30.w,
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.topCenter,
+              child: Text(
+                "\n指定单位\n",
+                style: Config.loadDefaultTextStyle(
+                  fonstSize: 22.w,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            )
+          ],
+        ),
         ListView.separated(
           separatorBuilder: (context, index) {
             return Divider(
@@ -73,21 +101,28 @@ class _DutyUnitWidgetState extends State<DutyUnitWidget> {
           },
           itemBuilder: (context, index) {
             if (index == dialoControllergMap.length) {
-              return InkWell(
-                onTap: () {
-                  int max = dialoControllergMap.length;
-                  dialoControllergMap[max.toString()] = TextEditingController();
-                  setState(() {});
-                },
-                child: Text('添加',
-                    style: Config.loadDefaultTextStyle(
-                      color: Config.fontColorSelect,
-                      fontWeight: FontWeight.w400,
-                    )),
+              return SizedBox(
+                child: InkWell(
+                  onTap: () {
+                    int max = dialoControllergMap.length;
+                    dialoControllergMap[max.toString()] =
+                        TextEditingController();
+                    setState(() {});
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 30.w),
+                    child: Text('添加单位',
+                        style: Config.loadDefaultTextStyle(
+                          color: Config.fontColorSelect,
+                          fontWeight: FontWeight.w400,
+                        )),
+                  ),
+                ),
               );
             }
             return Row(
               children: [
+                SizedBox(width: 30.w),
                 SizedBox(
                   width: widget.width,
                   child: createTextField(_loadController(index)),
@@ -119,8 +154,8 @@ class _DutyUnitWidgetState extends State<DutyUnitWidget> {
           width: widget.width + 100.w,
           child: TextField(
             controller: remardController,
-            maxLines: 5,
-            minLines: 5,
+            maxLines: 3,
+            minLines: 3,
             style: Config.loadDefaultTextStyle(
               fontWeight: FontWeight.w400,
               fonstSize: 19.w,
@@ -148,7 +183,8 @@ class _DutyUnitWidgetState extends State<DutyUnitWidget> {
                   child: const Text('发送链接'),
                 ),
               )
-            : SelectableText(link, style: Config.loadDefaultTextStyle())
+            : SelectableText(link, style: Config.loadDefaultTextStyle()),
+        SizedBox(height: 30.w),
       ],
     );
   }

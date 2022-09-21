@@ -7,6 +7,7 @@ import 'package:public_opinion_manage_web/custom/auto_complete_view.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/radio_group.dart';
 import 'package:public_opinion_manage_web/custom/select_file.dart';
+import 'package:public_opinion_manage_web/data/bean/update_event_bus.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
@@ -116,7 +117,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
     return [
       childTextItems('问题描述：', '问题描述', 'description', min: 3, max: 5),
       SizedBox(height: 43.w),
-      childTextItems('发帖主题：', '发帖主题', 'author'),
+      childTextItems('发帖主体：', '发帖主体', 'author'),
       SizedBox(height: 43.w),
       childDateItems('发布时间：', '发布时间', 'publishTime'),
       SizedBox(height: 43.w),
@@ -624,7 +625,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
               color: Colors.transparent,
             );
           });
-  final _fileView = FileListWidget(allowedExtensions: const ['']);
+  final _fileView = FileListWidget(allowedExtensions: vidoImgWordTxt);
   Widget titleFileView(title) => Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -718,9 +719,9 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
       List arr = [];
       for (int i = 0; i < _fileView.list.length; i++) {
         final element = _fileView.list[i];
-
-        arr.add(dio.MultipartFile.fromBytes(element.bytes!,
-            filename: 'file-${i + 1}${element.name!}'));
+        // 为了防止中文乱码，服务器在解码即可
+        final String encode = Uri.encodeComponent(element.name!);
+        arr.add(dio.MultipartFile.fromBytes(element.bytes!, filename: encode));
       }
       map['file'] = arr;
     }
@@ -728,7 +729,9 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
       '/saveEvent',
       data: dio.FormData.fromMap(map),
       success: (data) {
-        showSuccessDialog('录入成功');
+        showSuccessDialog('录入成功', dialogDismiss: () {
+          Config.eventBus.fire(ChangeHomepage()..index = 1);
+        });
       },
     );
   }

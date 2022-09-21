@@ -64,6 +64,7 @@ dependencies:
   charts_flutter: ^0.12.0
   # fl_chart: ^0.55.1
   url_launcher: ^6.1.5
+  event_bus: ^2.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -95,7 +96,7 @@ flutter:
     - images/icon_password.png
     - images/icon_select.png
     - images/icon_user.png
-    - images/ic_txt .png
+    - images/ic_video.png
     - images/ic_xls.png
     - images/login_left.png
     - images/logo.png

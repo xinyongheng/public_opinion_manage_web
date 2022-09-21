@@ -150,9 +150,10 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
                             childItem("发现时间：", eventInfo['findTime'] ?? ''),
                             ...superiorNotificationView(
                                 eventInfo['superiorNotificationTime']),
-                            // childItem("处理内容：", eventInfo['link'] ?? ''),
-                            childItem("管理员指定单位备注：",
-                                disposeEvent['manageRemark'] ?? '无'),
+                            // childItem("单位处理内容：", eventInfo['link'] ?? ''),
+                            childItem("管理员指定 \n单位备注：",
+                                disposeEvent['manageRemark'] ?? '无',
+                                line: 2),
                             ...historyDuty(),
                           ],
                         ),
@@ -195,15 +196,28 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
       }
     }
     var endList = <Widget>[];
-    print(finalPassState);
+    // print(finalPassState);
     if (finalPassState == '未处理') {
       endList = [dutyContent()];
     } else if (finalPassState == '待审核') {
-      endList = [childItem('处理内容：', lastMap['content'] ?? "")];
+      endList = [childItem('单位处理内容：', lastMap['content'] ?? "")];
     } else if (finalPassState == '通过') {
       endList = [
-        ...auditTitle(lastMap['utime'], finalPassState),
-        childItem("处理内容：\n(${lastMap['time']})", lastMap['content']),
+        SizedBox(
+          width: double.infinity,
+          child: Padding(
+            padding: EdgeInsets.only(left: 376.w),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...auditTitle(lastMap['utime'], finalPassState),
+                childItem("单位处理内容：\n(${lastMap['time']})", lastMap['content'],
+                    left: 23.w),
+              ],
+            ),
+          ),
+        )
       ];
     } else {
       //未通过
@@ -222,16 +236,19 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
   Widget historyDutyItem(String passState, String auditDate,
       String feedbackDate, String reason, String content) {
     return SizedBox(
-      width: 880.w,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ...auditTitle(auditDate, passState),
-          childItem("不通过原因：", reason),
-          childItem("处理内容：\n($feedbackDate)", content,
-              textAlign: TextAlign.right),
-        ],
+      width: double.infinity,
+      child: Padding(
+        padding: EdgeInsets.only(left: 376.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...auditTitle(auditDate, passState),
+            childItem("不通过原因：", reason, left: 23.w),
+            childItem("单位处理内容：\n($feedbackDate)", content,
+                textAlign: TextAlign.right, left: 23.w),
+          ],
+        ),
       ),
     );
   }
@@ -243,7 +260,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
       Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(width: 369.w),
+          SizedBox(width: 23.w),
           Text(
             '审核：',
             style: Config.loadDefaultTextStyle(
@@ -251,7 +268,10 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
               fontWeight: FontWeight.w400,
             ),
           ),
-          const Radio(value: 1, groupValue: 1, onChanged: null),
+          Radio(
+              value: 1,
+              groupValue: 1,
+              onChanged: passState == '通过' ? (a) {} : null),
           Text(
             passText(passState),
             style: Config.loadDefaultTextStyle(
@@ -259,7 +279,6 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
               fontWeight: FontWeight.w400,
             ),
           ),
-          const Spacer(),
         ],
       )
     ];
@@ -286,7 +305,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
         Text("审核日期：$data",
             style: Config.loadDefaultTextStyle(
                 fonstSize: 20.w, fontWeight: FontWeight.w500)),
-        SizedBox(width: 560.w),
+        const Spacer(),
       ],
     );
   }
@@ -294,9 +313,12 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
   Widget feedTimeView() {
     return Container(
       width: 624.w,
-      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 12.w),
-      child: Config.dateInputView('反馈时间', _feedTimeController,
-          initialDate: DateTime.now()),
+      padding: EdgeInsets.symmetric(horizontal: 0.w, vertical: 12.w),
+      child: Config.dateInputView(
+        '反馈时间',
+        _feedTimeController,
+        initialDate: DateTime.now(),
+      ),
     );
   }
 
@@ -308,28 +330,28 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          bordContentTitle('反馈时间', TextAlign.left),
+          bordContentTitle('反馈时间：', TextAlign.left, top: 0),
           feedTimeView(),
         ],
       ));
       arr.add(SizedBox(height: 23.w));
     }
-    return Row(
+    return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '处理内容：',
-          style: Config.loadDefaultTextStyle(
-            color: Colors.black.withOpacity(0.85),
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-        Column(
+        Row(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              '单位处理内容：',
+              style: Config.loadDefaultTextStyle(
+                color: Colors.black.withOpacity(0.85),
+                fontWeight: FontWeight.w400,
+              ),
+            ),
             SizedBox(
-              width: 642,
+              width: 624.w,
               child: TextField(
                 controller: _controller3,
                 maxLines: 6,
@@ -338,28 +360,28 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
                 decoration: Config.defaultInputDecoration(hintText: '请输入处理内容'),
               ),
             ),
-            SizedBox(height: 23.w),
-            ...arr,
-            TextButton(
-              onPressed: result
-                  ? null
-                  : () {
-                      requestCommitDutyContent(_controller3.text);
-                    },
-              style: TextButton.styleFrom(
-                primary: Colors.white,
-                backgroundColor: Config.fontColorSelect,
-                textStyle:
-                    Config.loadDefaultTextStyle(fontWeight: FontWeight.w400),
-                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.w),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.w)),
-              ),
-              child: const Text('提交'),
-            ),
-            SizedBox(height: 30.w),
+            SizedBox(width: 30.w),
           ],
-        )
+        ),
+        SizedBox(height: 23.w),
+        ...arr,
+        TextButton(
+          onPressed: result
+              ? null
+              : () {
+                  requestCommitDutyContent(_controller3.text);
+                },
+          style: TextButton.styleFrom(
+            primary: Colors.white,
+            backgroundColor: Config.fontColorSelect,
+            textStyle: Config.loadDefaultTextStyle(fontWeight: FontWeight.w400),
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.w),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.w)),
+          ),
+          child: const Text('提交'),
+        ),
+        SizedBox(height: 30.w),
       ],
     );
   }
@@ -423,32 +445,50 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
   }
 
   Widget childItem(String data, String content,
-      {double? bottom, TextAlign textAlign = TextAlign.left}) {
+      {double? bottom,
+      TextAlign textAlign = TextAlign.left,
+      int? line,
+      double left = 0}) {
     return Padding(
-      padding: EdgeInsets.only(bottom: bottom ?? 46.w),
+      padding: EdgeInsets.only(bottom: bottom ?? 46.w, left: left),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           bordContentTitle(data, textAlign),
-          bordContent(content),
+          bordContent(content, line),
         ],
       ),
     );
   }
 
-  Text bordContentTitle(String data, TextAlign textAlign) {
-    return Text(
-      data,
-      style: Config.loadDefaultTextStyle(
-        color: Colors.black.withOpacity(0.85),
-        fontWeight: FontWeight.w400,
+  Widget bordContentTitle(String data, TextAlign textAlign, {double? top}) {
+    return Padding(
+      padding: EdgeInsets.only(top: top ?? 12.w),
+      child: Stack(
+        children: [
+          Text(
+            data == '不通过原因：' ? '(2022-01-01 08:00:00)' : '',
+            style: Config.loadDefaultTextStyle(
+              color: Colors.transparent,
+              fontWeight: FontWeight.w400,
+            ),
+            textAlign: TextAlign.left,
+          ),
+          Text(
+            data,
+            style: Config.loadDefaultTextStyle(
+              color: Colors.black.withOpacity(0.85),
+              fontWeight: FontWeight.w400,
+            ),
+            textAlign: TextAlign.left,
+          )
+        ],
       ),
-      textAlign: TextAlign.left,
     );
   }
 
-  Container bordContent(String content) {
+  Container bordContent(String content, [int? line]) {
     return Container(
       width: 624.w,
       padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 12.w),
@@ -458,6 +498,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
       ),
       child: SelectableText(
         content,
+        maxLines: line,
         style: Config.loadDefaultTextStyle(
           color: Colors.black.withOpacity(0.65),
           fontWeight: FontWeight.w400,

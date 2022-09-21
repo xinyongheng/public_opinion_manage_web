@@ -133,7 +133,7 @@ class _HistoryPressFileWidgetState extends State<HistoryPressFileWidget> {
       children: [
         tableView('序号', 70.w),
         tableView('文件名称', 647.w), //291
-        tableView('文件上传时间', 175.w), //39
+        tableView('文件上传时间', 260.w), //39
         Expanded(
           child: Container(
               width: double.infinity,
@@ -163,8 +163,8 @@ class _HistoryPressFileWidgetState extends State<HistoryPressFileWidget> {
         fontSize: tableFrontSize,
         fontWeight: FontWeight.w400,
       );
-  Text listViewItemText(data) =>
-      Text(data, style: listViewItemTextStyle(Colors.black.withOpacity(0.65)));
+  SelectableText listViewItemText(data) => SelectableText(data,
+      style: listViewItemTextStyle(Colors.black.withOpacity(0.65)));
   Widget listViewItem(index) {
     final item = _list[index - 1];
     return Row(
@@ -183,15 +183,22 @@ class _HistoryPressFileWidgetState extends State<HistoryPressFileWidget> {
             ),
             70.w),
         tableChildView(listViewItemText(item.wordName), 647.w),
-        tableChildView(listViewItemText(item.utime), 175.w), //63
+        tableChildView(listViewItemText(item.utime), 260.w), //63
         const Spacer(),
         tableChildView(
-            InkWell(
-                onTap: () {
-                  preReadWord(item.content!, item.path!);
-                },
-                child: Text('查看',
-                    style: listViewItemTextStyle(Config.fontColorSelect))),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                  onTap: () {
+                    preReadWord(item.content!, item.path!);
+                  },
+                  child: Container(
+                    width: 84.w,
+                    alignment: Alignment.center,
+                    child: Text('查看',
+                        style: listViewItemTextStyle(Config.fontColorSelect)),
+                  )),
+            ),
             330.w), //26
       ],
     );
@@ -214,7 +221,7 @@ class _HistoryPressFileWidgetState extends State<HistoryPressFileWidget> {
     width: 396.w,
     height: 240.w,
     explain: '仅支持上传word文档，一次最多上传10个文件',
-    allowedExtensions: const ['doc', 'docx', 'word'],
+    allowedExtensions: const ['docx'],
   );
   void addFileDialog() {
     showCenterNoticeDialog(context,

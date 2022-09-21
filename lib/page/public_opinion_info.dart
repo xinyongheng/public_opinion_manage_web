@@ -1,4 +1,5 @@
 import 'package:date_time_picker/date_time_picker.dart';
+import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
@@ -6,8 +7,10 @@ import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/file_list_view.dart';
 import 'package:public_opinion_manage_web/custom/radio_group.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
+import 'package:public_opinion_manage_web/data/bean/update_event_bus.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/date_util.dart';
+import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 class PublicOpinionInfoPage extends StatefulWidget {
@@ -102,28 +105,7 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
                           SizedBox(width: 68.w),
                         ],
                       ),
-                      TextButton(
-                          onPressed: () {
-                            if (_canChange) {
-                              // 提交信息
-                              submitInfo();
-                            } else {
-                              //仅修改状态
-                              setState(() {
-                                _canChange = !_canChange;
-                              });
-                            }
-                          },
-                          style: TextButton.styleFrom(
-                            primary: Colors.white,
-                            backgroundColor: Config.fontColorSelect,
-                            minimumSize: const Size(1, 1),
-                            fixedSize: Size(87.w, 43.w),
-                            textStyle: Config.loadDefaultTextStyle(),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5.w)),
-                          ),
-                          child: Text(!_canChange ? '编辑' : '保存'))
+                      endView(context),
                     ],
                   ),
                 ),
@@ -133,6 +115,60 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
         ),
       ),
     );
+  }
+
+  Widget endView(context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextButton(
+            onPressed: () {
+              if (_canChange) {
+                // 提交信息
+                submitInfo();
+              } else {
+                //仅修改状态
+                setState(() {
+                  _canChange = !_canChange;
+                });
+              }
+            },
+            style: TextButton.styleFrom(
+              primary: Colors.white,
+              backgroundColor: Config.fontColorSelect,
+              minimumSize: const Size(1, 1),
+              fixedSize: Size(87.w, 43.w),
+              textStyle: Config.loadDefaultTextStyle(),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5.w)),
+            ),
+            child: Text(!_canChange ? '编辑' : '保存')),
+        Visibility(
+          visible: _publicOpinionBean?.feedbackTime?.isNotEmpty != true,
+          child: Padding(
+            padding: EdgeInsets.only(left: 30.w),
+            child: TextButton(
+                onPressed: () => showDeleteDialog(context),
+                style: TextButton.styleFrom(
+                  primary: Colors.white,
+                  backgroundColor: Config.fontColorSelect,
+                  minimumSize: const Size(1, 1),
+                  fixedSize: Size(87.w, 43.w),
+                  textStyle: Config.loadDefaultTextStyle(),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.w)),
+                ),
+                child: const Text('删除')),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void showDeleteDialog(context) {
+    showCenterNoticeDialog(context, contentString: '确定删除这条事件么？', onPress: () {
+      requestDeleteEventInfo(context);
+    });
   }
 
   Widget outsideWidget(double width, {required Widget child}) {
@@ -402,5 +438,21 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
     if (text != target) {
       map[key] = text;
     }
+  }
+
+  void requestDeleteEventInfo(context) async {
+    final mapData = await UserUtil.makeUserIdMap();
+    if (_publicOpinionBean == null ||
+        DataUtil.isEmpty(_publicOpinionBean?.id)) {
+      showNoticeDialog('信息丢失，暂无无法删除');
+      return;
+    }
+    mapData['eventId'] = _publicOpinionBean!.id;
+    ServiceHttp().post('/deleteEvent', data: mapData, success: (data) {
+      showSuccessDialog('删除成功', dialogDismiss: () {
+        Config.finishPage(context, refresh: true);
+        Config.eventBus.fire(UpdateEventListBean()..needUpdate = true);
+      });
+    });
   }
 }

@@ -38,11 +38,13 @@ class ShowFileListWidget extends StatelessWidget {
 
   Widget fileView(String path, String name) {
     String type = FileInfoBean.fileType(path);
-    int pointIndex = path.lastIndexOf('.');
-    String endString = "";
-    if (pointIndex > -1) {
-      endString = path.substring(pointIndex);
-      // print("${endString}---urlPath=" + path);
+    String endString = name;
+    if (!name.contains('.')) {
+      int pointIndex = path.lastIndexOf('.');
+      if (pointIndex > -1) {
+        endString = name + path.substring(pointIndex);
+        // print("${endString}---urlPath=" + path);
+      }
     }
     Widget image;
     final urlPath = "${ServiceHttp.parentUrl}/$path";
@@ -71,7 +73,7 @@ class ShowFileListWidget extends StatelessWidget {
         SizedBox(
           width: 107.w,
           child: Text(
-            "$name$endString",
+            endString,
             style: Config.loadDefaultTextStyle(
               fontWeight: FontWeight.w400,
               color: Config.fontColorSelect,

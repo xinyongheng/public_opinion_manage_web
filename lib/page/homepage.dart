@@ -1,8 +1,10 @@
+import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
+import 'package:public_opinion_manage_web/data/bean/update_event_bus.dart';
 import 'package:public_opinion_manage_web/page/login.dart';
 import 'package:public_opinion_manage_web/page/widget/duty_unit_info_list.dart';
 import 'package:public_opinion_manage_web/page/widget/save_event_info.dart';
@@ -33,7 +35,6 @@ class _ManageHomePageState extends State<ManageHomePage> {
   late List<Widget> pages;
 
   final Color lineColor = Colors.grey;
-
   @override
   void initState() {
     super.initState();
@@ -45,6 +46,14 @@ class _ManageHomePageState extends State<ManageHomePage> {
       const StatisticsWidget(),
       const MakeAccountWidget(),
     ];
+    Config.eventBus.on<ChangeHomepage>().listen((event) {
+      print("eventBus_ManageHomePageState");
+      if (event.index > 0) {
+        setState(() {
+          _nowIndex = event.index;
+        });
+      }
+    });
   }
 
   @override

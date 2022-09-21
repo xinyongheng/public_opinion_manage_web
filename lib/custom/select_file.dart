@@ -7,6 +7,28 @@ import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/data/bean/file_info.dart';
 import 'package:public_opinion_manage_web/utils/str_util.dart';
 
+const vidoImgWordTxt = [
+  'png',
+  'jpg',
+  'gif',
+  'jpeg',
+  'tif',
+  'bmp',
+  'mp4',
+  'avi',
+  'rmvb',
+  'flv',
+  'mov',
+  '3gp',
+  'rm',
+  'mpeg',
+  'doc',
+  'docx',
+  'xls',
+  'xlsx',
+  'txt'
+];
+
 ///添加本地文件
 class AddFileWidget extends StatelessWidget {
   final VoidCallback onPressed;
@@ -142,10 +164,10 @@ class _FileListWidgetState extends State<FileListWidget> {
             children: [
               InkWell(
                 onTap: () => imageClick(item),
-                child: Container(
+                child: SizedBox(
                     width: 45.w,
                     height: 45.w,
-                    color: const Color(0xFFD9D9D9),
+                    // color: const Color(0xFFD9D9D9),
                     child: imageWidget(item)),
               ),
               SizedBox(width: 8.w),
@@ -153,10 +175,17 @@ class _FileListWidgetState extends State<FileListWidget> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item.name!,
+                  SizedBox(
+                    width: 530.w,
+                    child: Text(
+                      item.name!,
+                      softWrap: true,
+                      overflow: TextOverflow.ellipsis,
                       style: Config.loadDefaultTextStyle(
-                          color: const Color(0xFF333333), fonstSize: 19.w)),
-                  Text("${formatNum(item.size! / 1204, 1)}K",
+                          color: const Color(0xFF333333), fonstSize: 19.w),
+                    ),
+                  ),
+                  Text(fileSize(item.size! / 1204),
                       style: Config.loadDefaultTextStyle(
                           color: const Color(0xFF333333), fonstSize: 19.w)),
                 ],
@@ -218,7 +247,7 @@ class _FileListWidgetState extends State<FileListWidget> {
       return Image.memory(bean.bytes!);
     }
     if (bean.type == 'video') {
-      return Image.asset('images/ic_txt.png');
+      return Image.asset('images/ic_video.png');
     }
     return Image.asset('images/ic_xls.png');
   }
@@ -231,8 +260,17 @@ class _FileListWidgetState extends State<FileListWidget> {
         // html.File file = html.File();
         final fileName = result.files.single.name;
         final fileBytes = result.files.single.bytes;
+        final fileSize = result.files.single.size;
+        if (fileSize > 314572800) {
+          showNoticeDialog('选择的文件超过300M，无法上传');
+          return;
+        }
         final fileInfo = FileInfoBean("web_$fileName",
-            bytes: fileBytes, name: fileName, size: result.files.single.size);
+            bytes: fileBytes, name: fileName, size: fileSize);
+        if (!vidoImgWordTxt.contains(fileInfo.fileEndType)) {
+          showNoticeDialog('该文件类型(${fileInfo.fileEndType})，无法上传');
+          return;
+        }
         setState(() {
           widget.list.add(fileInfo);
         });

@@ -136,8 +136,8 @@ showNoticeDialog(msg, {int seconds = 3, bool dismissOnTap = false}) {
   );
 }
 
-dismissDialog() {
-  EasyLoading.dismiss();
+dismissDialog() async {
+  await EasyLoading.dismiss();
 }
 
 toast(String msg) {
@@ -152,7 +152,13 @@ toast(String msg) {
 showSuccessDialog(msg,
     {int seconds = 3,
     bool dismissOnTap = false,
-    DialogDismiss? dialogDismiss}) {
+    DialogDismiss? dialogDismiss}) async {
+  await EasyLoading.showSuccess(
+    msg,
+    duration: Duration(seconds: seconds),
+    dismissOnTap: dismissOnTap,
+    maskType: EasyLoadingMaskType.black,
+  );
   if (null != dialogDismiss) {
     ServiceHttp().callback = (status) {
       if (status == EasyLoadingStatus.dismiss) {
@@ -165,10 +171,4 @@ showSuccessDialog(msg,
     };
     EasyLoading.addStatusCallback(ServiceHttp().callback!);
   }
-  EasyLoading.showSuccess(
-    msg,
-    duration: Duration(seconds: seconds),
-    dismissOnTap: dismissOnTap,
-    maskType: EasyLoadingMaskType.black,
-  );
 }

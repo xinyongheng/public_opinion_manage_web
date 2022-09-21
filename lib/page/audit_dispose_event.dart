@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
@@ -85,7 +87,7 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
       childItem("舆情类别：", eventInfo?.type ?? ''),
       childItem("发现时间：", eventInfo?.findTime ?? ''),
       ...superiorNotificationView(eventInfo?.superiorNotificationTime),
-      childItem("管理员指定单位备注：", disposeEvent?.manageRemark ?? '无'),
+      childItem("管理员指定 \n单位备注：", disposeEvent?.manageRemark ?? '无', line: 2),
     ];
     if (!DataUtil.isEmpty(unitList)) {
       arr.add(Padding(
@@ -431,7 +433,7 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
   }
 
   Widget childItem(String data, String content,
-      {double? bottom, TextAlign textAlign = TextAlign.left}) {
+      {double? bottom, TextAlign textAlign = TextAlign.left, int line = 1}) {
     return Padding(
       padding: EdgeInsets.only(bottom: bottom ?? 46.w),
       child: Row(
@@ -439,7 +441,7 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           bordContentTitle(data, textAlign),
-          bordContent(content),
+          bordContent(content, line),
         ],
       ),
     );
@@ -456,7 +458,7 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
     );
   }
 
-  Container bordContent(String content) {
+  Container bordContent(String content, [int line = 1]) {
     return Container(
       width: 624.w,
       padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 12.w),
@@ -466,6 +468,7 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
       ),
       child: SelectableText(
         content,
+        maxLines: line,
         style: Config.loadDefaultTextStyle(
           color: Colors.black.withOpacity(0.65),
           fontWeight: FontWeight.w400,
@@ -606,7 +609,8 @@ class DutyUnitList extends StatelessWidget {
         final reason = element.reason ?? "";
         final content = element.content ?? "";
         list.add(historyDutyItem(
-            passState, auditDate, feedbackDate, reason, content));
+            passState, auditDate, feedbackDate, reason, content,
+            index: i + 1));
       }
     }
     var endList = <Widget>[];
@@ -619,14 +623,19 @@ class DutyUnitList extends StatelessWidget {
       ];
     } else if (finalPassState == '通过') {
       endList = [
-        ...auditTitle(lastMap.utime, finalPassState),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: auditTitle(lastMap.utime, finalPassState!, max(length, 1)),
+        ),
         childItem("处理内容：\n（${lastMap.time}）", lastMap.content ?? "",
             textAlign: TextAlign.right),
       ];
     } else if (finalPassState == '未通过') {
       endList = [
         historyDutyItem(finalPassState ?? "", lastMap.utime ?? "",
-            lastMap.time ?? "", lastMap.reason ?? "", lastMap.content ?? "")
+            lastMap.time ?? "", lastMap.reason ?? "", lastMap.content ?? "",
+            index: max(length, 1))
       ];
     }
     return [
@@ -636,14 +645,15 @@ class DutyUnitList extends StatelessWidget {
   }
 
   Widget historyDutyItem(String passState, String auditDate,
-      String feedbackDate, String reason, String content) {
+      String feedbackDate, String reason, String content,
+      {int index = -1}) {
     return SizedBox(
       // width: 744.w,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ...auditTitle(auditDate, passState),
+          ...auditTitle(auditDate, passState, index),
           childItem("不通过原因：", reason),
           childItem("处理内容：\n（$feedbackDate）", content,
               textAlign: TextAlign.right),
@@ -652,14 +662,39 @@ class DutyUnitList extends StatelessWidget {
     );
   }
 
-  List<Widget> auditTitle(auditDate, passState) {
+  Widget childTitleView(fontData, data, index) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 30.w,
+          height: 30.w,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Colors.yellow,
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(100),
+          ),
+          child: Text("$index",
+              style: Config.loadDefaultTextStyle(
+                  fonstSize: 20.w, fontWeight: FontWeight.w500)),
+        ),
+        SizedBox(width: 6.w),
+        Text("$fontData：$data",
+            style: Config.loadDefaultTextStyle(
+                fonstSize: 20.w, fontWeight: FontWeight.w500)),
+      ],
+    );
+  }
+
+  List<Widget> auditTitle(auditDate, String passState, index) {
     return [
-      titleView('审核日期', auditDate),
+      childTitleView('审核日期', auditDate, index),
       SizedBox(height: 30.w),
       Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(width: 60.w),
+          SizedBox(width: 36.w),
           Text(
             '审核：',
             style: Config.loadDefaultTextStyle(
@@ -667,7 +702,10 @@ class DutyUnitList extends StatelessWidget {
               fontWeight: FontWeight.w400,
             ),
           ),
-          const Radio(value: 1, groupValue: 1, onChanged: null),
+          Radio(
+              value: 1,
+              groupValue: 1,
+              onChanged: passState == '通过' ? (a) {} : null),
           Text(
             passText(passState),
             style: Config.loadDefaultTextStyle(
@@ -693,7 +731,7 @@ class DutyUnitList extends StatelessWidget {
       padding: EdgeInsets.only(bottom: bottom ?? 46.w),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           bordContentTitle(data, textAlign),
           bordContent(content),
@@ -702,14 +740,32 @@ class DutyUnitList extends StatelessWidget {
     );
   }
 
-  Text bordContentTitle(String data, TextAlign textAlign) {
-    return Text(
-      data,
-      style: Config.loadDefaultTextStyle(
-        color: Colors.black.withOpacity(0.85),
-        fontWeight: FontWeight.w400,
+  Widget bordContentTitle(String data, TextAlign textAlign) {
+    return Padding(
+      padding: EdgeInsets.only(left: 36.w, top: 12.w),
+      child: Stack(
+        children: [
+          Opacity(
+            opacity: 0,
+            child: Text(
+              '（2022-05-06 08:00:00）',
+              style: Config.loadDefaultTextStyle(
+                color: Colors.black.withOpacity(0.85),
+                fontWeight: FontWeight.w400,
+              ),
+              textAlign: textAlign,
+            ),
+          ),
+          Text(
+            data,
+            style: Config.loadDefaultTextStyle(
+              color: Colors.black.withOpacity(0.85),
+              fontWeight: FontWeight.w400,
+            ),
+            textAlign: textAlign,
+          ),
+        ],
       ),
-      textAlign: textAlign,
     );
   }
 

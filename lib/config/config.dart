@@ -1,4 +1,5 @@
 import 'package:date_time_picker/date_time_picker.dart';
+import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -32,6 +33,8 @@ class Config {
       // height: 1.2,
     );
   }
+
+  static final EventBus eventBus = EventBus();
 
   static TextStyle loadDefaultTextStyle(
       {Color? color, double? fonstSize, FontWeight? fontWeight}) {
@@ -85,8 +88,8 @@ class Config {
         .pushReplacement(MaterialPageRoute(builder: (content) => page));
   }
 
-  static finishPage(BuildContext context) {
-    Navigator.of(context).pop();
+  static finishPage(BuildContext context, {bool refresh = false}) {
+    Navigator.of(context).pop(refresh);
   }
 
   static startLoginPage() {

@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:date_time_picker/date_time_picker.dart';
+import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
@@ -7,6 +8,7 @@ import 'package:public_opinion_manage_web/custom/check_box.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/duty_unit.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
+import 'package:public_opinion_manage_web/data/bean/update_event_bus.dart';
 import 'package:public_opinion_manage_web/page/audit_dispose_event.dart';
 import 'package:public_opinion_manage_web/page/public_opinion_info.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
@@ -32,6 +34,12 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
   void initState() {
     super.initState();
     askInternet(null);
+    Config.eventBus.on<UpdateEventListBean>().listen((event) {
+      // print("eventBus_PublicOpinionListWidgetState");
+      if (event.needUpdate && mounted) {
+        askInternet(null);
+      }
+    });
   }
 
   // 请求网络列表
@@ -42,9 +50,11 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
     }
     finalMap["userId"] = await UserUtil.getUserId();
     ServiceHttp().post("/eventList", data: finalMap, success: (data) {
-      setState(() {
-        _list = PublicOpinionBean.fromJsonArray(data);
-      });
+      if (mounted) {
+        setState(() {
+          _list = PublicOpinionBean.fromJsonArray(data);
+        });
+      }
     });
   }
 

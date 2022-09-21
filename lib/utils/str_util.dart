@@ -22,6 +22,20 @@ String formatNum(double num, int fractionDigits) {
   }
 }
 
+String fileSize(double num, [int fractionDigits = 1]) {
+  if (num > 102.4) {
+    // M,
+    double numM = num / 1024;
+    if (numM > 1000) {
+      return '${formatNum(numM / 1024, fractionDigits)}}G';
+    } else {
+      return '${formatNum(numM, fractionDigits)}M';
+    }
+  } else {
+    return '${formatNum(num, fractionDigits)}K';
+  }
+}
+
 ///防止文字自动换行
 String autoLineString(String str) {
   if (str.isNotEmpty) {

@@ -240,19 +240,32 @@ class _PressListWidgetState extends State<PressListWidget> {
         tableChildView(
             listViewItemText(pressTypeString(item['pressType'])), 190.w), //63
         tableChildView(listViewItemText(item['creteDate']), 402.w), //169
-        InkWell(
-            onTap: () {
-              clickPress(item, pressTypeString(item['pressType']), filePath,
-                  _list[index - 1]['weekList']);
-            },
-            child: tableChildView(listViewItemText('查看'), 84.w)), //26
-        InkWell(
-            onTap: () {
-              clickFile(filePath, item['id']);
-            },
-            child: tableChildView(
-                listViewItemText(DataUtil.isEmpty(filePath) ? '添加' : '查看'),
-                294.w)),
+        Material(
+          elevation: 0,
+          color: Colors.transparent,
+          child: InkWell(
+              onTap: () {
+                clickPress(item, pressTypeString(item['pressType']), filePath,
+                    _list[index - 1]['weekList']);
+              },
+              child: tableChildView(listViewItemText('查看'), 84.w)),
+        ), //26
+        tableChildView(
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                  onTap: () {
+                    clickFile(filePath, item['id']);
+                  },
+                  child: SizedBox(
+                    width: 84.w,
+                    child: Center(
+                      child: listViewItemText(
+                          DataUtil.isEmpty(filePath) ? '添加' : '下载'),
+                    ),
+                  )),
+            ),
+            294.w),
       ],
     );
   }

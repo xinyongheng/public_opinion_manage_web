@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 
 class FileInfoBean {
   late String type;
+  late String fileEndType;
   String? name;
   late String path;
   final Uint8List? bytes;
   int? size;
-
   // FileInfo();
   FileInfoBean(this.path, {this.bytes, this.name, this.size}) {
     if (name == null) {
@@ -20,6 +20,7 @@ class FileInfoBean {
         name = path;
       }
     }
+    fileEndType = fileEndText(name!);
     type = fileType(name!);
   }
 
@@ -32,15 +33,20 @@ class FileInfoBean {
     }
   }
 
-  static String fileType(String name) {
-    int pointIndex = name.lastIndexOf('.');
+  static String fileEndText(String fileName) {
+    int pointIndex = fileName.lastIndexOf('.');
     String endString;
     if (pointIndex > -1) {
-      endString = name.substring(pointIndex + 1);
+      endString = fileName.substring(pointIndex + 1).toLowerCase();
     } else {
-      endString = name;
+      endString = 'unknown';
     }
-    print(endString);
+    return endString;
+  }
+
+  static String fileType(String name) {
+    String endString = fileEndText(name);
+    //print(endString);
     switch (endString.toLowerCase()) {
       case 'jpg':
       case 'png':
@@ -60,6 +66,11 @@ class FileInfoBean {
       case 'flv':
       case '3gp':
         return 'video';
+      /* case 'txt':
+        return 'txt';
+      case 'doc':
+      case 'docx':
+        return 'word'; */
       default:
         return 'file';
     }
