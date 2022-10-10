@@ -155,6 +155,7 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
 
   void requestSearch() async {
     final mapData = <String, dynamic>{};
+    mapData['passState'] = '通过';
     controllerMap.forEach((key, value) => fillFilterData(mapData, key, value));
     askInternet(mapData.isEmpty ? null : mapData);
   }
@@ -775,8 +776,8 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
               ],
             ),
             SizedBox(height: 42.w),
-            childItem('标题：', 'title'),
-            SizedBox(height: 42.w),
+            // childItem('标题：', 'title'),
+            // SizedBox(height: 42.w),
             dateView('日期：', 'creteDate'),
             SizedBox(height: 42.w),
             childItem('刊号：', 'noName'),
@@ -1071,18 +1072,21 @@ class _WeekPressCreateWidgetState extends State<WeekPressCreateWidget> {
   }
 
   void makeWord() async {
-    String title = map['title']!.text;
-    if (title.isEmpty) {
-      toast("请输入标题");
-      return;
+    String title = '';
+    if (map['title'] != null) {
+      title = map['title']!.text;
+      if (title.isEmpty) {
+        toast("请输入标题");
+        return;
+      }
     }
     String creteDate = map['creteDate']!.text;
-    if (title.isEmpty) {
+    if (creteDate.isEmpty) {
       toast("请选择时间");
       return;
     }
     String noName = map['noName']!.text;
-    if (title.isEmpty) {
+    if (noName.isEmpty) {
       toast("请输入刊号");
       return;
     }

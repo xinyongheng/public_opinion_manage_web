@@ -60,9 +60,11 @@ showCenterNoticeDialog(BuildContext context,
     String? title,
     String? contentString,
     GestureTapCallback? onPress,
+    EdgeInsets? contentPadding,
     bool isNeedTitle = true,
     bool isNeedActions = true,
-    bool barrierDismissible = true}) {
+    bool barrierDismissible = true,
+    bool clickDismiss = true}) {
   showDialog(
     context: context,
     barrierDismissible: barrierDismissible,
@@ -86,7 +88,10 @@ showCenterNoticeDialog(BuildContext context,
               style: Config.loadDefaultTextStyle(),
             ),
           ),
+      contentPadding: EdgeInsets.symmetric(vertical: 24.w, horizontal: 24.w),
       actionsAlignment: MainAxisAlignment.center,
+      actionsPadding: EdgeInsets.only(bottom: 10.w),
+      titlePadding: EdgeInsets.only(top: 20.w),
       actions: isNeedActions
           ? [
               TextButton(
@@ -108,8 +113,10 @@ showCenterNoticeDialog(BuildContext context,
                   style: Config.loadDefaultTextStyle(color: null),
                 ),
                 onPressed: () {
-                  //关闭 返回true
-                  Navigator.of(context).pop(true);
+                  if (clickDismiss) {
+                    //关闭 返回true
+                    Navigator.of(context).pop(true);
+                  }
                   onPress?.call();
                 },
               ),
@@ -128,6 +135,7 @@ showWaitDialog() {
 }
 
 showNoticeDialog(msg, {int seconds = 3, bool dismissOnTap = false}) {
+  EasyLoading.instance.fontSize = Config.defaultSize;
   EasyLoading.showInfo(
     msg,
     duration: Duration(seconds: seconds),

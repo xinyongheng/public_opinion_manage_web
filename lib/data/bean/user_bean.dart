@@ -86,4 +86,15 @@ class UserData {
     data['utime'] = utime;
     return data;
   }
+
+  static List<UserData> fromJsonArray(List? data) {
+    if (data == null) return [];
+    final list = <UserData>[];
+    for (int i = 0; i < data.length; i++) {
+      final v = data[i];
+      final bean = UserData.fromJson(v);
+      list.add(bean);
+    }
+    return list;
+  }
 }

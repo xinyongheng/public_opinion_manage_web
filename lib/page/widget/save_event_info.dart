@@ -670,7 +670,8 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
     }
     String link = _listLink[0].value.text;
     if (link.isEmpty) {
-      return toast('请输入事件链接');
+      // return toast('请输入事件链接');
+      link = '无';
     }
     String mediaType = _listMediaType[0].value.text;
     if (mediaType.isEmpty) {

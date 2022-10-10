@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:date_time_picker/date_time_picker.dart';
-import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
@@ -9,6 +8,7 @@ import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/duty_unit.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/data/bean/update_event_bus.dart';
+import 'package:public_opinion_manage_web/data/bean/user_bean.dart';
 import 'package:public_opinion_manage_web/page/audit_dispose_event.dart';
 import 'package:public_opinion_manage_web/page/public_opinion_info.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
@@ -35,7 +35,7 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
     super.initState();
     askInternet(null);
     Config.eventBus.on<UpdateEventListBean>().listen((event) {
-      // print("eventBus_PublicOpinionListWidgetState");
+      print("eventBus_PublicOpinionListWidgetState, $mounted");
       if (event.needUpdate && mounted) {
         askInternet(null);
       }
@@ -602,7 +602,9 @@ class ListInfoWidgetState extends State<ListInfoWidget>
         // border: Border.all(color: Colors.black, width: 0.5),
       ),
       child: canClick
-          ? InkWell(onTap: () => viewClick(data, tag, index - 1), child: child)
+          ? InkWell(
+              onTap: data != '—' ? () => viewClick(data, tag, index - 1) : null,
+              child: child)
           : child,
     );
   }
@@ -674,8 +676,12 @@ class ListInfoWidgetState extends State<ListInfoWidget>
         ));
   }
 
-  void preDutyUnit(bean) {
-    showDutyUnitDialog(context, bean.id);
+  void preDutyUnit(bean) async {
+    ServiceHttp().post('/loadUser', data: await UserUtil.makeUserIdMap(),
+        success: (data) {
+      var list = UserData.fromJsonArray(data);
+      showDutyUnitDialog(context, bean.id, list);
+    });
   }
 
   TextEditingController? _timeController;

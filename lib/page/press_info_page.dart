@@ -97,7 +97,10 @@ class _PressInfoPageState extends State<PressInfoPage> {
                     SizedBox(height: 16.w),
                     _list?.isNotEmpty == true
                         ? ListInfoWidget(
-                            canSelect: false, selectList: _list!, type: 1)
+                            canSelect: false,
+                            selectList: _list!,
+                            type: 1,
+                            isOnlyShow: true)
                         : const SizedBox(width: 0, height: 0),
                   ],
                 ),
@@ -110,19 +113,24 @@ class _PressInfoPageState extends State<PressInfoPage> {
   }
 
   Widget headContentView() {
+    final arr = [
+      titleView('报刊类型：', widget.pressType),
+      SizedBox(height: 49.w),
+      titleView('日期：', widget.report['creteDate']),
+    ];
+    if (widget.pressType != '周报') {
+      arr.insertAll(2, [
+        titleView('标题：', widget.report['title']),
+        SizedBox(height: 49.w),
+      ]);
+    }
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            titleView('报刊类型：', widget.pressType),
-            SizedBox(height: 49.w),
-            titleView('标题：', widget.report['title']),
-            SizedBox(height: 49.w),
-            titleView('日期：', widget.report['creteDate']),
-          ],
+          children: arr,
         ),
         SizedBox(width: 170.w),
         Text('内容：', style: _textStyle()),
@@ -265,7 +273,7 @@ class WeekPressInfoWidget extends StatelessWidget {
           child: ListView.builder(
             itemBuilder: (context, index) {
               return ExpansionTile(
-                title: Text(list![index].firstRankTitle! + "：",
+                title: Text("${list![index].firstRankTitle!}：",
                     style: _textStyle()),
                 children: childListView(list![index].secondRank!),
               );
@@ -282,7 +290,7 @@ class WeekPressInfoWidget extends StatelessWidget {
   List<Widget> childListView(List<SecondRank> list) {
     List<Widget> views = [];
     for (SecondRank element in list) {
-      String title = element.secondRankTitle! + "：";
+      String title = "${element.secondRankTitle!}：";
       String content = element.content!;
       views.add(Column(
         mainAxisSize: MainAxisSize.min,

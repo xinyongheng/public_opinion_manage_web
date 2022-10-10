@@ -166,22 +166,29 @@ class Config {
     );
   }
 
-  static TextField textInputView(explain, controller) {
+  static TextField textInputView(explain, controller,
+      {int maxLength = 100, bool obscureText = false, String? counterText}) {
     return TextField(
       controller: controller,
-      maxLength: 100,
+      maxLength: maxLength,
       maxLines: 1,
-      scrollPadding: EdgeInsets.all(0.sp),
+      scrollPadding: EdgeInsets.zero,
       textInputAction: TextInputAction.next,
       style: Config.loadDefaultTextStyle(color: Colors.black),
+      obscureText: obscureText,
       decoration: InputDecoration(
+        counterText: counterText,
         // label: const Icon(Icons.people),
         // labelText: '请输入$explain',
         border: const OutlineInputBorder(gapPadding: 0),
         contentPadding: EdgeInsets.only(
-          left: 5.sp,
-          right: 20.sp,
+          left: 5.w,
+          right: 20.w,
+          top: 22.w,
+          bottom: 22.w,
         ),
+        // isCollapsed: true,
+        isDense: true,
         // helperText: '手机号',
         hintText: "请输入$explain",
         hintStyle: Config.loadDefaultTextStyle(color: Colors.grey),

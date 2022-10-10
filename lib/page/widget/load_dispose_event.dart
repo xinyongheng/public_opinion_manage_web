@@ -4,6 +4,7 @@ import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/file_list_view.dart';
 import 'package:public_opinion_manage_web/custom/triangle.dart';
+import 'package:public_opinion_manage_web/data/bean/update_event_bus.dart';
 import 'package:public_opinion_manage_web/data/bean/user_bean.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/info_save.dart';
@@ -58,7 +59,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
           'info': widget.info!,
         },
         isData: false, success: (data) {
-      print(data);
+      // print(data);
       List mappsings = data['mappings'];
       for (var element in mappsings) {
         if (element['dutyUnit'] == unit) {
@@ -178,8 +179,11 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
     final arr = [];
     final lastMap = disposeEventUnitMappingList!.last;
     //最终状态
-    final finalPassState = lastMap['passState'];
-
+    String finalPassState = lastMap['passState'];
+    if (eventInfo['passState'] == '通过' &&
+        finalPassState != eventInfo['passState']) {
+      finalPassState = eventInfo['passState'];
+    }
     final list = <Widget>[];
     if (length > 1) {
       // 不添加: 处理内容，仅展示
@@ -212,7 +216,8 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ...auditTitle(lastMap['utime'], finalPassState),
-                childItem("单位处理内容：\n(${lastMap['time']})", lastMap['content'],
+                childItem("单位处理内容：\n(${lastMap['time'] ?? '暂无'})",
+                    lastMap['content'] ?? '其他单位已处理',
                     left: 23.w),
               ],
             ),
@@ -669,6 +674,8 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
       setState(() {
         result = true;
       });
+      //通知更新首页数据
+      Config.eventBus.fire(DutyEventUpdateHomeData()..needUpdate = true);
       showSuccessDialog('提交成功');
     });
   }

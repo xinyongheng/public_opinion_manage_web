@@ -12,6 +12,7 @@ import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AuditDisposeEventPage extends StatefulWidget {
   final int eventId;
@@ -74,14 +75,23 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
 
   @override
   Widget build(BuildContext context) {
+    String linkPath = disposeEvent?.linkPath ?? '';
+    if (linkPath.isNotEmpty) {
+      linkPath = ServiceHttp.parentUrl + linkPath;
+    }
     final arr = [
       SizedBox(height: 68.w),
+      InkWell(
+          onTap: linkPath.isNotEmpty ? () => Config.launch(linkPath) : null,
+          child: childItem("单位链接：", linkPath)),
       childItem("事件名称：", eventInfo?.description ?? ''),
       childItem("原文链接：", eventInfo?.link ?? ''),
       DataUtil.isEmpty(files)
-          ? childItem("原文图文信息：", '')
-          : fileItem("原文图文信息：", files!),
-      SizedBox(height: 46.w),
+          ? childItem("原文图文信息：", '无')
+          : Padding(
+              padding: EdgeInsets.only(bottom: 46.w),
+              child: fileItem("原文图文信息：", files!),
+            ),
       childItem("媒体类型：", eventInfo?.mediaType ?? ''),
       childItem("发布时间：", eventInfo?.publishTime ?? ''),
       childItem("舆情类别：", eventInfo?.type ?? ''),
@@ -514,7 +524,7 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
     }
     unitList?.forEach((element) {
       element.list?.forEach((bean) {
-        if (bean.passState == '待审核') {
+        if (bean.passState == '待审核' || bean.passState == '通过') {
           arr.add(loadMapFromDisposeContent(bean, text));
         }
       });

@@ -58,7 +58,7 @@ class ServiceHttp {
     required SuccessCallback success,
     ErrorCallback? error,
   }) async {
-    showWaitDialog();
+    await showWaitDialog();
     String finalPath = path.startsWith('http') ? path : (parentUrl + path);
     Response res = await _dio
         .get(finalPath,
@@ -96,6 +96,7 @@ class ServiceHttp {
       bool isData = true,
       required SuccessCallback success,
       ErrorCallback? error}) async {
+    await showWaitDialog();
     String finalPath = path.startsWith('http') ? path : (parentUrl + path);
     Response res = await _dio
         .post(finalPath,
@@ -124,7 +125,6 @@ class ServiceHttp {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest:
           (RequestOptions options, RequestInterceptorHandler handler) async {
-        showWaitDialog();
         Map map = options.headers;
         await addHeaders(map, options.path);
         print(options.headers);

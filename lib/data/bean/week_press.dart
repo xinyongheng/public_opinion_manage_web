@@ -13,10 +13,12 @@ class WeekPressBean {
       });
     }
   }
-  static List<WeekPressBean> fromJsonList(List<dynamic> list) {
+  static List<WeekPressBean> fromJsonList(List<dynamic>? list) {
     List<WeekPressBean> weekList = [];
-    for (var element in list) {
-      weekList.add(WeekPressBean.fromJson(element));
+    if (list?.isNotEmpty == true) {
+      for (var element in list!) {
+        weekList.add(WeekPressBean.fromJson(element));
+      }
     }
     return weekList;
   }

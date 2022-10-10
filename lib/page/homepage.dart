@@ -1,4 +1,3 @@
-import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
@@ -12,6 +11,7 @@ import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 import 'widget/history_press_file.dart';
+import 'widget/home_menu.dart';
 import 'widget/info_public_opinion.dart';
 import 'widget/make_account.dart';
 import 'widget/press_list.dart';
@@ -150,29 +150,10 @@ class _ManageHomePageState extends State<ManageHomePage> {
             ),
           ),
           SizedBox(width: 20.w),
-          PopupMenuButton(
-            tooltip: '点击退出登录',
+          homeMenu(
+            '管理员',
             offset: Offset(0, 45.w),
             padding: EdgeInsets.zero,
-            // constraints: BoxConstraints.expand(height: 40.w, width: 100.w),
-            color: const Color(0xFFFAFAFA),
-            itemBuilder: (context) {
-              return [
-                PopupMenuItem(
-                  onTap: () {
-                    unLogin();
-                  },
-                  height: 35,
-                  value: "logitOut",
-                  padding: EdgeInsets.only(left: 50.w),
-                  child: Text(
-                    "退出登录",
-                    style: Config.loadDefaultTextStyle(fonstSize: 13.w),
-                  ),
-                ),
-              ];
-            },
-            child: Text('管理员', style: Config.loadDefaultTextStyle()),
           ),
           SizedBox(width: 32.w),
         ],
@@ -408,6 +389,11 @@ class _DutyUnitHomePageState extends State<DutyUnitHomePage> {
     super.initState();
     askInternet();
     UserUtil.getUnit().then((value) => setState(() => unit = value));
+    Config.eventBus.on<DutyEventUpdateHomeData>().listen((event) {
+      if (event.needUpdate && mounted) {
+        askInternet();
+      }
+    });
   }
 
   void askInternet() async {
@@ -544,28 +530,10 @@ class _DutyUnitHomePageState extends State<DutyUnitHomePage> {
           ),
         ),
         SizedBox(width: 20.w),
-        PopupMenuButton(
-          tooltip: '点击退出登录',
-          offset: Offset(0, 48.w),
+        homeMenu(
+          unit,
+          offset: Offset(0, 45.w),
           padding: EdgeInsets.zero,
-          // constraints: BoxConstraints.expand(height: 40.w, width: 100.w),
-          color: const Color(0xFFFAFAFA),
-          itemBuilder: (context) {
-            return [
-              PopupMenuItem(
-                onTap: () {
-                  unLogin();
-                },
-                value: "logitOut",
-                padding: EdgeInsets.only(left: 60.w),
-                child: Text(
-                  "退出登录",
-                  style: Config.loadDefaultTextStyle(fonstSize: 13.w),
-                ),
-              ),
-            ];
-          },
-          child: Text(unit, style: Config.loadDefaultTextStyle()),
         ),
         SizedBox(width: 32.w),
       ],

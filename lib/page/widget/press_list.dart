@@ -180,7 +180,7 @@ class _PressListWidgetState extends State<PressListWidget> {
       mainAxisSize: MainAxisSize.min,
       children: [
         tableView('序号', 70.w),
-        tableView('标题', 370.w),
+        tableView('标题/刊号', 370.w),
         tableView('报刊类型', 190.w), //63
         tableView('创建时间', 402.w), //169
         tableView('详情', 84.w), //26
@@ -236,7 +236,8 @@ class _PressListWidgetState extends State<PressListWidget> {
               ),
             ),
             70.w),
-        tableChildView(listViewItemText(item['title']), 370.w),
+        tableChildView(
+            listViewItemText(_spill(item['title'], item['noName'])), 370.w),
         tableChildView(
             listViewItemText(pressTypeString(item['pressType'])), 190.w), //63
         tableChildView(listViewItemText(item['creteDate']), 402.w), //169
@@ -282,6 +283,13 @@ class _PressListWidgetState extends State<PressListWidget> {
     loadList('');
   }
 
+  String _spill(String? data1, String? data2) {
+    if (data1?.isNotEmpty == true) {
+      return "${data1!}/${data2 ?? ''}";
+    }
+    return data2 ?? '';
+  }
+
   void createPress() {
     if (DataUtil.isEmpty(_pressType)) {
       toast('请选择创建报刊类型');
@@ -323,7 +331,9 @@ class _PressListWidgetState extends State<PressListWidget> {
     if (null == filePath) {
       showAddFileDialog(id);
     } else {
-      Config.launch('${ServiceHttp.parentUrl}/$filePath');
+      showCenterNoticeDialog(context, contentString: '确定下载么？', onPress: () {
+        Config.launch('${ServiceHttp.parentUrl}/$filePath');
+      });
     }
   }
 
@@ -354,10 +364,12 @@ class _PressListWidgetState extends State<PressListWidget> {
       '/addPressFile',
       data: dio.FormData.fromMap(map),
       success: (data) {
-        filterPress();
+        print('上传成功1');
         showSuccessDialog('上传成功', dialogDismiss: () {
+          print('上传成功2');
           //关闭上传弹窗
           Config.finishPage(context);
+          filterPress();
         });
       },
     );

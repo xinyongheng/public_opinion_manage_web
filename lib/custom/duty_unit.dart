@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
+import 'package:public_opinion_manage_web/data/bean/update_event_bus.dart';
+import 'package:public_opinion_manage_web/data/bean/user_bean.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
+import 'auto_complete_view.dart';
 import 'dialog.dart';
 
 // typedef ListCallback = void Function(List<String> list, String remark);
-void showDutyUnitDialog(context, eventId) {
+void showDutyUnitDialog(context, eventId, List<UserData> list) {
+  if (list.isEmpty) {
+    showNoticeDialog('请创建其他单位账号');
+    return;
+  }
   showDialog(
       context: context,
       builder: (context) {
@@ -20,7 +27,8 @@ void showDutyUnitDialog(context, eventId) {
           // titlePadding: EdgeInsets.only(top: 37.w, bottom: 17.w),
           content: SizedBox(
               width: 374.w,
-              child: DutyUnitWidget(width: 294.w, eventId: eventId)),
+              child:
+                  DutyUnitWidget(width: 294.w, eventId: eventId, list: list)),
         );
       },
       barrierDismissible: false);
@@ -29,10 +37,12 @@ void showDutyUnitDialog(context, eventId) {
 class DutyUnitWidget extends StatefulWidget {
   final double width;
   final int eventId;
+  final List<UserData> list;
   const DutyUnitWidget({
     Key? key,
     required this.width,
     required this.eventId,
+    required this.list,
   }) : super(key: key);
 
   @override
@@ -123,19 +133,19 @@ class _DutyUnitWidgetState extends State<DutyUnitWidget> {
             return Row(
               children: [
                 SizedBox(width: 30.w),
-                SizedBox(
-                  width: widget.width,
-                  child: createTextField(_loadController(index)),
-                ),
-                Visibility(
-                  visible: index != 0,
+                // Expanded(child: createTextField(_loadController(index))),
+                Expanded(child: childSelectView(_loadController(index))),
+                Opacity(
+                  opacity: index != 0 ? 1 : 0,
                   child: IconButton(
-                    onPressed: () {
-                      _loadController(index).dispose();
-                      setState(() {
-                        dialoControllergMap.remove(index.toString());
-                      });
-                    },
+                    onPressed: index != 0
+                        ? () {
+                            _loadController(index).dispose();
+                            setState(() {
+                              dialoControllergMap.remove(index.toString());
+                            });
+                          }
+                        : null,
                     icon: Icon(
                       Icons.close,
                       size: 30.w,
@@ -151,16 +161,19 @@ class _DutyUnitWidgetState extends State<DutyUnitWidget> {
         ),
         SizedBox(height: 20.w),
         SizedBox(
-          width: widget.width + 100.w,
-          child: TextField(
-            controller: remardController,
-            maxLines: 3,
-            minLines: 3,
-            style: Config.loadDefaultTextStyle(
-              fontWeight: FontWeight.w400,
-              fonstSize: 19.w,
+          width: double.infinity,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 30.w),
+            child: TextField(
+              controller: remardController,
+              maxLines: 3,
+              minLines: 3,
+              style: Config.loadDefaultTextStyle(
+                fontWeight: FontWeight.w400,
+                fonstSize: 19.w,
+              ),
+              decoration: Config.defaultInputDecoration(hintText: '请输入备注（非必填）'),
             ),
-            decoration: Config.defaultInputDecoration(hintText: '请输入备注（非必填）'),
           ),
         ),
         SizedBox(height: 20.w),
@@ -177,13 +190,17 @@ class _DutyUnitWidgetState extends State<DutyUnitWidget> {
                     primary: Colors.white,
                     backgroundColor: Config.fontColorSelect,
                     textStyle: Config.loadDefaultTextStyle(
-                        fonstSize: 19.w, fontWeight: FontWeight.w400),
-                    padding: EdgeInsets.all(8.w),
+                        fonstSize: 18.w, fontWeight: FontWeight.w400),
+                    padding: EdgeInsets.all(10.w),
                   ),
                   child: const Text('发送链接'),
                 ),
               )
-            : SelectableText(link, style: Config.loadDefaultTextStyle()),
+            : Padding(
+                padding: EdgeInsets.symmetric(horizontal: 30.w),
+                child:
+                    SelectableText(link, style: Config.loadDefaultTextStyle()),
+              ),
         SizedBox(height: 30.w),
       ],
     );
@@ -229,6 +246,69 @@ class _DutyUnitWidgetState extends State<DutyUnitWidget> {
     }
   }
 
+  String loadUserInfo(UserData userData) {
+    return "单位：${userData.unit!}\n名称：${userData.nickname}${userData.nickname}${userData.nickname}${userData.nickname}-${userData.account!}";
+  }
+
+  Widget childSelectView(TextEditingController controller,
+      [String hintText = '请输入责任单位']) {
+    return RawAutocomplete<UserData>(
+      displayStringForOption: (option) => option.unit!,
+      textEditingController: controller,
+      focusNode: FocusNode(),
+      optionsViewBuilder: (context, onSelected, options) {
+        return AutocompleteOptions(
+          displayStringForOption: loadUserInfo,
+          onSelected: onSelected,
+          options: options,
+          maxOptionsWidth: 314.w,
+        );
+      },
+      optionsBuilder: (textEditingValue) {
+        final v = textEditingValue.text;
+        List<UserData> candidates = widget.list;
+        return candidates.where(
+            (UserData c) => c.unit!.contains(v) || c.nickname!.contains(v));
+      },
+      fieldViewBuilder:
+          (context, textEditingController, focusNode, onFieldSubmitted) {
+        return TextFormField(
+          controller: textEditingController,
+          maxLines: 1,
+          minLines: 1,
+          focusNode: focusNode,
+          scrollPadding: EdgeInsets.zero,
+          textInputAction: TextInputAction.next,
+          style: Config.loadDefaultTextStyle(
+            fontWeight: FontWeight.w400,
+            fonstSize: 19.w,
+          ),
+          onFieldSubmitted: (String value) {
+            onFieldSubmitted();
+          },
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              gapPadding: 0,
+              borderRadius: BorderRadius.circular(5.sp),
+              borderSide: const BorderSide(color: Config.borderColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              gapPadding: 0,
+              borderRadius: BorderRadius.circular(5.sp),
+              borderSide: const BorderSide(color: Config.borderColor),
+            ),
+            contentPadding:
+                EdgeInsets.symmetric(vertical: 14.w, horizontal: 16.w),
+            counterText: '',
+            isDense: true,
+            hintText: hintText,
+            hintStyle: Config.loadDefaultTextStyle(color: Config.borderColor),
+          ),
+        );
+      },
+    );
+  }
+
   void askInternetDutyUnit(List list, String remark) async {
     String api = "/assignedDutyUnit";
     final map = <String, dynamic>{};
@@ -239,6 +319,7 @@ class _DutyUnitWidgetState extends State<DutyUnitWidget> {
       map["manageRemark"] = remark;
     }
     ServiceHttp().post(api, data: map, success: (data) {
+      Config.eventBus.fire(UpdateEventListBean()..needUpdate = true);
       setState(() {
         link = ServiceHttp.parentUrl + data['linkPath'];
       });

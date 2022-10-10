@@ -16,12 +16,14 @@ class _MakeAccountWidgetState extends State<MakeAccountWidget> {
   final _controllerPhone = TextEditingController();
   final _controllerUnit = TextEditingController();
   final _controllerPassword = TextEditingController();
+  final _controllerName = TextEditingController();
   @override
   void dispose() {
     super.dispose();
     _controllerPhone.dispose();
     _controllerUnit.dispose();
     _controllerPassword.dispose();
+    _controllerName.dispose();
   }
 
   @override
@@ -70,24 +72,37 @@ class _MakeAccountWidgetState extends State<MakeAccountWidget> {
                 ),
               ),
               SizedBox(height: 30.sp),
-              // TextField(
-              //   controller: _controllerPhone,
-              //   textInputAction: TextInputAction.newline,
-              //   keyboardType: TextInputType.number,
-              //   style: Config.loadDefaultTextStyle(),
-              //   maxLength: 11,
-              //   inputFormatters: [
-              //     FilteringTextInputFormatter(RegExp('[0-9X]'), allow: true)
-              //   ],
-              //   decoration: InputDecoration(
-              //       icon: Text('手机号：', style: Config.loadDefaultTextStyle()),
-              //       hintText: '请输入手机号',
-              //       hintStyle: Config.loadDefaultTextStyle()),
-              // ),
-              // SizedBox(height: 30.sp),
+              TextField(
+                controller: _controllerName,
+                textInputAction: TextInputAction.newline,
+                keyboardType: TextInputType.number,
+                style: Config.loadDefaultTextStyle(),
+                // maxLength: 11,
+                decoration: InputDecoration(
+                  icon: Text.rich(
+                      TextSpan(children: [
+                        TextSpan(
+                            text: '姓名', style: Config.loadDefaultTextStyle()),
+                        TextSpan(
+                            text: '空空',
+                            style: Config.loadDefaultTextStyle(
+                                color: Colors.transparent)),
+                        TextSpan(
+                            text: '：', style: Config.loadDefaultTextStyle()),
+                      ]),
+                      style: Config.loadDefaultTextStyle()),
+                  hintText: '请输入姓名',
+                  hintStyle: Config.loadDefaultTextStyle(),
+                  border: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.black),
+                    borderRadius: BorderRadius.circular(10.sp),
+                  ),
+                ),
+              ),
+              SizedBox(height: 30.sp),
               TextField(
                 controller: _controllerUnit,
-                textInputAction: TextInputAction.newline,
+                textInputAction: TextInputAction.go,
                 keyboardType: TextInputType.number,
                 style: Config.loadDefaultTextStyle(),
                 // maxLength: 11,
@@ -127,11 +142,14 @@ class _MakeAccountWidgetState extends State<MakeAccountWidget> {
     if (phone.isEmpty) return toast('请输入手机号');
     String unit = _controllerUnit.value.text;
     if (unit.isEmpty) return toast('请输入单位名称');
+    String name = _controllerName.value.text;
+    if (name.isEmpty) return toast('请输入姓名');
     const password = '123456';
     final map = <String, String>{};
     map['phone'] = phone;
     map['unit'] = unit;
     map['password'] = password;
+    map['nickname'] = name;
     map['tokenTag'] = 'not need';
     ServiceHttp().post(ServiceHttp.registerApi, data: map, success: (data) {
       _controllerPhone.text = '';

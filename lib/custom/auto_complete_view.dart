@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:public_opinion_manage_web/config/config.dart';
 
 class AutocompleteOptions<T extends Object> extends StatelessWidget {
   const AutocompleteOptions({
@@ -28,7 +29,13 @@ class AutocompleteOptions<T extends Object> extends StatelessWidget {
         child: ConstrainedBox(
           constraints: BoxConstraints(
               maxHeight: maxOptionsHeight, maxWidth: maxOptionsWidth),
-          child: ListView.builder(
+          child: ListView.separated(
+            separatorBuilder: (context, index) {
+              return Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: Config.borderColor.withOpacity(0.05));
+            },
             padding: EdgeInsets.zero,
             shrinkWrap: true,
             itemCount: options.length,
