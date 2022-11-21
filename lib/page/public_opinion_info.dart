@@ -39,6 +39,10 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
         success: (data) {
       setState(() {
         _publicOpinionBean = PublicOpinionBean.fromJson(data['data']);
+        radioGroupWidgetKey.currentState!.updateDefault(
+            _publicOpinionBean?.superiorNotificationTime?.isNotEmpty == true
+                ? 0
+                : 1);
         initControllerValue();
         files = data['files'];
       });
@@ -133,7 +137,7 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
               }
             },
             style: TextButton.styleFrom(
-              primary: Colors.white,
+              foregroundColor: Colors.white,
               backgroundColor: Config.fontColorSelect,
               minimumSize: const Size(1, 1),
               fixedSize: Size(87.w, 43.w),
@@ -149,7 +153,7 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
             child: TextButton(
                 onPressed: () => showDeleteDialog(context),
                 style: TextButton.styleFrom(
-                  primary: Colors.white,
+                  foregroundColor: Colors.white,
                   backgroundColor: Config.fontColorSelect,
                   minimumSize: const Size(1, 1),
                   fixedSize: Size(87.w, 43.w),
@@ -241,30 +245,34 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
             _itemView('通报时间：', 'superiorNotificationTime',
                 isDate: true, readOnly: !_canChange),
             SizedBox(height: 30.w),
-            _itemView('回复上级时间：', 'superiorNotificationTime',
+            _itemView('回复上级时间：', 'replySuperiorTime',
                 isDate: true, readOnly: !_canChange),
             SizedBox(height: 30.w),
           ],
         ));
   }
 
+  GlobalKey<RadioGroupWidgetState> radioGroupWidgetKey = GlobalKey();
+
   Row _radioView(bool tag) {
+    var radioGroupWidget = RadioGroupWidget(
+      key: radioGroupWidgetKey,
+      defaultSelectIndex: tag ? 0 : 1,
+      list: const ['通报', '未通报'],
+      change: _canChange
+          ? (value) {
+              setState(() {
+                _selectRadio = value!;
+              });
+            }
+          : null,
+    );
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text('上级是否通报：', style: _textStyle()),
         SizedBox(height: 30.w),
-        RadioGroupWidget(
-          defaultSelectIndex: tag ? 0 : 1,
-          list: const ['通报', '未通报'],
-          change: _canChange
-              ? (value) {
-                  setState(() {
-                    _selectRadio = value!;
-                  });
-                }
-              : null,
-        )
+        radioGroupWidget,
       ],
     );
   }
@@ -417,13 +425,14 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
     fillInfoForKey('leaderInstructionsContent', map,
         _publicOpinionBean?.leaderInstructionsContent ?? '');
     fillInfoForKey('leaderName', map, _publicOpinionBean?.leaderName ?? '');
-    if (map.length > 1) {
+    if (map.isNotEmpty) {
       map['id'] = widget.eventId;
       mapData["changeContent"] = map;
       ServiceHttp().post('/updateEvent', data: mapData, success: (data) {
         _publicOpinionBean = PublicOpinionBean.fromJson(data);
+        initControllerValue();
         setState(() {
-          initControllerValue();
+          _canChange = false;
         });
         showSuccessDialog('上传成功');
       });

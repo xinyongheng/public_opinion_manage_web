@@ -47,7 +47,6 @@ class _ManageHomePageState extends State<ManageHomePage> {
       const MakeAccountWidget(),
     ];
     Config.eventBus.on<ChangeHomepage>().listen((event) {
-      print("eventBus_ManageHomePageState");
       if (event.index > 0) {
         setState(() {
           _nowIndex = event.index;
@@ -118,7 +117,7 @@ class _ManageHomePageState extends State<ManageHomePage> {
             height: 53.w,
           ),
           Container(
-            height: 75.sp,
+            height: 50.w,
             width: 20.w,
             color: Colors.transparent,
           ),
@@ -170,7 +169,8 @@ class _ManageHomePageState extends State<ManageHomePage> {
       leftArr.add(SizedBox(height: 10.w));
     }
     return SizedBox(
-      width: 373.w,
+      // width: 373.w,
+      width: 160.w,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: leftArr,

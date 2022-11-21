@@ -7,15 +7,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/histogram.dart';
+import 'package:public_opinion_manage_web/custom/histogram_view.dart';
 import 'package:public_opinion_manage_web/custom/line_chart_view.dart';
+import 'package:public_opinion_manage_web/custom/pie_chart_view.dart';
+import 'package:public_opinion_manage_web/custom/radio_group.dart';
 import 'package:public_opinion_manage_web/custom/triangle.dart' as hTriangle;
-import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:public_opinion_manage_web/data/bean/line_data.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/page/statistics_event_info_list_page.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/date_util.dart';
-import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
 class StatisticsWidget extends StatefulWidget {
@@ -45,6 +46,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
 
   // Map<String, List<OrdinalSales>>? _unitSumStatistics;
   List<LinePoint>? _unitSumStatisticsList;
+  List<dynamic>? _reportStatistics;
 
   List<MapEntry>? _mediaTypeSumStatisticsList;
 
@@ -56,15 +58,19 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
     String start =
         formatDate(DateTime(dateTime.year, dateTime.month), DateUtil.formats);
     String end = DateUtil.nowDate();
-    startDateController.text = start;
-    endDateController.text = end;
-    requestData(start, end);
+    startDateController.text = DateUtil.subDate(start);
+    endDateController.text = DateUtil.subDate(end);
+    requestData(start, end, _completeTag);
   }
 
-  void requestData(String start, String end) async {
+  void requestData(String start, String end, bool selectTag) async {
     final map = await UserUtil.makeUserIdMap();
-    map['start'] = start;
-    map['end'] = end;
+    final String startFinal =
+        start.contains(':') ? DateUtil.subDate(start) : start;
+    final String endFinal = end.contains(':') ? DateUtil.subDate(end) : end;
+    map['start'] = '$startFinal 00:00:00';
+    map['end'] = "$endFinal 23:59:59";
+    map['isPass'] = selectTag ? -1 : 1;
     ServiceHttp().post("/loadStatistics", data: map, success: (data) {
       if (data is List) {
         setState(() {
@@ -80,6 +86,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
       makeUnitSumStatisticsData(data['unitSumStatistics']);
       makeMediaTypeSumStatisticsData(data['mediaTypeSumStatistics']);
       makeTypeClassifyStatisticsData(data['typeClassifyStatistics']);
+      makeReportStatisticsData(data['reportStatistics']);
     });
   }
 
@@ -171,10 +178,10 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
     });
   }
 
-  charts.TextStyleSpec _textStyleSpec() {
-    return const charts.TextStyleSpec(
-      color: charts.Color(r: 51, g: 51, b: 51, a: 153),
-    );
+  void makeReportStatisticsData(List<dynamic> reportStatistics) {
+    setState(() {
+      _reportStatistics = reportStatistics;
+    });
   }
 
   @override
@@ -199,12 +206,36 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
                   fonstSize: 26.w, fontWeight: FontWeight.w500),
             ),
             SizedBox(height: 36.w),
+            rangeSelectWidget(),
+            SizedBox(height: 30.w),
             dateSelectView(),
             SizedBox(height: 36.w),
             Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(child: unitOpinionTypeView(context)),
-                Expanded(child: unitOpinionView(context))
+                // SizedBox(width: 50.w),
+                Expanded(child: unitOpinionView(context)),
+                // SizedBox(width: 50.w),
+                Expanded(child: reportRateView(context)),
+                /* Expanded(
+                  child: SizedBox(
+                    width: 631.w,
+                    height: 400.w,
+                    child: HistogramRenderWidget(
+                      linePoint: _unitSumStatisticsList?.isNotEmpty == true
+                          ? _unitSumStatisticsList![0]
+                          : null,
+                      xAxisInfos: xAxisInfos ?? [],
+                      width: 300,
+                      height: 200,
+                      onChanged: (value) {
+                        toast(value.toString());
+                      },
+                    ),
+                  ),
+                ), */
               ],
             ),
             SizedBox(height: 56.w),
@@ -212,7 +243,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
               children: [
                 Expanded(
                     child: opinionTypeCountView(
-                        '舆情分类统计', _mediaTypeSumStatisticsList)),
+                        '舆情收发平台统计', _mediaTypeSumStatisticsList)),
                 Expanded(
                     child: opinionTypeCountView(
                         '舆情类别统计', _typeClassifyStatisticsList))
@@ -267,7 +298,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
           '时间：',
           style: Config.loadDefaultTextStyle(
             color: Colors.black.withOpacity(0.85),
-            fonstSize: 16.w,
+            fonstSize: 18.w,
             fontWeight: FontWeight.w400,
           ),
         ),
@@ -305,10 +336,11 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         SizedBox(width: 30.w),
         TextButton(
             onPressed: () {
-              requestData(startDateController.text, endDateController.text);
+              requestData(startDateController.text, endDateController.text,
+                  _completeTag);
             },
             style: TextButton.styleFrom(
-              primary: Colors.white,
+              foregroundColor: Colors.white,
               backgroundColor: Colors.blue,
               padding: EdgeInsets.only(
                 left: 20.w,
@@ -323,9 +355,43 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
     );
   }
 
+  /// 舆情事件选择范围 已完成/全部
+  bool _completeTag = false;
+  Widget rangeSelectWidget() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '范围：',
+          style: Config.loadDefaultTextStyle(
+            color: Colors.black.withOpacity(0.85),
+            fonstSize: 18.w,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        RadioGroupWidget(
+          list: const ['已完成', '全部'],
+          defaultSelectIndex: 0,
+          change: (int? value) {
+            bool boolValue = value == 1;
+            if (boolValue != _completeTag) {
+              setState(() {
+                _completeTag = boolValue;
+              });
+            }
+          },
+        )
+      ],
+    );
+  }
+
+  void requestUpdateSelectRange() {
+    requestData(startDateController.text, endDateController.text, _completeTag);
+  }
+
   Widget lineChartForUnitOpinion(linePoints, String tag, context) {
     return LineChartWidget(
-      size: Size(631.w, 400.w),
+      size: Size(410.w, 400.w),
       linePoints: linePoints ?? [],
       xAxisInfos: xAxisInfos ?? [],
       showPopupMenu: tag != '各单位舆情总数',
@@ -363,7 +429,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
         ),
         SizedBox(height: 27.w),
         SizedBox(
-          width: 631.w,
+          width: 410.w,
           height: 400.w,
           child: lineChartForUnitOpinion(
               _unitMediaTypeClassifyStatisticsList, '各单位舆情分类', context),
@@ -378,6 +444,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         titleView('各单位舆情总数'),
+        SizedBox(height: 27.w),
         Text('空格',
             style: Config.loadDefaultTextStyle(
               color: Colors.transparent,
@@ -385,10 +452,22 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
             )),
         SizedBox(height: 27.w),
         SizedBox(
-          width: 631.w,
+          width: 410.w,
           height: 400.w,
-          child: lineChartForUnitOpinion(
-              _unitSumStatisticsList, '各单位舆情总数', context),
+          /* child: lineChartForUnitOpinion(
+              _unitSumStatisticsList, '各单位舆情总数', context), */
+          child: HistogramRenderWidget(
+            linePoint: _unitSumStatisticsList?.isNotEmpty == true
+                ? _unitSumStatisticsList![0]
+                : null,
+            xAxisInfos: xAxisInfos ?? [],
+            width: 410.w,
+            height: 400.w,
+            onChanged: (value) {
+              _startEventInfoPage(context, value['unit'], value['eventList']);
+              // toast(value.toString());
+            },
+          ),
         ),
       ],
     );
@@ -411,6 +490,22 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
             fonstSize: 16.w,
           )),
     ];
+  }
+
+  Widget reportRateView(context) {
+    return MyPieChartWidget(
+      list: _reportStatistics ??
+          [
+            {'size': 0, 'type': '上级未通报'},
+            {'size': 0, 'type': '上级通报'}
+          ],
+      clickValue: (value) {
+        if (_reportStatistics != null) {
+          String title = value['type'];
+          _startEventInfoPage(context, title, value['list']);
+        }
+      },
+    );
   }
 
   void _startEventInfoPage(context, title, eventList) {

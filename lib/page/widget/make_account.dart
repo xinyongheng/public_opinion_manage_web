@@ -32,105 +32,109 @@ class _MakeAccountWidgetState extends State<MakeAccountWidget> {
       width: double.infinity,
       height: double.infinity,
       child: Center(
-        child: SizedBox(
-          width: 600.w,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _controllerPhone,
-                textInputAction: TextInputAction.newline,
-                keyboardType: TextInputType.number,
-                style: Config.loadDefaultTextStyle(),
-                maxLength: 11,
-                inputFormatters: [
-                  FilteringTextInputFormatter(RegExp('[0-9]'), allow: true)
-                ],
-                // Text('手机号：', style: Config.loadDefaultTextStyle())
-                decoration: InputDecoration(
-                  icon: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                            text: '手机号', style: Config.loadDefaultTextStyle()),
-                        TextSpan(
-                            text: '空',
-                            style: Config.loadDefaultTextStyle(
-                                color: Colors.transparent)),
-                        TextSpan(
-                            text: '：', style: Config.loadDefaultTextStyle()),
-                      ],
+        child: Padding(
+          padding: EdgeInsets.only(bottom: 200.w),
+          child: SizedBox(
+            width: 600.w,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _controllerPhone,
+                  textInputAction: TextInputAction.newline,
+                  keyboardType: TextInputType.number,
+                  style: Config.loadDefaultTextStyle(),
+                  maxLength: 11,
+                  inputFormatters: [
+                    FilteringTextInputFormatter(RegExp('[0-9]'), allow: true)
+                  ],
+                  // Text('手机号：', style: Config.loadDefaultTextStyle())
+                  decoration: InputDecoration(
+                    icon: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                              text: '手机号',
+                              style: Config.loadDefaultTextStyle()),
+                          TextSpan(
+                              text: '空',
+                              style: Config.loadDefaultTextStyle(
+                                  color: Colors.transparent)),
+                          TextSpan(
+                              text: '：', style: Config.loadDefaultTextStyle()),
+                        ],
+                      ),
+                    ),
+                    hintText: '请输入手机号',
+                    hintStyle: Config.loadDefaultTextStyle(),
+                    counterText: '',
+                    border: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.black),
+                      borderRadius: BorderRadius.circular(10.sp),
                     ),
                   ),
-                  hintText: '请输入手机号',
-                  hintStyle: Config.loadDefaultTextStyle(),
-                  counterText: '',
-                  border: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.black),
-                    borderRadius: BorderRadius.circular(10.sp),
+                ),
+                SizedBox(height: 30.sp),
+                TextField(
+                  controller: _controllerName,
+                  textInputAction: TextInputAction.newline,
+                  keyboardType: TextInputType.number,
+                  style: Config.loadDefaultTextStyle(),
+                  // maxLength: 11,
+                  decoration: InputDecoration(
+                    icon: Text.rich(
+                        TextSpan(children: [
+                          TextSpan(
+                              text: '姓名', style: Config.loadDefaultTextStyle()),
+                          TextSpan(
+                              text: '空空',
+                              style: Config.loadDefaultTextStyle(
+                                  color: Colors.transparent)),
+                          TextSpan(
+                              text: '：', style: Config.loadDefaultTextStyle()),
+                        ]),
+                        style: Config.loadDefaultTextStyle()),
+                    hintText: '请输入姓名',
+                    hintStyle: Config.loadDefaultTextStyle(),
+                    border: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.black),
+                      borderRadius: BorderRadius.circular(10.sp),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 30.sp),
-              TextField(
-                controller: _controllerName,
-                textInputAction: TextInputAction.newline,
-                keyboardType: TextInputType.number,
-                style: Config.loadDefaultTextStyle(),
-                // maxLength: 11,
-                decoration: InputDecoration(
-                  icon: Text.rich(
-                      TextSpan(children: [
-                        TextSpan(
-                            text: '姓名', style: Config.loadDefaultTextStyle()),
-                        TextSpan(
-                            text: '空空',
-                            style: Config.loadDefaultTextStyle(
-                                color: Colors.transparent)),
-                        TextSpan(
-                            text: '：', style: Config.loadDefaultTextStyle()),
-                      ]),
-                      style: Config.loadDefaultTextStyle()),
-                  hintText: '请输入姓名',
-                  hintStyle: Config.loadDefaultTextStyle(),
-                  border: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.black),
-                    borderRadius: BorderRadius.circular(10.sp),
+                SizedBox(height: 30.sp),
+                TextField(
+                  controller: _controllerUnit,
+                  textInputAction: TextInputAction.go,
+                  keyboardType: TextInputType.number,
+                  style: Config.loadDefaultTextStyle(),
+                  // maxLength: 11,
+                  decoration: InputDecoration(
+                    icon: Text('单位名称：', style: Config.loadDefaultTextStyle()),
+                    hintText: '请输入单位',
+                    hintStyle: Config.loadDefaultTextStyle(),
+                    border: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.black),
+                      borderRadius: BorderRadius.circular(10.sp),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 30.sp),
-              TextField(
-                controller: _controllerUnit,
-                textInputAction: TextInputAction.go,
-                keyboardType: TextInputType.number,
-                style: Config.loadDefaultTextStyle(),
-                // maxLength: 11,
-                decoration: InputDecoration(
-                  icon: Text('单位名称：', style: Config.loadDefaultTextStyle()),
-                  hintText: '请输入单位',
-                  hintStyle: Config.loadDefaultTextStyle(),
-                  border: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.black),
-                    borderRadius: BorderRadius.circular(10.sp),
+                SizedBox(height: 60.sp),
+                TextButton(
+                  onPressed: () => requestMakeAccount(),
+                  style: TextButton.styleFrom(
+                    primary: Colors.white,
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.sp)),
+                    fixedSize:
+                        Size(Config.defaultSize * 10, Config.defaultSize * 3),
+                    textStyle: Config.loadDefaultTextStyle(),
                   ),
-                ),
-              ),
-              SizedBox(height: 60.sp),
-              TextButton(
-                onPressed: () => requestMakeAccount(),
-                style: TextButton.styleFrom(
-                  primary: Colors.white,
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.sp)),
-                  fixedSize:
-                      Size(Config.defaultSize * 10, Config.defaultSize * 3),
-                  textStyle: Config.loadDefaultTextStyle(),
-                ),
-                child: const Text('确定'),
-              )
-            ],
+                  child: const Text('确定'),
+                )
+              ],
+            ),
           ),
         ),
       ),

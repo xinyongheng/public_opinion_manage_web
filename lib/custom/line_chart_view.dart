@@ -1,8 +1,9 @@
 // ignore_for_file: unnecessary_brace_in_string_interps
 
-import 'dart:math';
+import 'dart:math' as math show max, pow;
 
 import 'package:flutter/material.dart';
+import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/data/bean/line_data.dart';
 import 'dart:ui' as ui show Gradient;
 import 'circle_point.dart' show CirclePointRenderWidget;
@@ -12,6 +13,10 @@ class AxisInfo {
   Offset offset;
   String explain;
   AxisInfo(this.explain, this.offset);
+  @override
+  String toString() {
+    return explain;
+  }
 }
 
 class LayoutInfo {
@@ -43,13 +48,13 @@ class LineChartWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<LineChartWidget> createState() => _LineChartWidgetState();
+  State<LineChartWidget> createState() => LineChartWidgetState();
 }
 
-class _LineChartWidgetState extends State<LineChartWidget> {
+class LineChartWidgetState extends State<LineChartWidget> {
   List<LayoutInfo>? listLayoutInfo;
   late LineMultiChildLayoutDelegate _delegate;
-  // List<AxisInfo>? xListAxisInfo;
+  late List<AxisInfo> xListAxisInfo;
   // List<AxisInfo>? yListAxisInfo;
   @override
   Widget build(BuildContext context) {
@@ -66,7 +71,7 @@ class _LineChartWidgetState extends State<LineChartWidget> {
   }
 
   /// 计算单位距离
-  List<int> loadMaxValue(List<LinePoint> list) {
+  static List<int> loadMaxValue(List<LinePoint> list) {
     int maxLength = 0;
     double maxValue = 0;
     for (var linePoint in list) {
@@ -85,7 +90,7 @@ class _LineChartWidgetState extends State<LineChartWidget> {
   }
 
   /// 5, 10的倍数
-  int calculationMaxInt(double value) {
+  static int calculationMaxInt(double value) {
     int intValue = value.ceil();
     if (intValue <= 10) return intValue;
     if (value <= 50) return value ~/ 5 * 5 + 5;
@@ -95,14 +100,14 @@ class _LineChartWidgetState extends State<LineChartWidget> {
     return intValue ~/ 10 * 10 + 10;
   }
 
-  int ySpiltCount(int max) {
+  static int ySpiltCount(int max) {
     if (max <= 10) return max;
     if (max <= 50) return max ~/ 5;
     int _max = max ~/ 10;
     return _Less10(_max);
   }
 
-  int _Less10(int count) {
+  static int _Less10(int count) {
     if (count <= 10) {
       return count;
     } else {
@@ -110,11 +115,11 @@ class _LineChartWidgetState extends State<LineChartWidget> {
     }
   }
 
-  List<int> calculationYSize(int max) {
+  static List<int> calculationYSize(int max) {
     int ySizeTem = ySpiltCount(max);
     int yEverySizeTem = max ~/ ySizeTem;
     int count = yEverySizeTem.toString().length;
-    int divisor = pow(10, count - 1) as int;
+    int divisor = math.pow(10, count - 1) as int;
     int yEverySize = (yEverySizeTem / divisor).round() * divisor;
     int ySize = (max / yEverySize).ceil();
     int newMax = ySize * yEverySize;
@@ -135,10 +140,11 @@ class _LineChartWidgetState extends State<LineChartWidget> {
     List<int> result = loadMaxValue(linePoints);
     // print("result=${result}");
     int maxLength = result[0] == 0 ? 6 : result[0];
+    int maxLengthX = math.max(widget.xAxisInfos.length, 1);
     List calculationArr = calculationYSize(result[1] == 0 ? 10 : result[1]);
     int max = calculationArr[0];
     //x轴
-    double xSingleLength = width / maxLength;
+    double xSingleLength = width / maxLengthX;
     double xSingleLengthHalf = xSingleLength / 2.0;
     //y轴
     int ySize = calculationArr[1];
@@ -147,14 +153,14 @@ class _LineChartWidgetState extends State<LineChartWidget> {
     // print("ySize=${ySize}, max=${max} ${yEveryLength}-${height}");
     //x轴上坐标
     var xListAxisInfo = <AxisInfo>[];
-    for (int i = 0; i < maxLength; i++) {
-      xListAxisInfo.add(
-        AxisInfo(
-          _loadAxisInfoForX(i),
-          Offset(xSingleLengthHalf + i * xSingleLength, height),
-        ),
-      );
+    for (int i = 0; i < widget.xAxisInfos.length; i++) {
+      xListAxisInfo.add(AxisInfo(
+        _loadAxisInfoForX(i),
+        Offset(xSingleLengthHalf + i * xSingleLength, height),
+      ));
+      print('x轴：${i + 1} ${xSingleLengthHalf + i * xSingleLength}');
     }
+    this.xListAxisInfo = xListAxisInfo;
     //y轴上坐标
     var yListAxisInfo = <AxisInfo>[];
     for (var i = 0; i < ySize; i++) {
@@ -174,16 +180,20 @@ class _LineChartWidgetState extends State<LineChartWidget> {
       var size = list.length;
       var color = element.background;
       var tag = element.tag;
-      for (int i = 0; i < maxLength; i++) {
+      for (int i = 0; i < maxLengthX; i++) {
         if (i < size) {
           var pointInfo = list[i];
           var point = pointInfo.point;
-          pointInfo.offset = Offset(
-              xListAxisInfo[i].offset.dx, height - yEveryLength * point.y);
+          int indexForX = loadIndexForX(
+              xListAxisInfo, i, maxLengthX, pointInfo.point.data['unit']);
+          pointInfo.offset = Offset(xListAxisInfo[indexForX].offset.dx,
+              height - yEveryLength * point.y);
           String childId = "${tag}_${i}";
+          print('点$indexForX ${i} ${childId} ${pointInfo.offset!.dx}');
           viewList.add(LayoutId(
               id: childId,
-              child: makePointView(color, point, i, tag, pointInfo.offset!)));
+              child: makePointView(
+                  color, point, indexForX, tag, pointInfo.offset!)));
           listLayoutInfo!.add(LayoutInfo(childId, pointInfo.offset!));
         }
       }
@@ -212,7 +222,7 @@ class _LineChartWidgetState extends State<LineChartWidget> {
           child: LineRenderWidget(
             length: lineLength,
             value: clickTag.isNotEmpty,
-            backgroundColor: Colors.white,
+            backgroundColor: Config.borderColor,
             strokeWidth: 1.5,
           ),
         )));
@@ -239,17 +249,19 @@ class _LineChartWidgetState extends State<LineChartWidget> {
   int clickIndex = -1;
   String clickTag = '';
   Widget makePointView(
-      Color color, Point point, int index, String tag, Offset offset) {
-    Map<String, Point> map = loadTargetPoint(index);
+      Color color, Point point, int indexForX, String tag, Offset offset) {
+    String xInfo = _loadAxisInfoForX(indexForX);
+    final pointDx = offset.dx;
+    final pointDy = offset.dy;
+    Map<String, Point> map = loadTargetPoint(xInfo);
     if (!widget.showPopupMenu) {
       return InkWell(
           onTap: () {
             widget.itemClick?.call(point.data);
           },
           child: Tooltip(
-            message: widget.tooltipValueGetter
-                    ?.call([_loadAxisInfoForX(index), tag, point.y]) ??
-                "${_loadAxisInfoForX(index)}:${point.y}",
+            message: widget.tooltipValueGetter?.call([xInfo, tag, point.y]) ??
+                "${xInfo}:${point.y}",
             child: SizedBox(
                 width: 16,
                 height: 16,
@@ -268,7 +280,7 @@ class _LineChartWidgetState extends State<LineChartWidget> {
           height: 35,
           enabled: false,
           child: Text(
-            _loadAxisInfoForX(index),
+            _loadAxisInfoForX(indexForX),
             style: const TextStyle(color: Colors.white),
           ),
         )
@@ -299,6 +311,7 @@ class _LineChartWidgetState extends State<LineChartWidget> {
     } else {
       arr = widget.popupMenuGetter!.call(map);
     }
+    // print('click11:$tag dx=$pointDx $pointDy ${_loadAxisInfoForX(indexForX)}');
     return PopupMenuButton(
       color: const Color(0xFF4B4F52).withOpacity(0.8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.33)),
@@ -306,8 +319,8 @@ class _LineChartWidgetState extends State<LineChartWidget> {
       offset: const Offset(10, 10),
       constraints: const BoxConstraints(maxWidth: 179),
       tooltip: widget.tooltipValueGetter
-              ?.call([_loadAxisInfoForX(index), tag, point.y]) ??
-          "${_loadAxisInfoForX(index)}-$tag:${point.y}",
+              ?.call([_loadAxisInfoForX(indexForX), tag, point.y]) ??
+          "${_loadAxisInfoForX(indexForX)}-$tag:${point.y}",
       onSelected: <Point>(value) {
         widget.itemClick?.call(value.data);
         setState(() {
@@ -329,15 +342,17 @@ class _LineChartWidgetState extends State<LineChartWidget> {
         height: 16,
         child: CirclePointRenderWidget(
           color.withOpacity(0.2),
-          clickIndex == index && clickTag == tag,
+          clickIndex == indexForX && clickTag == tag,
           color.withOpacity(1),
           8,
-          tag: '$tag,%$index,%${offset.dx},%${offset.dy}',
+          tag: '$tag,%$indexForX,%${pointDx},%${pointDy}',
           onChanged: (String value) {
+            print(value);
             List<String> arr = value.split(',%');
             String tagTem = arr[0];
             int indexTem = int.parse(arr[1]);
             double dx = double.parse(arr[2]);
+            // print('click:$tag dx=$dx ${_loadAxisInfoForX(indexTem)}');
             // double dy = double.parse(arr[3]);
             setState(() {
               clickIndex = indexTem;
@@ -353,13 +368,36 @@ class _LineChartWidgetState extends State<LineChartWidget> {
     );
   }
 
-  Map<String, Point> loadTargetPoint(int index) {
+  Map<String, Point> loadTargetPoint(String xInfo) {
     var map = <String, Point>{};
     for (var linePoint in widget.linePoints) {
-      var pointInfo = linePoint.list[index];
-      map[linePoint.tag] = pointInfo.point;
+      var list = linePoint.list;
+      for (var i = 0; i < list.length; i++) {
+        PointInfo pointInfo = list[i];
+        String unit = pointInfo.point.data['unit'];
+        if (unit == xInfo) {
+          map[linePoint.tag] = pointInfo.point;
+        }
+      }
     }
     return map;
+  }
+
+  int loadIndexForX(
+    List<AxisInfo> xListAxisInfo,
+    int index,
+    int xLength,
+    String tag,
+  ) {
+    int indexForX = index;
+    for (int i = 0; i < xListAxisInfo.length; i++) {
+      AxisInfo element = xListAxisInfo[i];
+      if (element.explain == tag) {
+        indexForX = i;
+        break;
+      }
+    }
+    return indexForX;
   }
 }
 
@@ -384,8 +422,14 @@ class LineMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
 
   @override
   bool shouldRelayout(covariant LineMultiChildLayoutDelegate oldDelegate) {
-    return oldDelegate.x != x;
+    return oldDelegate.x != x || oldDelegate.list.length != list.length;
   }
+
+  /* @override
+  Size getSize(BoxConstraints constraints) {
+    // TODO: implement getSize
+    return super.getSize(constraints);
+  } */
 }
 
 class LineChartPainter extends CustomPainter {
@@ -478,8 +522,8 @@ class LineChartPainter extends CustomPainter {
       drawArrow(canvas, p2.translate(-10, 5), p2.translate(-10, -5), p2);
       canvas.drawLine(p1, p2, _paint);
     } else {
-      p1 = Offset(0, height);
-      p2 = Offset.zero.translate(0, -10);
+      // p1 = Offset(0, height);
+      // p2 = Offset.zero.translate(0, -10);
       //drawArrow(canvas, p2.translate(5, 10), p2.translate(-5, 10), p2);
     }
   }

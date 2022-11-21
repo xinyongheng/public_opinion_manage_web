@@ -68,7 +68,7 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: EdgeInsets.fromLTRB(43.w, 32.w, 0, 39.w),
+        padding: EdgeInsets.fromLTRB(30.w, 32.w, 0, 39.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,7 +306,7 @@ class ListInfoWidgetState extends State<ListInfoWidget>
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(right: 42.w),
+      padding: EdgeInsets.only(right: 5.w),
       child: Stack(children: [
         ListView.separated(
           physics: const NeverScrollableScrollPhysics(),

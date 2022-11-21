@@ -2,6 +2,7 @@ import 'dart:ui';
 
 class Point {
   double x;
+  // 显示的数
   double y;
   dynamic data;
   Point(this.x, this.y, {this.data});

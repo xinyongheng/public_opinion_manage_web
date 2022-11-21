@@ -247,7 +247,7 @@ class _DutyUnitWidgetState extends State<DutyUnitWidget> {
   }
 
   String loadUserInfo(UserData userData) {
-    return "单位：${userData.unit!}\n名称：${userData.nickname}${userData.nickname}${userData.nickname}${userData.nickname}-${userData.account!}";
+    return "单位：${userData.unit!}\n名称：${userData.nickname}-${userData.account!}";
   }
 
   Widget childSelectView(TextEditingController controller,

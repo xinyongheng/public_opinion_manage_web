@@ -16,16 +16,18 @@ class RadioGroupWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<RadioGroupWidget> createState() => _RadioGroupWidgetState();
+  State<RadioGroupWidget> createState() => RadioGroupWidgetState();
 }
 
-class _RadioGroupWidgetState extends State<RadioGroupWidget> {
+class RadioGroupWidgetState extends State<RadioGroupWidget> {
   int _selectValue = -1;
   @override
   void initState() {
     super.initState();
     _selectValue = widget.defaultSelectIndex;
   }
+
+  List<Radio> radios = [];
 
   @override
   Widget build(BuildContext context) {
@@ -36,29 +38,38 @@ class _RadioGroupWidgetState extends State<RadioGroupWidget> {
     );
   }
 
+  void updateDefault(int index) {
+    setState(() {
+      _selectValue = index;
+    });
+  }
+
   List<Widget> loadItmes() {
     final items = <Widget>[];
+    radios.clear();
     for (int i = 0; i < widget.list.length; i++) {
       final element = widget.list[i];
+      Radio radio = Radio<int>(
+        activeColor: const Color.fromARGB(255, 29, 153, 93),
+        value: i,
+        groupValue: _selectValue,
+        onChanged: widget.change == null
+            ? null
+            : (int? value) {
+                if (value != _selectValue) {
+                  setState(() {
+                    _selectValue = value ?? 0;
+                  });
+                }
+                widget.change?.call(value);
+              },
+      );
+      radios.add(radio);
       items.add(Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Radio(
-            activeColor: const Color.fromARGB(255, 29, 153, 93),
-            value: i,
-            groupValue: _selectValue,
-            onChanged: widget.change == null
-                ? null
-                : (int? value) {
-                    if (value != _selectValue) {
-                      setState(() {
-                        _selectValue = value ?? 0;
-                      });
-                    }
-                    widget.change?.call(value);
-                  },
-          ),
+          radio,
           // SizedBox(width: 5.sp),
           Text(element, style: Config.loadDefaultTextStyle()),
         ],

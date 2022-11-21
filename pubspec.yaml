@@ -40,7 +40,8 @@ dependencies:
   dio: ^4.0.6
   flutter_svg: ^1.1.0
   zoomable_image: ^1.3.1
-  flutter_screenutil: ^5.5.3+2
+  # 屏幕适配
+  flutter_screenutil: ^5.5.4
   # 图片加载
   cached_network_image: ^3.2.1
   # 选择图像，支持多选
@@ -61,10 +62,11 @@ dependencies:
   flutter_easyloading: ^3.0.5
   shared_preferences: ^2.0.15
   # 图表
-  charts_flutter: ^0.12.0
-  # fl_chart: ^0.55.1
+  # charts_flutter: ^0.12.0
+  fl_chart: ^0.55.2
   url_launcher: ^6.1.5
   event_bus: ^2.0.0
+  pie_chart: ^5.3.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -90,6 +92,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - images/
     - images/bg.png
     - images/icon_date.png
     - images/icon_down.png

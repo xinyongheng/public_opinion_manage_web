@@ -45,7 +45,7 @@ class CirclePointWidget extends StatelessWidget {
 
 class _RenderCirclePointBox<T> extends RenderBox {
   int pointerId = -1;
-  final T? tag;
+  T? tag;
   //选中状态发生改变后的回调
   final ValueChanged<T>? onChanged;
   final Color bgColor;
@@ -191,11 +191,12 @@ class CirclePointRenderWidget<T> extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, _RenderCirclePointBox renderObject) {
+      BuildContext context, _RenderCirclePointBox<T> renderObject) {
+    renderObject.tag = tag;
     if (renderObject.value != value) {
       renderObject.animationStatus =
           value ? AnimationStatus.forward : AnimationStatus.reverse;
+      renderObject.value = value;
     }
-    renderObject.value = value;
   }
 }
