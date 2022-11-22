@@ -29,6 +29,167 @@ const vidoImgWordTxt = [
   'txt'
 ];
 
+class SingleFileWidget extends StatefulWidget {
+  SingleFileWidget({super.key, this.width = 200, this.height = 100});
+  final double width;
+  final double height;
+  final List<FileInfoBean> list = <FileInfoBean>[];
+  @override
+  State<SingleFileWidget> createState() => _SingleFileWidgetState();
+}
+
+class _SingleFileWidgetState extends State<SingleFileWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: widget.width,
+      child: widget.list.isEmpty ? noImageView() : loadItemView(),
+    );
+  }
+
+  Widget noImageView() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Icon(Icons.add, size: 25.w, color: Config.fontColorSelect),
+        // SizedBox(width: 5.sp),
+        InkWell(
+          onTap: () {
+            addSelectFile();
+          },
+          child: Text(
+            '选择图片',
+            style: Config.loadDefaultTextStyle(color: Config.fontColorSelect),
+          ),
+        )
+      ],
+    );
+  }
+
+  void imageClick(FileInfoBean bean) {
+    if (bean.type != 'image') {
+      toast('不支持预览');
+      return;
+    }
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('预览', style: Config.loadDefaultTextStyle()),
+            content: Container(
+              width: 450.w,
+              height: 450.w,
+              color: const Color(0xFFD9D9D9),
+              child: Image.memory(bean.bytes!),
+            ),
+          );
+        });
+  }
+
+  Widget loadItemView() {
+    var bean = widget.list.first;
+    String fileSizeS = fileSize(bean.size! / 1204);
+    return Row(
+      children: [
+        InkWell(
+          onTap: () {
+            imageClick(bean);
+          },
+          child: Container(
+            color: Config.borderColor,
+            width: 45.w,
+            height: 45.w,
+            child: Image.memory(bean.bytes!),
+          ),
+        ),
+        Expanded(
+          flex: 1,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: Text(
+                  bean.name!,
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
+                  style: Config.loadDefaultTextStyle(
+                      color: const Color(0xFF333333), fonstSize: 19.w),
+                ),
+              ),
+              Text(fileSizeS,
+                  style: Config.loadDefaultTextStyle(
+                      color: const Color(0xFF333333), fonstSize: 19.w)),
+            ],
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            showDeleteDialog(context, 0);
+          },
+          style: TextButton.styleFrom(
+            foregroundColor: Config.fontColorSelect,
+            backgroundColor: Colors.white,
+            fixedSize: Size(40.w, 29.w),
+            padding: EdgeInsets.zero,
+            textStyle: Config.loadDefaultTextStyle(),
+          ),
+          child: const Text('删除'),
+        )
+      ],
+    );
+  }
+
+  void showDeleteDialog(context, index) {
+    showCenterNoticeDialog(context, contentString: '确定删除图片么？', onPress: () {
+      setState(() {
+        widget.list.removeAt(index);
+      });
+    });
+  }
+
+  void addSelectFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      allowedExtensions: const ['png', 'jpg', 'gif', 'jpeg', 'tif', 'bmp'],
+      type: FileType.custom,
+    );
+    if (result != null && result.files.isNotEmpty) {
+      if (kIsWeb) {
+        // html.File file = html.File();
+        final fileName = result.files.single.name;
+        final fileBytes = result.files.single.bytes;
+        final fileSize = result.files.single.size;
+        if (fileSize > 314572800) {
+          showNoticeDialog('选择的文件超过300M，无法上传');
+          return;
+        }
+        final fileInfo = FileInfoBean("web_$fileName",
+            bytes: fileBytes, name: fileName, size: fileSize);
+        if (!vidoImgWordTxt.contains(fileInfo.fileEndType)) {
+          showNoticeDialog('该文件类型(${fileInfo.fileEndType})，无法上传');
+          return;
+        }
+        setState(() {
+          widget.list.add(fileInfo);
+        });
+        // String text = String.fromCharCodes(fileBytes!);
+        // final text = const Utf8Decoder().convert(fileBytes!);
+        // result.files.single.path
+      } else {
+        // File file = File(result.files.single.path!);
+        // String s = await file.readAsString(encoding: utf8);
+        // print(s);
+        final fileInfo = FileInfoBean(result.files.single.path!);
+        setState(() {
+          widget.list.add(fileInfo);
+        });
+      }
+    } else {}
+  }
+}
+
 ///添加本地文件
 class AddFileWidget extends StatelessWidget {
   final VoidCallback onPressed;
@@ -68,7 +229,7 @@ class AddFileWidget extends StatelessWidget {
           TextButton(
             onPressed: onPressed,
             style: TextButton.styleFrom(
-              primary: Config.fontColorSelect,
+              foregroundColor: Config.fontColorSelect,
               backgroundColor: Colors.white,
               fixedSize: Size(150.w, 44.w),
               padding: EdgeInsets.zero,
@@ -93,6 +254,7 @@ class FileListWidget extends StatefulWidget {
   final double? height;
   final List<String>? allowedExtensions;
   final int? maxSize;
+  final bool noNeedWidth;
   FileListWidget({
     Key? key,
     this.explain = '支持上传图片，视频，word的doc，excel以及文本txt',
@@ -100,6 +262,7 @@ class FileListWidget extends StatefulWidget {
     this.height,
     this.allowedExtensions,
     this.maxSize,
+    this.noNeedWidth = false,
   })  : assert(maxSize == null || maxSize > 0),
         super(key: key);
 
@@ -147,7 +310,7 @@ class _FileListWidgetState extends State<FileListWidget> {
                     addSelectFile();
                   },
                   style: TextButton.styleFrom(
-                    primary: Config.fontColorSelect,
+                    foregroundColor: Config.fontColorSelect,
                     backgroundColor: Colors.white,
                     fixedSize: Size(80.w, 29.w),
                     padding: EdgeInsets.zero,
@@ -176,7 +339,7 @@ class _FileListWidgetState extends State<FileListWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    width: 530.w,
+                    width: widget.noNeedWidth ? null : 530.w,
                     child: Text(
                       item.name!,
                       softWrap: true,
@@ -196,7 +359,7 @@ class _FileListWidgetState extends State<FileListWidget> {
                   showDeleteDialog(context, index);
                 },
                 style: TextButton.styleFrom(
-                  primary: Config.fontColorSelect,
+                  foregroundColor: Config.fontColorSelect,
                   backgroundColor: Colors.white,
                   fixedSize: Size(40.w, 29.w),
                   padding: EdgeInsets.zero,

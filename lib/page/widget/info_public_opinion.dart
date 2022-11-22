@@ -6,6 +6,8 @@ import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/check_box.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/duty_unit.dart';
+import 'package:public_opinion_manage_web/custom/select_file.dart';
+import 'package:public_opinion_manage_web/data/bean/file_info.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/data/bean/update_event_bus.dart';
 import 'package:public_opinion_manage_web/data/bean/user_bean.dart';
@@ -15,7 +17,7 @@ import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/date_util.dart';
 import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
-
+import 'package:dio/dio.dart' as dio;
 import 'load_dispose_event.dart';
 
 ///舆情列表
@@ -728,6 +730,9 @@ class ListInfoWidgetState extends State<ListInfoWidget>
   // 领导批示
   String? _name;
   String? _content;
+
+  final _fileView = SingleFileWidget(width: 293.w);
+
   void lingDaoPiShi(eventId) {
     showCenterNoticeDialog(
       context,
@@ -788,6 +793,18 @@ class ListInfoWidgetState extends State<ListInfoWidget>
                   ),
                 ],
               ),
+              SizedBox(height: 20.w),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('上传图片：', style: Config.loadDefaultTextStyle()),
+                  SizedBox(
+                    width: 293.w,
+                    child: _fileView,
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -814,7 +831,19 @@ class ListInfoWidgetState extends State<ListInfoWidget>
           "leaderInstructionsContent": _content,
           "leaderName": _name,
         };
-        ServiceHttp().post("/updateEvent", data: map, success: (data) {
+        dynamic dataMap = map;
+        if (_fileView.list.isNotEmpty) {
+          for (FileInfoBean element in _fileView.list) {
+            // 为了防止中文乱码，服务器在解码即可
+            final String encode = Uri.encodeComponent(element.name!);
+            map['leader'] = [
+              dio.MultipartFile.fromBytes(element.bytes!, filename: encode)
+            ];
+          }
+          dataMap = dio.FormData.fromMap(map);
+        }
+        print(dataMap);
+        ServiceHttp().post("/updateEvent", data: dataMap, success: (data) {
           _timeController?.text = '';
           _name = null;
           _content = null;
