@@ -169,8 +169,8 @@ class SingleHistogramRenderWidget<T> extends LeafRenderObjectWidget {
   @override
   void updateRenderObject(
       BuildContext context, covariant RenderHistogramObject renderObject) {
-    renderObject.value = value;
     if (renderObject._height != height) {
+      renderObject.value = value;
       renderObject.height = height;
       // renderObject.onChanged = onChanged;
       renderObject.animationStatus = AnimationStatus.forward;
@@ -202,7 +202,7 @@ class RenderHistogramObject<T> extends RenderBox
     if (value != _height) {
       _height = value;
       progress = 0;
-      markNeedsPaint();
+      markNeedsLayout();
     }
   }
 
@@ -229,7 +229,11 @@ class RenderHistogramObject<T> extends RenderBox
   @override
   void performLayout() {
     Size size1 = Size(width, _height);
+    // print('-------------------');
+    // print(size1);
     size = constraints.constrain(constraints.isTight ? Size.infinite : size1);
+    // print(size);
+    // print('-------------------');
   }
 
   /* @override
@@ -275,7 +279,7 @@ class RenderHistogramObject<T> extends RenderBox
     Rect progressRect = Rect.lerp(
         Rect.fromLTWH(rect.left, rect.bottom, rect.width, 0), rect, progress)!;
     // 绘制矩形
-    // print('$rect--$progressRect');
+    // print('${rect.height} $rect');
     canvas.drawRect(progressRect, _paint);
   }
 }

@@ -92,6 +92,7 @@ class _MyPieChartWidgetState extends State<MyPieChartWidget> {
   @override
   Widget build(BuildContext context) {
     final dataList = widget.list;
+    // print(dataList);
     final double noReport = dataList[0]['size'] * 1.0;
     final double hadReport = dataList[1]['size'] * 1.0;
     return AspectRatio(
@@ -134,7 +135,7 @@ class _MyPieChartWidgetState extends State<MyPieChartWidget> {
                         color: Config.borderColor,
                         borderRadius: BorderRadius.circular(200.w),
                       ),
-                      child: Text('暂无数据'),
+                      child: const Text('暂无数据'),
                     ),
                   )
                 : Container(
@@ -152,7 +153,7 @@ class _MyPieChartWidgetState extends State<MyPieChartWidget> {
                                 return;
                               }
                               if (event is FlTapDownEvent) {
-                                print('touchCallback11');
+                                // print('touchCallback11');
                                 // 点击
                                 widget.clickValue.call(widget.list[
                                     pieTouchResponse
@@ -186,7 +187,7 @@ class _MyPieChartWidgetState extends State<MyPieChartWidget> {
     return List.generate(2, (i) {
       final isTouched = i == touchedIndex;
       final double fontSize = isTouched ? 25.w : 16.w;
-      final double radius = isTouched ? 190.w : 180.w;
+      final double radius = isTouched ? 170.w : 160.w;
       switch (i) {
         case 0:
           return PieChartSectionData(

@@ -5,6 +5,7 @@ import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/file_list_view.dart';
 import 'package:public_opinion_manage_web/custom/radio_group.dart';
+import 'package:public_opinion_manage_web/data/bean/file_info.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/data/bean/update_event_bus.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
@@ -26,6 +27,7 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
   final mapController = <String, TextEditingController>{};
   PublicOpinionBean? _publicOpinionBean;
   List? files;
+  List? leaderFiles;
   @override
   void initState() {
     super.initState();
@@ -37,6 +39,18 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
     map["eventId"] = widget.eventId;
     ServiceHttp().post('/loadEventInfo', data: map, isData: false,
         success: (data) {
+      List? allFiles = data['files'];
+      List remarkList = [];
+      List leaderList = [];
+      if (allFiles?.isNotEmpty == true) {
+        for (var element in allFiles!) {
+          if (element['fileType'] == 'leader') {
+            leaderList.add(element);
+          } else {
+            remarkList.add(element);
+          }
+        }
+      }
       setState(() {
         _publicOpinionBean = PublicOpinionBean.fromJson(data['data']);
         radioGroupWidgetKey.currentState!.updateDefault(
@@ -44,7 +58,8 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
                 ? 0
                 : 1);
         initControllerValue();
-        files = data['files'];
+        files = remarkList;
+        leaderFiles = leaderList;
       });
     });
   }
@@ -288,7 +303,10 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
         _itemView('领导姓名：', 'leaderName', isDate: false, readOnly: !_canChange),
         SizedBox(height: 30.w),
         _itemView('领导批示内容：', 'leaderInstructionsContent',
-            isDate: false, readOnly: !_canChange, line: 10),
+            isDate: false, readOnly: !_canChange, line: 6),
+        leaderFiles?.isNotEmpty == true
+            ? leaderFileItem('领导批示图片：', leaderFiles!)
+            : const SizedBox(),
       ],
     );
   }
@@ -395,6 +413,67 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
             list: list,
             width: 344.w,
             crossAxisCount: 2,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget leaderFileItem(String data, List list) {
+    String path = "${ServiceHttp.parentUrl}/${list.first['path']}";
+    String name = list.first['description'];
+    // String type = FileInfoBean.fileType(path);
+    String endString = name;
+    if (!name.contains('.')) {
+      int pointIndex = path.lastIndexOf('.');
+      if (pointIndex > -1) {
+        endString = name + path.substring(pointIndex);
+        // print("${endString}---urlPath=" + path);
+      }
+    }
+    return Padding(
+      padding: EdgeInsets.only(bottom: 30.w, top: 30.w),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            data,
+            style: Config.loadDefaultTextStyle(
+              color: Colors.black.withOpacity(0.85),
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          SizedBox(
+            width: 213.w,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 45.w,
+                  height: 43.w,
+                  color: Colors.grey,
+                  alignment: Alignment.center,
+                  child: InkWell(
+                    onTap: () {
+                      Config.launch(path);
+                    },
+                    child: Image.network(path),
+                  ),
+                ),
+                SizedBox(width: 11.w),
+                Expanded(
+                  child: Text(
+                    endString,
+                    style: Config.loadDefaultTextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: Config.fontColorSelect,
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
         ],
       ),

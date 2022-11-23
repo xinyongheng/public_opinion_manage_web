@@ -158,7 +158,7 @@ class LineChartWidgetState extends State<LineChartWidget> {
         _loadAxisInfoForX(i),
         Offset(xSingleLengthHalf + i * xSingleLength, height),
       ));
-      print('x轴：${i + 1} ${xSingleLengthHalf + i * xSingleLength}');
+      // print('x轴：${i + 1} ${xSingleLengthHalf + i * xSingleLength}');
     }
     this.xListAxisInfo = xListAxisInfo;
     //y轴上坐标
@@ -189,7 +189,7 @@ class LineChartWidgetState extends State<LineChartWidget> {
           pointInfo.offset = Offset(xListAxisInfo[indexForX].offset.dx,
               height - yEveryLength * point.y);
           String childId = "${tag}_${i}";
-          print('点$indexForX ${i} ${childId} ${pointInfo.offset!.dx}');
+          // print('点$indexForX ${i} ${childId} ${pointInfo.offset!.dx}');
           viewList.add(LayoutId(
               id: childId,
               child: makePointView(
@@ -347,7 +347,7 @@ class LineChartWidgetState extends State<LineChartWidget> {
           8,
           tag: '$tag,%$indexForX,%${pointDx},%${pointDy}',
           onChanged: (String value) {
-            print(value);
+            // print(value);
             List<String> arr = value.split(',%');
             String tagTem = arr[0];
             int indexTem = int.parse(arr[1]);
@@ -483,10 +483,10 @@ class LineChartPainter extends CustomPainter {
 
   void drawText(Canvas canvas, String text, Offset offset, Axis axis) {
     var textPainter = TextPainter(
-      textDirection: TextDirection.rtl,
+      textDirection: TextDirection.ltr,
       text: TextSpan(text: text, style: axisTextStyle),
     );
-    textPainter.layout(maxWidth: 50, minWidth: 5);
+    textPainter.layout(maxWidth: 70, minWidth: 5);
     if (axis == Axis.horizontal) {
       textPainter.paint(canvas, offset.translate(-textPainter.width / 2.0, 5));
     } else {

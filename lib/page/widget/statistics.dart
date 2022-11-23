@@ -79,6 +79,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
           _unitSumStatisticsList = null;
           _mediaTypeSumStatisticsList = null;
           _typeClassifyStatisticsList = null;
+          _reportStatistics = null;
         });
         return;
       }
@@ -218,7 +219,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
                 // SizedBox(width: 50.w),
                 Expanded(child: unitOpinionView(context)),
                 // SizedBox(width: 50.w),
-                Expanded(child: reportRateView(context)),
+                Expanded(child: reportRateTitleView(context)),
                 /* Expanded(
                   child: SizedBox(
                     width: 631.w,
@@ -490,6 +491,24 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
             fonstSize: 16.w,
           )),
     ];
+  }
+
+  Widget reportRateTitleView(context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        titleView('通报占比'),
+        SizedBox(height: 27.w),
+        SizedBox(
+          // width: 410.w,
+          height: 400.w,
+          /* child: lineChartForUnitOpinion(
+              _unitSumStatisticsList, '各单位舆情总数', context), */
+          child: reportRateView(context),
+        ),
+      ],
+    );
   }
 
   Widget reportRateView(context) {
