@@ -547,7 +547,7 @@ class _DutyUnitHomePageState extends State<DutyUnitHomePage> {
       leftArr.add(SizedBox(height: 10.w));
     }
     return SizedBox(
-      width: 373.w,
+      width: 160.w,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: leftArr,

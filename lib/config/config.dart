@@ -229,7 +229,7 @@ class Config {
           child: Padding(
             padding: EdgeInsets.only(bottom: 30.w),
             child: Container(
-              width: 1515.w,
+              width: 1630.w,
               height: double.infinity,
               decoration: BoxDecoration(
                 color: Colors.white,
