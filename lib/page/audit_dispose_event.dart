@@ -12,7 +12,6 @@ import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class AuditDisposeEventPage extends StatefulWidget {
   final int eventId;

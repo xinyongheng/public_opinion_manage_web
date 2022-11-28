@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 // import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/render_custom.dart';
 import 'package:public_opinion_manage_web/data/bean/line_data.dart';
+import 'package:public_opinion_manage_web/page/widget/empty_data.dart';
 
 import 'line_chart_view.dart';
 
@@ -34,6 +35,10 @@ class HistogramRenderWidget extends StatefulWidget {
 class _HistogramRenderWidgetState extends State<HistogramRenderWidget> {
   @override
   Widget build(BuildContext context) {
+    if (widget.linePoint?.list.isNotEmpty != true ||
+        widget.xAxisInfos.isEmpty) {
+      return emptyWidget();
+    }
     var array = makeViews(widget.linePoint);
     return CustomMultiChildLayout(
       delegate: LineMultiChildLayoutDelegate(array[0]),

@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
+import 'package:public_opinion_manage_web/page/widget/empty_data.dart';
 
 class Indicator extends StatelessWidget {
   const Indicator({
@@ -92,9 +93,14 @@ class _MyPieChartWidgetState extends State<MyPieChartWidget> {
   @override
   Widget build(BuildContext context) {
     final dataList = widget.list;
-    // print(dataList);
+    if (dataList.isEmpty) {
+      return emptyWidget();
+    }
     final double noReport = dataList[0]['size'] * 1.0;
     final double hadReport = dataList[1]['size'] * 1.0;
+    if (noReport < 1 && hadReport < 1) {
+      return emptyWidget();
+    }
     return AspectRatio(
       aspectRatio: 41 / 40,
       child: Column(

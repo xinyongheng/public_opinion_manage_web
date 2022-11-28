@@ -498,7 +498,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        titleView('通报占比'),
+        titleView('市通报占比'),
         SizedBox(height: 27.w),
         SizedBox(
           // width: 410.w,

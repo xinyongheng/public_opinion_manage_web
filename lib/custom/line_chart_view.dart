@@ -5,6 +5,7 @@ import 'dart:math' as math show max, pow;
 import 'package:flutter/material.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/data/bean/line_data.dart';
+import 'package:public_opinion_manage_web/page/widget/empty_data.dart';
 import 'dart:ui' as ui show Gradient;
 import 'circle_point.dart' show CirclePointRenderWidget;
 import 'line_view.dart';
@@ -58,6 +59,9 @@ class LineChartWidgetState extends State<LineChartWidget> {
   // List<AxisInfo>? yListAxisInfo;
   @override
   Widget build(BuildContext context) {
+    if (widget.linePoints.isEmpty || widget.xAxisInfos.isEmpty) {
+      return emptyWidget();
+    }
     var children = makePointOffsetViews(widget.linePoints, widget.size);
     _delegate = LineMultiChildLayoutDelegate(listLayoutInfo!);
     return SizedBox(

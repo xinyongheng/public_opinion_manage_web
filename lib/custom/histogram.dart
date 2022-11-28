@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/page/statistics_event_info_list_page.dart';
+import 'package:public_opinion_manage_web/page/widget/empty_data.dart';
 
 class TriangleWidget extends StatelessWidget {
   final Color color;
@@ -71,6 +72,9 @@ class HistogramWidget extends StatefulWidget {
 class _HistogramWidgetState extends State<HistogramWidget> {
   @override
   Widget build(BuildContext context) {
+    if (widget.list?.isNotEmpty != true) {
+      return emptyWidget();
+    }
     double max = 631.w;
     double maxNum = 1000;
     final arr = <Widget>[];

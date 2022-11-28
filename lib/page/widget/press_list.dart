@@ -98,10 +98,10 @@ class _PressListWidgetState extends State<PressListWidget> {
                       value: '周报',
                       // onTap: () {},
                       child: Text('周报', style: Config.loadDefaultTextStyle())),
-                  DropdownMenuItem(
-                      value: '快报',
-                      // onTap: () {},
-                      child: Text('快报', style: Config.loadDefaultTextStyle())),
+                  // DropdownMenuItem(
+                  //     value: '快报',
+                  //     // onTap: () {},
+                  //     child: Text('快报', style: Config.loadDefaultTextStyle())),
                 ],
                 decoration: Config.defaultInputDecoration(
                     suffixIcon: Image.asset(
