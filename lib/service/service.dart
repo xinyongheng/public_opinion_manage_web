@@ -16,8 +16,8 @@ class ServiceHttp {
   static ServiceHttp? _instance;
   late Dio _dio;
   // static const String parentUrl = 'http://124.222.125.236:8249';
-  // static const String parentUrl = 'http://60.174.116.164:8249';
-  static const String parentUrl = 'http://192.168.1.105:8249';
+  static const String parentUrl = 'http://60.174.116.164:8249';
+  // static const String parentUrl = 'http://192.168.1.105:8249';
   static const String loginApi = '/api/login';
   static const String registerApi = '/api/register';
 

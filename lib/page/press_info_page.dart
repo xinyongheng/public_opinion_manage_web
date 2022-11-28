@@ -302,7 +302,8 @@ class WeekPressInfoWidget extends StatelessWidget {
           SizedBox(width: 35.w),
           Text(data, style: _textStyle(fontWeight: FontWeight.w500)),
           SizedBox(height: 16.w),
-          SizedBox(child: SelectableText(content, style: _textStyle()))
+          SizedBox(
+              width: 600.w, child: SelectableText(content, style: _textStyle()))
         ],
       ),
     );
