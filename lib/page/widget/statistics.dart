@@ -11,6 +11,7 @@ import 'package:public_opinion_manage_web/custom/histogram_view.dart';
 import 'package:public_opinion_manage_web/custom/line_chart_view.dart';
 import 'package:public_opinion_manage_web/custom/pie_chart_view.dart';
 import 'package:public_opinion_manage_web/custom/radio_group.dart';
+// ignore: library_prefixes
 import 'package:public_opinion_manage_web/custom/triangle.dart' as hTriangle;
 import 'package:public_opinion_manage_web/data/bean/line_data.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
@@ -211,15 +212,15 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
             SizedBox(height: 30.w),
             dateSelectView(),
             SizedBox(height: 36.w),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Wrap(
+              // mainAxisSize: MainAxisSize.min,
+              // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: unitOpinionTypeView(context)),
-                // SizedBox(width: 50.w),
-                Expanded(child: unitOpinionView(context)),
-                // SizedBox(width: 50.w),
-                Expanded(child: reportRateTitleView(context)),
+                unitOpinionTypeView(context),
+                // SizedBox(height: 250.w),
+                unitOpinionView(context),
+                // SizedBox(height: 250.w),
+                reportRateTitleView(context),
                 /* Expanded(
                   child: SizedBox(
                     width: 631.w,
@@ -241,6 +242,8 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
             ),
             SizedBox(height: 56.w),
             Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                     child: opinionTypeCountView(
@@ -392,7 +395,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
 
   Widget lineChartForUnitOpinion(linePoints, String tag, context) {
     return LineChartWidget(
-      size: Size(410.w, 400.w),
+      size: Size(1640.w, 400.w),
       linePoints: linePoints ?? [],
       xAxisInfos: xAxisInfos ?? [],
       showPopupMenu: tag != '各单位舆情总数',
@@ -411,10 +414,11 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
   }
 
   Widget unitOpinionTypeView(context) {
-    final arr = <Widget>[SizedBox(width: 28.w)];
+    // final arr = <Widget>[SizedBox(width: 28.w)];
+    final arr = <Widget>[];
     if (_unitMediaTypeClassifyStatisticsList?.isNotEmpty == true) {
       for (var e in _unitMediaTypeClassifyStatisticsList!) {
-        arr.addAll(unitOpinionViewItem(e.background, e.tag));
+        arr.add(unitOpinionViewItem(e.background, e.tag));
         arr.add(SizedBox(width: 28.w));
       }
     }
@@ -424,13 +428,17 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
       children: [
         titleView('各单位舆情分类'),
         SizedBox(height: 27.w),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: arr,
+        Padding(
+          padding: EdgeInsets.only(left: 28.w),
+          child: Wrap(
+            direction: Axis.horizontal,
+            // mainAxisSize: MainAxisSize.min,
+            children: arr,
+          ),
         ),
         SizedBox(height: 27.w),
         SizedBox(
-          width: 410.w,
+          width: 1640.w,
           height: 400.w,
           child: lineChartForUnitOpinion(
               _unitMediaTypeClassifyStatisticsList, '各单位舆情分类', context),
@@ -444,6 +452,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 80),
         titleView('各单位舆情总数'),
         SizedBox(height: 27.w),
         Text('空格',
@@ -453,7 +462,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
             )),
         SizedBox(height: 27.w),
         SizedBox(
-          width: 410.w,
+          width: 1640.w,
           height: 400.w,
           /* child: lineChartForUnitOpinion(
               _unitSumStatisticsList, '各单位舆情总数', context), */
@@ -462,7 +471,7 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
                 ? _unitSumStatisticsList![0]
                 : null,
             xAxisInfos: xAxisInfos ?? [],
-            width: 410.w,
+            width: 1640.w,
             height: 400.w,
             onChanged: (value) {
               _startEventInfoPage(context, value['unit'], value['eventList']);
@@ -474,23 +483,26 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
     );
   }
 
-  List<Widget> unitOpinionViewItem(Color color, String data) {
-    return [
-      Container(
-        width: 13.w,
-        height: 13.w,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(1.w),
+  Widget unitOpinionViewItem(Color color, String data) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 13.w,
+          height: 13.w,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(1.w),
+          ),
         ),
-      ),
-      SizedBox(width: 9.w),
-      Text(data,
-          style: Config.loadDefaultTextStyle(
-            color: const Color(0xFF333333),
-            fonstSize: 16.w,
-          )),
-    ];
+        SizedBox(width: 9.w),
+        Text(data,
+            style: Config.loadDefaultTextStyle(
+              color: const Color(0xFF333333),
+              fonstSize: 16.w,
+            )),
+      ],
+    );
   }
 
   Widget reportRateTitleView(context) {
@@ -498,10 +510,11 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 80),
         titleView('市通报占比'),
         SizedBox(height: 27.w),
         SizedBox(
-          // width: 410.w,
+          width: 1640.w,
           height: 400.w,
           /* child: lineChartForUnitOpinion(
               _unitSumStatisticsList, '各单位舆情总数', context), */

@@ -2,6 +2,7 @@ import 'base_bean.dart';
 
 class User extends BaseBean {
   String? token;
+  String? loginTime;
   UserData? data;
 
   User({
@@ -14,12 +15,14 @@ class User extends BaseBean {
   User.fromJson(Map<String, dynamic> json) {
     BaseBean.fromJson(json);
     token = json['token'];
+    loginTime = json['loginTime'];
     data = UserData.fromJson(json['data']);
   }
   @override
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> map = super.toJson();
     map['token'] = token;
+    map['loginTime'] = loginTime;
     if (data != null) {
       map['data'] = data!.toJson();
     }

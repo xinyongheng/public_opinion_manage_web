@@ -187,9 +187,13 @@ class _MyPieChartWidgetState extends State<MyPieChartWidget> {
     );
   }
 
-  List<PieChartSectionData> showingSections(noReport, hadReport) {
-    print('noReport=$noReport hadReport=$hadReport');
-
+  List<PieChartSectionData> showingSections(double noReport, double hadReport) {
+    // print('noReport=$noReport hadReport=$hadReport');
+    var sum = noReport + hadReport;
+    var noReportRate = ((noReport) * 100 / sum).toStringAsFixed(2);
+    // print(noReportRate);
+    // print(noReport);
+    var hadReportRate = (100 - double.parse(noReportRate)).toStringAsFixed(2);
     return List.generate(2, (i) {
       final isTouched = i == touchedIndex;
       final double fontSize = isTouched ? 25.w : 16.w;
@@ -199,7 +203,7 @@ class _MyPieChartWidgetState extends State<MyPieChartWidget> {
           return PieChartSectionData(
             color: const Color(0xff0293ee),
             value: noReport,
-            title: '上级未通报',
+            title: '上级未通报$noReportRate%',
             radius: radius,
             titleStyle: TextStyle(
                 fontSize: fontSize,
@@ -210,7 +214,7 @@ class _MyPieChartWidgetState extends State<MyPieChartWidget> {
           return PieChartSectionData(
             color: const Color(0xfff8b250),
             value: hadReport,
-            title: '上级通报',
+            title: '上级通报$hadReportRate%',
             radius: radius,
             titleStyle: TextStyle(
                 fontSize: fontSize,

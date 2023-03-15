@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:public_opinion_manage_web/main.dart';
-import 'package:public_opinion_manage_web/page/login.dart';
+import 'package:public_opinion_manage_web/page/new_login.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -37,11 +37,15 @@ class Config {
   static final EventBus eventBus = EventBus();
 
   static TextStyle loadDefaultTextStyle(
-      {Color? color, double? fonstSize, FontWeight? fontWeight}) {
+      {Color? color,
+      double? fonstSize,
+      FontWeight? fontWeight,
+      String? fontFamily}) {
     return TextStyle(
       color: color,
       fontSize: fonstSize ?? defaultSize,
       fontWeight: fontWeight,
+      fontFamily: fontFamily,
       // height: 1.2,
       // textBaseline: TextBaseline.alphabetic,
     );
@@ -68,7 +72,7 @@ class Config {
 
   static ButtonStyle loadPerformButtonStyle() {
     return TextButton.styleFrom(
-      primary: Colors.white,
+      foregroundColor: Colors.white,
       backgroundColor: Colors.blue,
       padding: EdgeInsets.only(
         left: 60.sp,
@@ -167,11 +171,14 @@ class Config {
   }
 
   static TextField textInputView(explain, controller,
-      {int maxLength = 100, bool obscureText = false, String? counterText}) {
+      {int? maxLength = 100,
+      bool obscureText = false,
+      String? counterText,
+      int? maxLines = 1}) {
     return TextField(
       controller: controller,
       maxLength: maxLength,
-      maxLines: 1,
+      maxLines: maxLines,
       scrollPadding: EdgeInsets.zero,
       textInputAction: TextInputAction.next,
       style: Config.loadDefaultTextStyle(color: Colors.black),
@@ -204,7 +211,10 @@ class Config {
     }
   }
 
-  static Widget pageScaffold({String? title, required Widget body}) {
+  static Widget pageScaffold(
+      {String? title,
+      required Widget body,
+      ScrollController? scrollController}) {
     return Container(
       decoration: const BoxDecoration(
         image: DecorationImage(
@@ -236,6 +246,7 @@ class Config {
                 borderRadius: BorderRadius.circular(13.w),
               ),
               child: SingleChildScrollView(
+                controller: scrollController,
                 child: body,
               ),
             ),

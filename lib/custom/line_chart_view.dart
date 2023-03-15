@@ -1,6 +1,7 @@
 // ignore_for_file: unnecessary_brace_in_string_interps
 
 import 'dart:math' as math show max, pow;
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
@@ -490,9 +491,15 @@ class LineChartPainter extends CustomPainter {
       textDirection: TextDirection.ltr,
       text: TextSpan(text: text, style: axisTextStyle),
     );
-    textPainter.layout(maxWidth: 70, minWidth: 5);
+    textPainter.layout(maxWidth: 80, minWidth: 5);
     if (axis == Axis.horizontal) {
-      textPainter.paint(canvas, offset.translate(-textPainter.width / 2.0, 5));
+      canvas.save();
+      var newOffset = offset.translate(0, 0);
+      textPainter.size;
+      canvas.translate(newOffset.dx, newOffset.dy);
+      canvas.rotate(-pi / 180 * 45);
+      textPainter.paint(canvas, Offset.zero.translate(-textPainter.width, 0));
+      canvas.restore();
     } else {
       textPainter.paint(canvas,
           offset.translate(-textPainter.width - 5, -textPainter.height / 2.0));

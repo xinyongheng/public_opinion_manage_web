@@ -8,7 +8,7 @@ class UserUtil {
   static Future<bool> isLogin() async => !DataUtil.isEmpty(await getToken());
 
   //Bearer
-  static save(UserData user, {String? token}) async {
+  static save(UserData user, {String? token, required String loginTime}) async {
     await InfoSaveUtil.save('id', user.id!);
     await InfoSaveUtil.save('nickname', user.nickname ?? '');
     if (token?.isNotEmpty == true) {
@@ -23,6 +23,7 @@ class UserUtil {
     await InfoSaveUtil.save('unit', user.unit!);
     await InfoSaveUtil.save('ctime', user.ctime ?? '');
     await InfoSaveUtil.save('utime', user.utime ?? '');
+    await InfoSaveUtil.save('loginTime', loginTime);
   }
 
   static Future<bool> clearUser() async => await InfoSaveUtil.clear();
@@ -39,6 +40,8 @@ class UserUtil {
   static getType() async => await InfoSaveUtil.getInt('type');
 
   static getUnit() async => await InfoSaveUtil.getString('unit');
+
+  static getLoginTime() async => await InfoSaveUtil.getString('loginTime');
 
   static getStringValue(String key) async => await InfoSaveUtil.getString(key);
 

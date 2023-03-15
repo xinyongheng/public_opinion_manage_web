@@ -6,6 +6,7 @@ import 'package:public_opinion_manage_web/custom/file_list_view.dart';
 import 'package:public_opinion_manage_web/custom/triangle.dart';
 import 'package:public_opinion_manage_web/data/bean/update_event_bus.dart';
 import 'package:public_opinion_manage_web/data/bean/user_bean.dart';
+import 'package:public_opinion_manage_web/page/manage_duty_unit_deal_with_event.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/str_util.dart';
@@ -49,9 +50,19 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
   }
 
   void askInternet(map) async {
+    //print('load-- askInternet');
     // String token = map['token']!;
     int userId = map['userId']!;
     int userType = await UserUtil.getType();
+    if (userType == 1) {
+      // ignore: use_build_context_synchronously
+      Config.startPageAndFinishOther(
+          context,
+          ManageDutyUnitAndDealWithPage(
+            info: widget.info,
+          ));
+      return;
+    }
     String unit = await UserUtil.getUnit();
     ServiceHttp().post('/loadDisposeEvent',
         data: {
@@ -74,6 +85,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
           mappingId = mappsings.first['id'];
         }
       }
+      // print('load-- askInternet --result');
       setState(() {
         files = data['files'];
         eventInfo = data['data'];
@@ -89,6 +101,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
     _controller1.dispose();
     _controller2.dispose();
     _controller3.dispose();
+    _feedTimeController.dispose();
   }
 
 // loadDisposeEvent?info=
@@ -152,8 +165,8 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
                             ...superiorNotificationView(
                                 eventInfo['superiorNotificationTime']),
                             // childItem("单位处理内容：", eventInfo['link'] ?? ''),
-                            childItem("管理员指定 \n单位备注：",
-                                disposeEvent['manageRemark'] ?? '无',
+                            childItem(
+                                "管理员备注：", disposeEvent['manageRemark'] ?? '无',
                                 line: 2),
                             ...historyDuty(),
                           ],
@@ -168,7 +181,11 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
   }
 
   List<Widget> historyDuty() {
-    if (DataUtil.isEmpty(disposeEventUnitMappingList)) {
+    //print(disposeEventUnitMappingList?.length ?? -1);
+    //print('runtype=' + disposeEventUnitMappingList.runtimeType.toString());
+    int legnth = disposeEventUnitMappingList?.length ?? 0;
+    if (legnth < 1) {
+      // print('--historyDuty isEmpry');
       return <Widget>[dutyContent()];
     }
     // 从小到大排序
@@ -377,7 +394,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
                   requestCommitDutyContent(_controller3.text);
                 },
           style: TextButton.styleFrom(
-            primary: Colors.white,
+            foregroundColor: Colors.white,
             backgroundColor: Config.fontColorSelect,
             textStyle: Config.loadDefaultTextStyle(fontWeight: FontWeight.w400),
             padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.w),
@@ -561,7 +578,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
             requestLogin(context);
           },
           style: TextButton.styleFrom(
-            primary: Colors.white,
+            foregroundColor: Colors.white,
             backgroundColor: Colors.blue,
             fixedSize: Size(300.sp, 80.sp),
             textStyle: Config.loadDefaultTextStyle(),
@@ -637,7 +654,8 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
         isData: false,
         success: (data) async {
           User user = User.fromJson(data);
-          await UserUtil.save(user.data!, token: user.token);
+          await UserUtil.save(user.data!,
+              token: user.token, loginTime: user.loginTime ?? '');
           if (!mounted) return;
           showSuccessDialog('登录成功', dialogDismiss: () {
             Navigator.of(context).pop();
@@ -666,6 +684,7 @@ class _LoadDisposeEventPageState extends State<LoadDisposeEventPage> {
         map['feedbackTime'] = date;
       }
     }
+    // map['userId'] = await UserUtil.getUserId();
     map['content'] = text;
     map['eventId'] = disposeEvent['eventId'];
     map['disposeEventId'] = disposeEvent['id'];

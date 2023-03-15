@@ -73,7 +73,7 @@ class _PressListWidgetState extends State<PressListWidget> {
                 filterPress();
               },
               style: TextButton.styleFrom(
-                primary: Colors.white,
+                foregroundColor: Colors.white,
                 backgroundColor: Config.fontColorSelect,
                 padding: EdgeInsets.symmetric(horizontal: 25.w, vertical: 7.w),
                 textStyle: Config.loadDefaultTextStyle(fonstSize: 19.w),
@@ -139,7 +139,7 @@ class _PressListWidgetState extends State<PressListWidget> {
                 createPress();
               },
               style: TextButton.styleFrom(
-                primary: Colors.white,
+                foregroundColor: Colors.white,
                 backgroundColor: Config.fontColorSelect,
                 padding: EdgeInsets.symmetric(horizontal: 25.w, vertical: 7.w),
                 textStyle: Config.loadDefaultTextStyle(fonstSize: 19.w),

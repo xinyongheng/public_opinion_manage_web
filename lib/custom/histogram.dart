@@ -71,9 +71,21 @@ class HistogramWidget extends StatefulWidget {
 
 class _HistogramWidgetState extends State<HistogramWidget> {
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (widget.list?.isNotEmpty != true) {
       return emptyWidget();
+    }
+    if (widget.list?.isNotEmpty == true) {
+      widget.list!.sort(((a, b) {
+        var aa = a.value['num'] as int;
+        var bb = b.value['num'] as int;
+        return bb.compareTo(aa);
+      }));
     }
     double max = 631.w;
     double maxNum = 1000;
@@ -81,7 +93,7 @@ class _HistogramWidgetState extends State<HistogramWidget> {
     if (widget.list?.isNotEmpty == true) {
       maxNum = math.max(
           widget.list!.first.value['num'], widget.list!.last.value['num']);
-      int count = -1;
+      int count = 0;
       for (MapEntry element in widget.list!) {
         count++;
         String mediaType = element.key;
@@ -117,7 +129,7 @@ class _HistogramWidgetState extends State<HistogramWidget> {
 
     return [
       SizedBox(
-        width: width,
+        // width: width,
         child: Padding(
           padding: EdgeInsets.only(bottom: 16.w),
           child: Row(
@@ -134,11 +146,12 @@ class _HistogramWidgetState extends State<HistogramWidget> {
                   style: Config.loadDefaultTextStyle(
                       fontWeight: FontWeight.w400,
                       color: const Color(0xFF333333))),
-              const Spacer(),
+              const SizedBox(width: 20),
               Text(data,
                   style: Config.loadDefaultTextStyle(
                       fontWeight: FontWeight.w400,
                       color: const Color(0xFF333333))),
+              const Spacer(),
             ],
           ),
         ),

@@ -4,12 +4,12 @@ import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/data/bean/update_event_bus.dart';
-import 'package:public_opinion_manage_web/page/login.dart';
 import 'package:public_opinion_manage_web/page/widget/duty_unit_info_list.dart';
 import 'package:public_opinion_manage_web/page/widget/save_event_info.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
+import 'new_login.dart';
 import 'widget/history_press_file.dart';
 import 'widget/home_menu.dart';
 import 'widget/info_public_opinion.dart';
@@ -122,7 +122,7 @@ class _ManageHomePageState extends State<ManageHomePage> {
             color: Colors.transparent,
           ),
           // SizedBox(width: 10.sp),
-          Text('舆情台账管理', style: Config.loadFirstTextStyle()),
+          Text('智慧网信系统', style: Config.loadFirstTextStyle()),
           const Spacer(),
 
           /* Text('($newNoticeNum/$sumNoticeNum)',
@@ -150,7 +150,7 @@ class _ManageHomePageState extends State<ManageHomePage> {
           ),
           SizedBox(width: 20.w),
           homeMenu(
-            '管理员',
+            '蒙城县委网信办',
             offset: Offset(0, 45.w),
             padding: EdgeInsets.zero,
           ),
@@ -408,7 +408,7 @@ class _DutyUnitHomePageState extends State<DutyUnitHomePage> {
       setState(() {
         newNoticeNum = weiChuLiList!.length + weiTongGuoList!.length;
         sumNoticeNum = allList!.length;
-        print("$newNoticeNum/$sumNoticeNum");
+        // print("$newNoticeNum/$sumNoticeNum");
       });
     });
   }
@@ -503,7 +503,7 @@ class _DutyUnitHomePageState extends State<DutyUnitHomePage> {
           color: Colors.transparent,
         ),
         // SizedBox(width: 10.sp),
-        Text('舆情台账管理', style: Config.loadFirstTextStyle()),
+        Text('智慧网信系统', style: Config.loadFirstTextStyle()),
         const Spacer(),
 
         Text('($newNoticeNum/$sumNoticeNum)',

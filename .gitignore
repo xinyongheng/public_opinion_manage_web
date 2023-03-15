@@ -40,6 +40,8 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
+*.7z
+*.zip
 
 # Android Studio will place build artifacts here
 /android/

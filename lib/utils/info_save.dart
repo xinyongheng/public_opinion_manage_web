@@ -1,15 +1,15 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DataUtil {
-  static isEmpty(dynamic data) {
+  static isEmpty(Object? data) {
     if (null == data) return true;
     switch (data.runtimeType) {
       case String:
-        return (data! as String).isEmpty;
+        return (data as String).isEmpty;
       case List:
-        return (data! as List).isEmpty;
+        return (data as List).isEmpty;
       case Map:
-        return (data! as Map).isEmpty;
+        return (data as Map).isEmpty;
       default:
         return false;
     }

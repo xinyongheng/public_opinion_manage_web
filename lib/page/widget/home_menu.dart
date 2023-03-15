@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
-import 'package:public_opinion_manage_web/page/login.dart';
+import 'package:public_opinion_manage_web/page/new_login.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 

@@ -1,4 +1,4 @@
-import 'dart:convert';
+// import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -15,10 +15,14 @@ class ServiceHttp {
   // static void checkToken(String token, Callback callback) {}
   static ServiceHttp? _instance;
   late Dio _dio;
-  // static const String parentUrl = 'http://124.222.125.236:8249';
-  static const String parentUrl = 'http://60.174.116.164:8249';
-  // static const String parentUrl = 'http://192.168.1.105:8249';
+  // 测试服务器地址
+  // static const String parentUrl = 'http://60.174.116.164:8249';
+  // 正式服务器地址
+  static const String parentUrl = 'http://60.174.116.164:8349';
+  // 本地服务器地址
+  // static const String parentUrl = 'http://192.168.1.103:8249';
   static const String loginApi = '/api/login';
+  static const String loadCode = '/api/loadCode';
   static const String registerApi = '/api/register';
 
   EasyLoadingStatusCallback? callback;
@@ -40,6 +44,7 @@ class ServiceHttp {
     if (!path.contains('/api/')) {
       String? token = await UserUtil.getToken();
       map['Authorization'] = token!;
+      map['loginTime'] = await UserUtil.getLoginTime();
     }
     map['Platform'] = loadPlatform();
   }
@@ -68,7 +73,7 @@ class ServiceHttp {
             cancelToken: cancelToken,
             onReceiveProgress: onReceiveProgress)
         .catchError((err) {
-      print('Error11: $err');
+      //print('Error11: $err');
       showNoticeDialog('请检查网络，稍后重试');
     });
     _handleRes(res, isData, success, error);
@@ -78,7 +83,7 @@ class ServiceHttp {
       ErrorCallback? error) {
     int code = res.data['code'];
     String message = res.data['message'] ?? "未知错误";
-    // print("${code is int}--${message}");
+    // //print("${code is int}--${message}");
     if (code != 200) {
       //  错误
       _handlerError(message, code, error);
@@ -107,7 +112,7 @@ class ServiceHttp {
             cancelToken: cancelToken,
             onReceiveProgress: onReceiveProgress)
         .catchError((err) {
-      print('Error11: $err');
+      //print('Error11: $err');
       showNoticeDialog('请检查网络，稍后重试');
     });
     _handleRes(res, isData, success, error);
@@ -128,22 +133,22 @@ class ServiceHttp {
           (RequestOptions options, RequestInterceptorHandler handler) async {
         Map map = options.headers;
         await addHeaders(map, options.path);
-        print(options.headers);
-        print(options.data);
-        print(options.uri);
-        print('*************input**************');
+        //print(options.headers);
+        //print(options.data);
+        //print(options.uri);
+        //print('*************input**************');
         handler.next(options);
       },
       onResponse: (Response e, ResponseInterceptorHandler handler) {
-        // print('onResponse： ${DateTime.now()}');
-        print(json.encode(e.data));
-        print('*************output**************');
+        // //print('onResponse： ${DateTime.now()}');
+        //print(json.encode(e.data));
+        //print('*************output**************');
         handler.next(e);
         dismissDialog();
       },
       onError: (DioError e, ErrorInterceptorHandler handler) {
         // handler.next(e);
-        print(e.message);
+        //print(e.message);
         handler.resolve(Response(
             requestOptions: e.requestOptions,
             statusCode: 444,

@@ -3,13 +3,16 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
+import 'package:public_opinion_manage_web/custom/auto_complete_view.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/file_list_view.dart';
 import 'package:public_opinion_manage_web/custom/radio_group.dart';
 import 'package:public_opinion_manage_web/custom/triangle.dart';
 import 'package:public_opinion_manage_web/data/bean/dispose_event.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
+import 'package:public_opinion_manage_web/data/bean/update_event_bus.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
+import 'package:public_opinion_manage_web/utils/date_util.dart';
 import 'package:public_opinion_manage_web/utils/info_save.dart';
 import 'package:public_opinion_manage_web/utils/token_util.dart';
 
@@ -69,7 +72,7 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
   void dispose() {
     super.dispose();
     _controller3.dispose();
-    _finalController?.dispose();
+    // _finalController?.dispose();
   }
 
   @override
@@ -83,7 +86,7 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
       InkWell(
           onTap: linkPath.isNotEmpty ? () => Config.launch(linkPath) : null,
           child: childItem("单位链接：", linkPath)),
-      childItem("事件名称：", eventInfo?.description ?? ''),
+      childItem("事件名称：", eventInfo?.description ?? '', line: null),
       childItem("原文链接：", eventInfo?.link ?? ''),
       DataUtil.isEmpty(files)
           ? childItem("原文图文信息：", '无')
@@ -96,7 +99,12 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
       childItem("舆情类别：", eventInfo?.type ?? ''),
       childItem("发现时间：", eventInfo?.findTime ?? ''),
       ...superiorNotificationView(eventInfo?.superiorNotificationTime),
-      childItem("管理员指定 \n单位备注：", disposeEvent?.manageRemark ?? '无', line: 2),
+      childItem(
+          "管理员备注：",
+          disposeEvent?.manageRemark?.isNotEmpty == true
+              ? disposeEvent!.manageRemark!
+              : '无',
+          line: 2),
     ];
     if (!DataUtil.isEmpty(unitList)) {
       arr.add(Padding(
@@ -251,11 +259,20 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
             ),
             SizedBox(
               width: 624.w,
-              child: Autocomplete(
+              child: Autocomplete<String>(
                 optionsBuilder: (textEditingValue) {
                   final v = textEditingValue.text;
                   return unitNameList.where(
                       (String c) => c.toUpperCase().contains(v.toUpperCase()));
+                },
+                optionsViewBuilder: (context, onSelected, options) {
+                  return AutocompleteOptions<String>(
+                    displayStringForOption: ((option) => option.toString()),
+                    onSelected: onSelected,
+                    options: options,
+                    maxOptionsWidth: 600.w,
+                    maxOptionsHeight: 314.w,
+                  );
                 },
                 fieldViewBuilder: (
                   context,
@@ -442,7 +459,7 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
   }
 
   Widget childItem(String data, String content,
-      {double? bottom, TextAlign textAlign = TextAlign.left, int line = 1}) {
+      {double? bottom, TextAlign textAlign = TextAlign.left, int? line = 1}) {
     return Padding(
       padding: EdgeInsets.only(bottom: bottom ?? 46.w),
       child: Row(
@@ -467,7 +484,7 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
     );
   }
 
-  Container bordContent(String content, [int line = 1]) {
+  Container bordContent(String content, [int? line = 1]) {
     return Container(
       width: 624.w,
       padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 12.w),
@@ -537,6 +554,7 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
         submitResult = true;
       });
       showSuccessDialog('提交成功');
+      Config.eventBus.fire(UpdateEventListBean()..needUpdate = true);
       if (_auditType == 1) {
         showCenterNoticeDialog(context,
             title: '新的链接',
@@ -627,7 +645,8 @@ class DutyUnitList extends StatelessWidget {
     //if (finalPassState == '未处理') return [auditContent()];
     if (finalPassState == '待审核') {
       endList = [
-        childItem("处理内容：\n（${lastMap.time}）", lastMap.content ?? "",
+        childItem("处理内容：\n（${DateUtil.subDate(lastMap.time ?? '')}）",
+            lastMap.content ?? "",
             textAlign: TextAlign.right)
       ];
     } else if (finalPassState == '通过') {
@@ -637,7 +656,8 @@ class DutyUnitList extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: auditTitle(lastMap.utime, finalPassState!, max(length, 1)),
         ),
-        childItem("处理内容：\n（${lastMap.time}）", lastMap.content ?? "",
+        childItem("处理内容：\n（${DateUtil.subDate(lastMap.time ?? '')}）",
+            lastMap.content ?? "",
             textAlign: TextAlign.right),
       ];
     } else if (finalPassState == '未通过') {
@@ -664,7 +684,7 @@ class DutyUnitList extends StatelessWidget {
         children: [
           ...auditTitle(auditDate, passState, index),
           childItem("不通过原因：", reason),
-          childItem("处理内容：\n（$feedbackDate）", content,
+          childItem("处理内容：\n（${DateUtil.subDate(feedbackDate)}）", content,
               textAlign: TextAlign.right),
         ],
       ),
@@ -757,7 +777,7 @@ class DutyUnitList extends StatelessWidget {
           Opacity(
             opacity: 0,
             child: Text(
-              '（2022-05-06 08:00:00）',
+              '（2022-05-06）',
               style: Config.loadDefaultTextStyle(
                 color: Colors.black.withOpacity(0.85),
                 fontWeight: FontWeight.w400,

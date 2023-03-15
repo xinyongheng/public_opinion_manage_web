@@ -1,6 +1,6 @@
 # public_opinion_manage_web
 
-舆情台账管理
+舆情台账管理，智慧网信系统
 
 ## Getting Started
 

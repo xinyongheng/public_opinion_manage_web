@@ -93,24 +93,20 @@ class _PressPageState extends State<PressPage> {
           elevation: 0,
         ),
         body: Container(
+          // width: ScreenUtil().screenWidth,
+          // height: 800,
           alignment: Alignment.topCenter,
-          child: Padding(
-            padding: EdgeInsets.only(bottom: 30.w),
-            child: SizedBox(
-              width: 1515.w,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    headWidget,
-                    SizedBox(height: 30.w),
-                    Opacity(
-                      opacity: selectSize > 0 ? 1 : 0,
-                      child: pressWidget,
-                    ),
-                  ],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(child: headWidget),
+                SizedBox(height: 30.w),
+                Opacity(
+                  opacity: selectSize > 0 ? 1 : 0,
+                  child: pressWidget,
                 ),
-              ),
+              ],
             ),
           ),
         ),
@@ -125,7 +121,7 @@ Widget parentContainer(Widget child, {double? height}) {
       borderRadius: BorderRadius.circular(13.w),
       color: Colors.white,
     ),
-    width: 1515.w,
+    width: (1630 + 40 + 40).w,
     height: height,
     child: child,
   );
@@ -169,6 +165,7 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
     finalMap["userId"] = await UserUtil.getUserId();
     ServiceHttp().post("/eventList", data: finalMap, success: (data) {
       selectList.clear();
+      _resetSelect();
       setState(() {
         _allList = PublicOpinionBean.fromJsonArray(data);
       });
@@ -201,7 +198,7 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
     return parentContainer(
       Padding(
         padding:
-            EdgeInsets.only(left: 38.w, top: 32.w, right: 38.w, bottom: 32.w),
+            EdgeInsets.only(left: 30.w, top: 32.w, right: 30.w, bottom: 32.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,7 +242,7 @@ class _PressHeadWidgetState extends State<PressHeadWidget> {
           ],
         ),
       ),
-      height: 925.w,
+      // height: 925.w,
     );
   }
 

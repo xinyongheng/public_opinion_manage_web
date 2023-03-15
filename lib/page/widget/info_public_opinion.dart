@@ -6,12 +6,14 @@ import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/check_box.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
 import 'package:public_opinion_manage_web/custom/duty_unit.dart';
+import 'package:public_opinion_manage_web/custom/select_duty_unit_dialog.dart';
 import 'package:public_opinion_manage_web/custom/select_file.dart';
 import 'package:public_opinion_manage_web/data/bean/file_info.dart';
 import 'package:public_opinion_manage_web/data/bean/public_opinion.dart';
 import 'package:public_opinion_manage_web/data/bean/update_event_bus.dart';
 import 'package:public_opinion_manage_web/data/bean/user_bean.dart';
 import 'package:public_opinion_manage_web/page/audit_dispose_event.dart';
+import 'package:public_opinion_manage_web/page/manage_duty_unit_deal_with_event.dart';
 import 'package:public_opinion_manage_web/page/public_opinion_info.dart';
 import 'package:public_opinion_manage_web/service/service.dart';
 import 'package:public_opinion_manage_web/utils/date_util.dart';
@@ -37,7 +39,7 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
     super.initState();
     askInternet(null);
     Config.eventBus.on<UpdateEventListBean>().listen((event) {
-      print("eventBus_PublicOpinionListWidgetState, $mounted");
+      //print("eventBus_PublicOpinionListWidgetState, $mounted");
       if (event.needUpdate && mounted) {
         askInternet(null);
       }
@@ -144,7 +146,7 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-        primary: primary,
+        foregroundColor: primary,
         backgroundColor: backgroundColor,
         textStyle: Config.loadDefaultTextStyle(fonstSize: 19.sp),
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.w),
@@ -619,20 +621,17 @@ class ListInfoWidgetState extends State<ListInfoWidget>
         break;
       case '责任单位':
         if (data == '指定') {
-          preDutyUnit(bean);
+          //preDutyUnit(bean);
+          _showSelectDutyUnitDialog(bean, firstOnTap: () => preDutyUnit(bean));
+        } else if (data.contains("(未通过)") || data.contains("未处理")) {
+          _showSelectDutyUnitDialog(
+            bean,
+            first: '仅查看',
+            second: '辅助填写处理内容',
+            firstOnTap: () => startToPage(bean, index),
+          );
         } else {
-          if (widget.type == 1) {
-            //管理员
-            Config.startPage(context,
-                AuditDisposeEventPage(eventId: widget.selectList[index].id!));
-          } else {
-            String linkPath = widget.selectList[index].linkPath ?? '';
-
-            Config.startPage(
-                context,
-                LoadDisposeEventPage(
-                    info: linkPath.replaceAll('/loadDisposeEvent?info=', '')));
-          }
+          startToPage(bean, index);
         }
         break;
       case '上级通报时间':
@@ -665,6 +664,21 @@ class ListInfoWidgetState extends State<ListInfoWidget>
     }
   }
 
+  void startToPage(bean, index) {
+    if (widget.type == 1) {
+      //管理员
+      Config.startPage(context,
+          AuditDisposeEventPage(eventId: widget.selectList[index].id!));
+    } else {
+      String linkPath = widget.selectList[index].linkPath ?? '';
+
+      Config.startPage(
+          context,
+          LoadDisposeEventPage(
+              info: linkPath.replaceAll('/loadDisposeEvent?info=', '')));
+    }
+  }
+
   void showNotice(String title, String msg) {
     showCenterNoticeDialog(context,
         title: title,
@@ -675,6 +689,31 @@ class ListInfoWidgetState extends State<ListInfoWidget>
             style: Config.loadDefaultTextStyle(
                 color: Colors.black, fontWeight: FontWeight.w400),
           ),
+        ));
+  }
+
+  void _showSelectDutyUnitDialog(bean,
+      {String? first,
+      String? second,
+      required GestureTapCallback firstOnTap,
+      GestureTapCallback? secondOnTap}) {
+    showSelectDutyUnitDialog(
+      context,
+      onTapDuty: firstOnTap,
+      onTapDealWith: () => secondOnTap ?? startManageDutyUnitPage(bean),
+      first: first,
+      second: second,
+    );
+  }
+
+  void startManageDutyUnitPage(bean) {
+    Config.startPage(
+        // context, ManageDutyUnitAndDealWithPage(eventId: bean.id)),
+        context,
+        ManageDutyUnitAndDealWithPage(
+          eventId: bean.id,
+          // info:
+          //     'LZd32Y36MnXQLZ%2BNT78HPOfn9l9GTL6gjMh%2B%2F%2FWzJ%2Bacz6bwi3O%2B2o3Xjg9Y4klfcosB2fmFD0TmrCeqZrW%2BQeZLimeY5ZBucTSn0a%2BgQjJ7w4tN7I86tcLYouMskMgq%2Bqe6WMfhAcREpnu7SjmpyA%3D%3D',
         ));
   }
 

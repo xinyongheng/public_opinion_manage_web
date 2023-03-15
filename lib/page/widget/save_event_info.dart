@@ -55,7 +55,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
               TextButton(
                 onPressed: () => saveEventInfo(),
                 style: TextButton.styleFrom(
-                    primary: Colors.white,
+                    foregroundColor: Colors.white,
                     backgroundColor: Colors.blue,
                     textStyle: Config.loadDefaultTextStyle(),
                     shape: RoundedRectangleBorder(
@@ -77,7 +77,11 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
   @override
   void dispose() {
     super.dispose();
-    _controllerMap.forEach((_, value) => value.dispose());
+    _controllerMap.forEach((key, value) {
+      if (key != 'type') {
+        value.dispose();
+      }
+    });
     for (var element in _listLink) {
       element.dispose();
     }

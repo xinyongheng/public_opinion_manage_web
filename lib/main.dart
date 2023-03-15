@@ -6,10 +6,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 // import 'package:public_opinion_manage_web/custom/histogram.dart';
-import 'package:public_opinion_manage_web/page/login.dart';
 
 import 'package:public_opinion_manage_web/utils/info_save.dart';
-// import 'dart:html';
+import 'page/new_login.dart' as newLogin;
 import 'package:universal_html/html.dart' show window;
 
 import 'page/widget/load_dispose_event.dart';
@@ -34,6 +33,8 @@ void main() {
     info = qp['info'];
     print(info);
   }
+  // info =
+  //     'LZd32Y36MnXQLZ%2BNT78HPOfn9l9GTL6gjMh%2B%2F%2FWzJ%2Bacz6bwi3O%2B2o3Xjg9Y4klfcosB2fmFD0TmrCeqZrW%2BQeZLimeY5ZBucTSn0a%2BgQjJ7w4tN7I86tcLYouMskMgq%2Bqe6WMfhAcREpnu7SjmpyA%3D%3D';
   runApp(MyApp(value: info));
   // SystemUiOverlayStyle systemUiOverlayStyle =
   //     const SystemUiOverlayStyle(statusBarColor: Colors.transparent);
@@ -64,7 +65,7 @@ class MyApp extends StatelessWidget {
             Locale('en')
           ],
           locale: const Locale('zh', 'CH'),
-          title: '舆情台账',
+          title: '智慧网信系统',
           builder: EasyLoading.init(builder: (context, child) {
             EasyLoading.instance.loadingStyle = EasyLoadingStyle.custom;
             EasyLoading.instance.indicatorColor = Colors.blue;
@@ -87,11 +88,13 @@ class MyApp extends StatelessWidget {
       child: //const HistogramWidget()
           !DataUtil.isEmpty(value)
               ? LoadDisposeEventPage(info: value!)
-              : const LoginPage(),
+              : const newLogin.LoginPage(),
     );
   }
 }
 
+//http://192.168.1.9:8249/
+//loadDisposeEvent?info=LZd32Y36MnXQLZ%2BNT78HPOfn9l9GTL6gjMh%2B%2F%2FWzJ%2Bacz6bwi3O%2B2o3Xjg9Y4klfcosB2fmFD0TmrCeqZrW%2BQeZLimeY5ZBucTSn0a%2BgQjJ7w4tN7I86tcLYouMskMgq%2Bqe6WMfhAcREpnu7SjmpyA%3D%3D
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
