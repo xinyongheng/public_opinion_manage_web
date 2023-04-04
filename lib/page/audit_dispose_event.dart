@@ -379,6 +379,13 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
           ),
         ),
         SizedBox(height: 30.w),
+        Visibility(
+          visible: _auditType == 0 && eventInfo?.isLateReport == null,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 30.w),
+            child: isLateReport(),
+          ),
+        ),
         TextButton(
           onPressed: submitResult
               ? null
@@ -396,6 +403,33 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
           child: const Text('提交'),
         ),
         SizedBox(height: 30.w),
+      ],
+    );
+  }
+
+  int isLateReportTag = -2;
+  Widget isLateReport() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(width: 10.w),
+        Text(
+          '是否迟报：',
+          style: Config.loadDefaultTextStyle(
+            color: Colors.black.withOpacity(0.85),
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        SizedBox(
+          width: 624.w,
+          child: RadioGroupWidget(
+            list: const ['否', '是'],
+            change: (value) {
+              isLateReportTag = value ?? -1;
+            },
+          ),
+        )
       ],
     );
   }
@@ -537,6 +571,13 @@ class _AuditDisposeEventPageState extends State<AuditDisposeEventPage> {
         return;
       }
       map['finalDutyUnit'] = finalDutyUnit;
+      if (isLateReportTag != -2) {
+        if (isLateReportTag == -1) {
+          toast('请选择是否迟报');
+          return;
+        }
+        map['isLateReport'] = isLateReportTag;
+      }
     }
     unitList?.forEach((element) {
       element.list?.forEach((bean) {

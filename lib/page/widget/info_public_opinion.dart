@@ -590,11 +590,19 @@ class ListInfoWidgetState extends State<ListInfoWidget>
     );
     if (tag == '序号') {
       child = Container(
-          width: 22.w,
-          height: 22.w,
-          color: Config.fontColorSelect,
-          alignment: Alignment.center,
-          child: child);
+        width: 35.w,
+        height: 35.w,
+        color: Config.fontColorSelect,
+        alignment: Alignment.center,
+        child: Text(
+          dataTem,
+          style: Config.loadDefaultTextStyle(
+            color: Colors.white,
+            fonstSize: 13.w,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      );
     }
     return Container(
       alignment: Alignment.center,

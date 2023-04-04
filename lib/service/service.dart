@@ -18,9 +18,9 @@ class ServiceHttp {
   // 测试服务器地址
   // static const String parentUrl = 'http://60.174.116.164:8249';
   // 正式服务器地址
-  static const String parentUrl = 'http://60.174.116.164:8349';
+  // static const String parentUrl = 'http://60.174.116.164:8349';
   // 本地服务器地址
-  // static const String parentUrl = 'http://192.168.1.103:8249';
+  static const String parentUrl = 'http://192.168.1.3:8249';
   static const String loginApi = '/api/login';
   static const String loadCode = '/api/loadCode';
   static const String registerApi = '/api/register';

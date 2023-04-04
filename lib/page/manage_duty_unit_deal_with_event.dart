@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:public_opinion_manage_web/config/config.dart';
 import 'package:public_opinion_manage_web/custom/dialog.dart';
+import 'package:public_opinion_manage_web/custom/radio_group.dart';
 import 'package:public_opinion_manage_web/custom/select_duty_unit_dialog.dart';
 import 'package:public_opinion_manage_web/data/bean/deal_with_content.dart';
 import 'package:public_opinion_manage_web/data/bean/file_info.dart';
@@ -38,6 +39,7 @@ class _ManageDutyUnitAndDealWithPageState
 
   ///事件id
   int? eventId;
+  int isLateReportTag = -2;
   final _dataFuture = AsyncMemoizer();
   @override
   Widget build(BuildContext context) {
@@ -198,6 +200,8 @@ class _ManageDutyUnitAndDealWithPageState
       //rowView('管理员备注：', loadValue(disposeEvent, 'manageRemark')),
       lineView(), paddingSpace(),
       manageRemarkView(disposeEvent), paddingSpace(),
+      // 是否迟报 审核时添加
+      // isLateReport(disposeEvent), paddingSpace(),
       //feedbackTimeView(), paddingSpace(),
       //事件信息结束，添加间隔线
       lineView(), paddingSpace(),
@@ -251,6 +255,37 @@ class _ManageDutyUnitAndDealWithPageState
             width: 624.w,
             child: _textField(remarkController, Config.borderColor,
                 maxLinex: 3, minLine: 1))
+      ],
+    );
+  }
+
+  int defaultSelectIndex(Map? disposeEvent) {
+    if (disposeEvent == null) return -1;
+    return disposeEvent['isLateReport'] ?? -1;
+  }
+
+  Widget isLateReport(Map? disposeEvent) {
+    int index = defaultSelectIndex(disposeEvent);
+    if (index == -1) {
+      isLateReportTag = -1;
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        titleView('是否迟报；'),
+        SizedBox(
+          width: 624.w,
+          child: RadioGroupWidget(
+            list: const ['是', '否'],
+            defaultSelectIndex: index,
+            change: index != -1
+                ? null
+                : (value) {
+                    isLateReportTag = value ?? -1;
+                  },
+          ),
+        )
       ],
     );
   }
@@ -727,6 +762,10 @@ class _ManageDutyUnitAndDealWithPageState
       showNoticeDialog('请至少填写一个完整的单位处理内容');
       return;
     }
+    if (isLateReportTag == -1) {
+      showNoticeDialog('请选择是否迟报');
+      return;
+    }
     commit(context);
   }
 
@@ -752,6 +791,9 @@ class _ManageDutyUnitAndDealWithPageState
     String manageRemark = remarkController.text;
     data['manageRemark'] = manageRemark;
     data['eventId'] = eventId;
+    // if (isLateReportTag != -2) {
+    //   data['isLateReport'] = isLateReportTag;
+    // }
     data['disposeEventUnitList'] = disposeEventUnitList;
     showCenterNoticeDialog(
       context,

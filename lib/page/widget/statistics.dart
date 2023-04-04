@@ -64,6 +64,18 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
     requestData(start, end, _completeTag);
   }
 
+  void requestExport(String start, String end, bool selectTag) async {
+    final map = await UserUtil.makeUserIdMap();
+    if (!selectTag) {
+      map['passState'] = '通过';
+    }
+    map['start'] = '${start.substring(0, 10)} 00:00:00';
+    map['end'] = '${end.substring(0, 10)} 23:59:59';
+    ServiceHttp().post("/loadExportEvent", data: map, success: (data) {
+      Config.launch('${ServiceHttp.parentUrl}/$data');
+    });
+  }
+
   void requestData(String start, String end, bool selectTag) async {
     final map = await UserUtil.makeUserIdMap();
     final String startFinal =
@@ -354,7 +366,25 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
               ),
               textStyle: Config.loadDefaultTextStyle(),
             ),
-            child: const Text('筛选'))
+            child: const Text('筛选')),
+        SizedBox(width: 30.w),
+        TextButton(
+            onPressed: () {
+              requestExport(startDateController.text, endDateController.text,
+                  _completeTag);
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.blue,
+              padding: EdgeInsets.only(
+                left: 20.w,
+                top: 15.sp,
+                right: 20.w,
+                bottom: 15.sp,
+              ),
+              textStyle: Config.loadDefaultTextStyle(),
+            ),
+            child: const Text('导出')),
       ],
     );
   }

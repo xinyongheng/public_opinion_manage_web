@@ -467,7 +467,7 @@ class LineChartPainter extends CustomPainter {
     required this.yList,
     this.axisTextStyle = const TextStyle(
       fontWeight: FontWeight.w300,
-      fontSize: 13,
+      fontSize: 12,
       color: Colors.black,
     ),
     this.axisColor = Colors.black,
@@ -487,16 +487,20 @@ class LineChartPainter extends CustomPainter {
   }
 
   void drawText(Canvas canvas, String text, Offset offset, Axis axis) {
+    if (text.length > 10) {
+      text = '${text.substring(0, 10)}…';
+    }
     var textPainter = TextPainter(
       textDirection: TextDirection.ltr,
       text: TextSpan(text: text, style: axisTextStyle),
+      maxLines: 2,
     );
     textPainter.layout(maxWidth: 80, minWidth: 5);
     if (axis == Axis.horizontal) {
       canvas.save();
       var newOffset = offset.translate(0, 0);
       textPainter.size;
-      canvas.translate(newOffset.dx, newOffset.dy);
+      canvas.translate(newOffset.dx - textPainter.height / 3, newOffset.dy);
       canvas.rotate(-pi / 180 * 45);
       textPainter.paint(canvas, Offset.zero.translate(-textPainter.width, 0));
       canvas.restore();
