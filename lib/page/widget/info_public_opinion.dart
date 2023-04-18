@@ -635,7 +635,14 @@ class ListInfoWidgetState extends State<ListInfoWidget>
           _showSelectDutyUnitDialog(
             bean,
             first: '仅查看',
-            second: '辅助填写处理内容',
+            second: '修改单位及内容',
+            firstOnTap: () => startToPage(bean, index),
+          );
+        } else if (data.contains("(待审核)")) {
+          _showSelectDutyUnitDialog(
+            bean,
+            first: '去审核',
+            second: '修改单位及内容',
             firstOnTap: () => startToPage(bean, index),
           );
         } else {
