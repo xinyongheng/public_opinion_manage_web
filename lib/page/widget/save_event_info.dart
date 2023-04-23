@@ -113,7 +113,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
     '安全生产',
     '环境保护',
     '疫情防控',
-    '拖欠农民工工资',
+    '社会保障',
     '信访维权',
     '其他'
   ];
