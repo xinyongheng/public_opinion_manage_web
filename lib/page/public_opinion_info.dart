@@ -234,11 +234,13 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        _itemView('舆情类别：', 'type'),
+        _itemView('舆情类别：', 'type', readOnly: !_canChange),
         SizedBox(height: 30.w),
         _itemView('发现时间：', 'findTime'),
         SizedBox(height: 30.w),
         _itemView('反馈时间：', 'feedbackTime', isDate: true, readOnly: !_canChange),
+        SizedBox(height: 30.w),
+        _itemView('风险等级：', 'riskLevel', readOnly: !_canChange),
         // _itemView('上级是否通报：', 'description'),
         SizedBox(height: 30.w),
         _radioView(tag),
@@ -342,6 +344,8 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
 
   String _defaultValue(String key) {
     switch (key) {
+      case 'riskLevel':
+        return _publicOpinionBean?.riskLevelString() ?? '';
       case 'description':
         return _publicOpinionBean?.description ?? "";
       case 'link':
@@ -497,7 +501,10 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
           _publicOpinionBean?.replySuperiorTime ?? '');
     }
 
+    fillInfoForKey('type', map, _publicOpinionBean?.type ?? '');
     fillInfoForKey('feedbackTime', map, _publicOpinionBean?.feedbackTime ?? '');
+    fillInfoForKey(
+        'riskLevel', map, _publicOpinionBean?.riskLevelString() ?? '');
 
     fillInfoForKey('leaderInstructionsTime', map,
         _publicOpinionBean?.leaderInstructionsTime ?? '');
@@ -506,6 +513,19 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
     fillInfoForKey('leaderName', map, _publicOpinionBean?.leaderName ?? '');
     if (map.isNotEmpty) {
       map['id'] = widget.eventId;
+      if (map.containsKey('riskLevel')) {
+        String riskLevel = map['riskLevel'];
+        if (riskLevel == '低') {
+          map['riskLevel'] = 0;
+        } else if (riskLevel == '中') {
+          map['riskLevel'] = 1;
+        } else if (riskLevel == '高') {
+          map['riskLevel'] = 2;
+        } else {
+          toast('风险等级输入错误，只能是高、中、低');
+          return;
+        }
+      }
       mapData["changeContent"] = map;
       ServiceHttp().post('/updateEvent', data: mapData, success: (data) {
         _publicOpinionBean = PublicOpinionBean.fromJson(data);
@@ -521,7 +541,7 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
   }
 
   void fillInfoForKey(String key, map, target) {
-    String text = _controller(key).text;
+    String text = _controller(key).text.trim();
     if (text != target) {
       map[key] = text;
     }

@@ -117,6 +117,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
     '信访维权',
     '其他'
   ];
+  final riskLevel = ['低', '中', '高'];
   List<Widget> firstColumn() {
     return [
       childTextItems('问题描述：', '问题描述', 'description', min: 3, max: 5),
@@ -125,7 +126,9 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
       SizedBox(height: 43.w),
       childDateItems('发布时间：', '发布时间', 'publishTime'),
       SizedBox(height: 43.w),
-      childAutocomplete('舆情类别：', '舆情类别', typeList),
+      childAutocomplete('舆情类别：', '舆情类别', typeList, 'type'),
+      SizedBox(height: 43.w),
+      childAutocomplete('风险等级：', '风险等级', riskLevel, 'riskLevel'),
       SizedBox(height: 43.w),
       childDateItems('发现时间：', '发现时间', 'findTime'),
       SizedBox(height: 43.w),
@@ -143,7 +146,9 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
         child: Text(data, style: Config.loadDefaultTextStyle()),
       );
 
-  Widget childAutocomplete(title, explain, List<String> searchList) => Row(
+  Widget childAutocomplete(
+          title, explain, List<String> searchList, String key) =>
+      Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(width: 440.w),
@@ -170,7 +175,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
                   TextEditingController textEditingController,
                   FocusNode focusNode,
                   VoidCallback onFieldSubmitted) {
-                _controllerMap['type'] = textEditingController;
+                _controllerMap[key] = textEditingController;
                 return TextFormField(
                   controller: textEditingController,
                   focusNode: focusNode,
@@ -638,7 +643,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
             titleView(title),
             _fileView,
           ]);
-  String loadText(String key) => _controllerMap[key]?.value.text ?? '';
+  String loadText(String key) => _controllerMap[key]?.value.text.trim() ?? '';
   String splicingString(List<TextEditingController> list) {
     if (list.length < 2) return ',';
     String s = ',';
@@ -656,9 +661,17 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
     if (description.isEmpty) {
       return toast('请输入事件问题描述');
     }
+
     String author = loadText('author');
     if (author.isEmpty) {
-      return toast('请输入事件问题描述');
+      return toast('请输入发帖主题');
+    }
+    String riskLevel = loadText('riskLevel');
+    if (riskLevel.isEmpty) {
+      return toast('请选择事件危险等级');
+    }
+    if (riskLevel != '高' && riskLevel != '中' && riskLevel != '低') {
+      return toast('事件危险等级，只能选择高、中、低');
     }
     String publishTime = loadText('publishTime');
     if (publishTime.isEmpty) {
@@ -693,6 +706,13 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
     }
     map['description'] = description;
     map['author'] = author;
+    if (riskLevel == '高') {
+      map['riskLevel'] = 2;
+    } else if (riskLevel == '中') {
+      map['riskLevel'] = 1;
+    } else if (riskLevel == '低') {
+      map['riskLevel'] = 0;
+    }
     map['publishTime'] = publishTime;
     map['type'] = type;
     map['findTime'] = findTime;

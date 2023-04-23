@@ -20,6 +20,7 @@ class PublicOpinionBean {
   late String findTime;
   // 舆情类别
   late String type;
+  late int riskLevel;
 
   // 责任单位
   String? dutyUnit;
@@ -59,6 +60,7 @@ class PublicOpinionBean {
     this.mediaType,
     this.publishTime,
     this.findTime,
+    this.riskLevel,
     this.type, {
     this.no,
     this.dutyUnit,
@@ -74,6 +76,12 @@ class PublicOpinionBean {
     this.passState,
     this.linkPath,
   });
+
+  String riskLevelString() {
+    if (riskLevel == 0) return '低';
+    if (riskLevel == 1) return '中';
+    return '高';
+  }
 
   PublicOpinionBean.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -99,6 +107,7 @@ class PublicOpinionBean {
     passState = json['passState'];
     leaderName = json['leaderName'];
     linkPath = json['linkPath'];
+    riskLevel = json['riskLevel'];
   }
 
   static List<PublicOpinionBean> fromJsonArray(List data) {
@@ -118,6 +127,7 @@ class PublicOpinionBean {
     data['author'] = author;
     data['description'] = description;
     data['type'] = type;
+    data['riskLevel'] = riskLevel;
     data['publishTime'] = publishTime;
     data['findTime'] = findTime;
     data['auditApprovedTime'] = auditApprovedTime;
