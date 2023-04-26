@@ -18,9 +18,11 @@ class DateUtil {
     return formatDate(DateTime.now(), formats);
   }
 
-  static String subDate(String time) {
-    // yyyy-mm-dd
-    if (time.length > 10) return time.substring(0, 10);
+  static String subDate(String time, {bool tag = true}) {
+    // yyyy-mm-dd HH:mm
+    if (tag) {
+      if (time.length > 16) return time.substring(0, 16);
+    }
     return time;
   }
 }

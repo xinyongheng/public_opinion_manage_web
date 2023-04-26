@@ -221,6 +221,8 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
         _itemView('媒体类型：', 'mediaType'),
         SizedBox(height: 30.w),
         _itemView('发布时间：', 'publishTime'),
+        SizedBox(height: 30.w),
+        _itemView('发现时间：', 'findTime'),
       ],
     );
   }
@@ -236,7 +238,7 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
       children: [
         _itemView('舆情类别：', 'type', readOnly: !_canChange),
         SizedBox(height: 30.w),
-        _itemView('发现时间：', 'findTime'),
+        _itemView('转办时间：', 'transferTime', isDate: true, readOnly: !_canChange),
         SizedBox(height: 30.w),
         _itemView('反馈时间：', 'feedbackTime', isDate: true, readOnly: !_canChange),
         SizedBox(height: 30.w),
@@ -354,6 +356,8 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
         return _publicOpinionBean?.mediaType ?? "";
       case 'publishTime':
         return DateUtil.subDate(_publicOpinionBean?.publishTime ?? "");
+      case 'transferTime':
+        return DateUtil.subDate(_publicOpinionBean?.transferTime ?? "");
       case 'type':
         return _publicOpinionBean?.type ?? "";
       case 'findTime':
@@ -394,10 +398,10 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
         style: _textStyle(),
       );
   Widget _dateInputView(String key, readOnly) => Config.dateInputView(
-        '年/月/日',
+        '年/月/日 时:分',
         _controller(key),
         readOnly: readOnly,
-        type: DateTimePickerType.date,
+        type: DateTimePickerType.dateTime,
       );
   // 图文信息 列表
   Widget fileItem(String data, List list) {
@@ -503,6 +507,7 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
 
     fillInfoForKey('type', map, _publicOpinionBean?.type ?? '');
     fillInfoForKey('feedbackTime', map, _publicOpinionBean?.feedbackTime ?? '');
+    fillInfoForKey('transferTime', map, _publicOpinionBean?.transferTime ?? '');
     fillInfoForKey(
         'riskLevel', map, _publicOpinionBean?.riskLevelString() ?? '');
 

@@ -132,6 +132,8 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
       SizedBox(height: 43.w),
       childDateItems('发现时间：', '发现时间', 'findTime'),
       SizedBox(height: 43.w),
+      childDateItems('转办时间：', '转办时间', 'transferTime'),
+      SizedBox(height: 43.w),
       childRadioItems('上级是否通报：'),
       Visibility(visible: _isSuperiorNotice, child: SizedBox(height: 43.w)),
       Visibility(
@@ -258,8 +260,8 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
           width: 624.w,
           child: DateTimePicker(
             controller: loadcontroller(key),
-            type: DateTimePickerType.date,
-            dateMask: 'yyyy-MM-dd',
+            type: DateTimePickerType.dateTime,
+            dateMask: 'yyyy-MM-dd HH:mm',
             firstDate: DateTime(1992),
             lastDate: DateTime.now(),
             textInputAction: TextInputAction.next,

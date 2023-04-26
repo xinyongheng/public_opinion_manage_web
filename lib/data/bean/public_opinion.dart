@@ -16,6 +16,7 @@ class PublicOpinionBean {
   String? linkOther;
   // 发布时间
   late String publishTime;
+  String? transferTime;
   // 发现时间
   late String findTime;
   // 舆情类别
@@ -59,6 +60,7 @@ class PublicOpinionBean {
     this.link,
     this.mediaType,
     this.publishTime,
+    this.transferTime,
     this.findTime,
     this.riskLevel,
     this.type, {
@@ -89,6 +91,7 @@ class PublicOpinionBean {
     description = json['description'];
     type = json['type'];
     publishTime = json['publishTime'];
+    transferTime = json['transferTime'];
     findTime = json['findTime'];
     auditApprovedTime = json['auditApprovedTime'];
     superiorNotificationTime = json['superiorNotificationTime'];
@@ -129,6 +132,7 @@ class PublicOpinionBean {
     data['type'] = type;
     data['riskLevel'] = riskLevel;
     data['publishTime'] = publishTime;
+    data['transferTime'] = transferTime;
     data['findTime'] = findTime;
     data['auditApprovedTime'] = auditApprovedTime;
     data['superiorNotificationTime'] = superiorNotificationTime;

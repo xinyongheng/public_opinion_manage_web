@@ -103,13 +103,13 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
           SizedBox(width: 45.w),
           ...filterWidget('舆情类别：', 'typeFilter'),
           SizedBox(width: 45.w),
-          ...filterWidget('舆情报刊类型：', 'pressTypeFilter'),
+          ...filterWidget('舆情风险等级：', 'riskLevelFilter'),
           SizedBox(width: 45.w),
           ...filterWidget('媒体类型：', 'mediaTypeFilter'),
         ],
       ),
       SizedBox(width: 45.w, height: 21.w),
-      timeFilter('发布时间：', 'publishTimeStart', 'publishTimeEnd'),
+      timeFilter('转办时间：', 'transferTimeStart', 'transferTimeEnd'),
       SizedBox(width: 45.w, height: 21.w),
       timeFilter('反馈时间：', 'feedbackTimeStart', 'feedbackTimeEnd'),
       SizedBox(width: 45.w, height: 21.w),
@@ -251,6 +251,22 @@ class _PublicOpinionListWidgetState extends State<PublicOpinionListWidget> {
   void requestSearch() async {
     final map = <String, dynamic>{};
     controllerMap.forEach((key, value) => fillFilterData(map, key, value));
+    if (map.containsKey('riskLevelFilter')) {
+      var value = map['riskLevelFilter'];
+      int type = -1;
+      if (value == '高') {
+        type = 2;
+      } else if (value == '中') {
+        type = 1;
+      } else if (value == '低') {
+        type = 0;
+      }
+      if (type == -1) {
+        showNoticeDialog('风险等级输入错误，只能为高、中、低');
+        return;
+      }
+      map['riskLevelFilter'] = type;
+    }
     askInternet(map.isEmpty ? null : map);
   }
 
@@ -397,7 +413,7 @@ class ListInfoWidgetState extends State<ListInfoWidget>
           width: 8 * wordLength,
           bgColor: const Color(0xFFFAFAFA),
           height: 72.w),
-      childItemView('发布时间', '',
+      childItemView('转办时间', '',
           width: 8 * wordLength,
           bgColor: const Color(0xFFFAFAFA),
           height: 72.w),
@@ -422,7 +438,7 @@ class ListInfoWidgetState extends State<ListInfoWidget>
           width: 8 * wordLength,
           bgColor: const Color(0xFFFAFAFA),
           height: 72.w),
-      childItemView('报刊类型', '',
+      childItemView('风险等级', '',
           width: 6 * wordLength,
           bgColor: const Color(0xFFFAFAFA),
           height: 72.w),
@@ -500,7 +516,7 @@ class ListInfoWidgetState extends State<ListInfoWidget>
           width: 8 * wordLength, index: index),
       childItemView(bean.mediaType.toString(), '媒体类型',
           width: 8 * wordLength, index: index),
-      childItemView(bean.publishTime.toString(), '发布时间',
+      childItemView(bean.transferTime?.toString() ?? '—', '转办时间',
           width: 8 * wordLength, index: index),
       childItemView(bean.findTime.toString(), '发现时间',
           width: 8 * wordLength, index: index),
@@ -516,7 +532,7 @@ class ListInfoWidgetState extends State<ListInfoWidget>
           width: 8 * wordLength, index: index),
       childItemView(bean.superiorNotificationTime ?? "—", '上级通报时间',
           width: 8 * wordLength, index: index),
-      childItemView(bean.pressType ?? "—", '报刊类型',
+      childItemView(bean.riskLevelString(), '风险等级',
           width: 6 * wordLength, index: index),
       childItemView(
           bean.isLateReport == 1 ? '是' : (bean.isLateReport == 0 ? '否' : "—"),
@@ -571,8 +587,8 @@ class ListInfoWidgetState extends State<ListInfoWidget>
       if (tag == '事件描述') {
         canClick = true;
       }
-    } else if (tag.contains('时间') && data.length > 10) {
-      dataTem = data.substring(0, 10);
+    } else if (tag.contains('时间') && data.length > 16) {
+      dataTem = data.substring(0, 16);
     }
     child = Text(
       dataTem,
@@ -652,7 +668,7 @@ class ListInfoWidgetState extends State<ListInfoWidget>
       case '上级通报时间':
         shangJiShiJian(bean.id);
         break;
-      case '报刊类型':
+      case '风险等级':
         break;
       case '领导批示':
         lingDaoPiShi(bean.id);
