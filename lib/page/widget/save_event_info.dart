@@ -679,6 +679,10 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
     if (publishTime.isEmpty) {
       return toast('请输入事件发布时间');
     }
+    String transferTime = loadText('transferTime');
+    if (transferTime.isEmpty) {
+      return toast('请输入转办时间');
+    }
     String type = loadText('type');
     if (type.isEmpty) {
       return toast('请输入事件舆情类型');
@@ -715,6 +719,7 @@ class _SaveEventInfoWidgetState extends State<SaveEventInfoWidget> {
     } else if (riskLevel == '低') {
       map['riskLevel'] = 0;
     }
+    map['transferTime'] = transferTime;
     map['publishTime'] = publishTime;
     map['type'] = type;
     map['findTime'] = findTime;

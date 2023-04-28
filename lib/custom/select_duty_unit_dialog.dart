@@ -123,7 +123,7 @@ Widget feedbackTimeView(feedbackTimeController, readOnly) {
         // Text('反馈时间；', style: Config.loadDefaultTextStyle()),
         Expanded(
           child: Config.dateInputView('请设置反馈时间', feedbackTimeController,
-              type: DateTimePickerType.date, readOnly: readOnly),
+              type: DateTimePickerType.dateTime, readOnly: readOnly),
         ),
       ],
     ),
