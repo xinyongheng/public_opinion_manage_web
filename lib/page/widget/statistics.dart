@@ -76,11 +76,17 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
     });
   }
 
+  String subDate(String dateStr) {
+    if (dateStr.contains(":")) {
+      return dateStr.substring(0, 10);
+    }
+    return dateStr;
+  }
+
   void requestData(String start, String end, bool selectTag) async {
     final map = await UserUtil.makeUserIdMap();
-    final String startFinal =
-        start.contains(':') ? DateUtil.subDate(start) : start;
-    final String endFinal = end.contains(':') ? DateUtil.subDate(end) : end;
+    final String startFinal = start.contains(':') ? subDate(start) : start;
+    final String endFinal = end.contains(':') ? subDate(end) : end;
     map['start'] = '$startFinal 00:00:00';
     map['end'] = "$endFinal 23:59:59";
     map['isPass'] = selectTag ? -1 : 1;
