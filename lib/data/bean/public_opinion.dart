@@ -12,7 +12,7 @@ class PublicOpinionBean {
   // 媒体类型
   late String mediaType;
   String? mediaTypeOther;
-  late String link;
+  String? link;
   String? linkOther;
   // 发布时间
   late String publishTime;

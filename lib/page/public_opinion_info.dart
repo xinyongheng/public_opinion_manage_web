@@ -207,9 +207,9 @@ class _PublicOpinionInfoPageState extends State<PublicOpinionInfoPage> {
           elevation: 0,
           color: Colors.transparent,
           child: InkWell(
-              onTap: _publicOpinionBean?.link.isNotEmpty == true
+              onTap: _publicOpinionBean?.link?.isNotEmpty == true
                   ? () {
-                      Config.launch(_publicOpinionBean!.link);
+                      Config.launch(_publicOpinionBean!.link!);
                     }
                   : null,
               child: _itemView('原文链接：', 'link', line: 1)),
